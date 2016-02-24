@@ -1,4 +1,4 @@
-package app.web;
+package app.data;
 
 import app.data.User;
 import app.data.UserRepository;
@@ -22,6 +22,7 @@ import javax.persistence.EntityManager;
 @RunWith(MockitoJUnitRunner.class)
 public class UserRepositoryTest
 {
+    // todo test with database fixture
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     EntityManager em;
@@ -45,8 +46,7 @@ public class UserRepositoryTest
     }
 
     @Test
-    // test with database fixture
-    public void testFindByEmail()
+    public void testFindByEmail() throws Exception
     {
         when(em.createQuery(anyString())
                 .setParameter(anyString(), anyString())
