@@ -9,8 +9,9 @@ import org.springframework.web.servlet.config.annotation.EnableWebMvc;
  * @author ngnmhieu
  */
 @Configuration
-@ComponentScan(basePackages = "app",
-        excludeFilters = {@ComponentScan.Filter(type = FilterType.ANNOTATION, value = EnableWebMvc.class)}
+@ComponentScan(
+        basePackages = "app",
+        excludeFilters = {@ComponentScan.Filter(type = FilterType.ANNOTATION, value = EnableWebMvc.class)} // exclude the WebConfig
 )
 public class RootConfig
 {
