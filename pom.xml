@@ -28,7 +28,7 @@
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
-            <artifactId>jackson-core</artifactId>
+            <artifactId>jackson-databind</artifactId>
             <version>2.7.1</version>
         </dependency>
 
@@ -116,6 +116,11 @@
             <groupId>mysql</groupId>
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.38</version>
+        </dependency>
+        <dependency>
+            <groupId>net.minidev</groupId>
+            <artifactId>json-smart</artifactId>
+            <version>2.2</version>
         </dependency>
         <!-- end Database -->
 
