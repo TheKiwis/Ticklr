@@ -3,6 +3,7 @@ package app.web.forms;
 import app.data.User;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
@@ -43,6 +44,7 @@ public class UserForm
 
     public User getUser()
     {
-        return new User(email, password);
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        return new User(email, encoder.encode(password));
     }
 }
