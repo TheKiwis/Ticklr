@@ -22,8 +22,6 @@ import javax.persistence.EntityManager;
 @RunWith(MockitoJUnitRunner.class)
 public class UserRepositoryTest
 {
-    // todo test with database fixture
-
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     EntityManager em;
 
