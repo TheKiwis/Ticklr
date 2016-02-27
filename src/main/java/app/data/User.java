@@ -1,25 +1,42 @@
 package app.data;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.GenericGenerator;
+
+import javax.persistence.*;
+
 /**
  * @author ngnmhieu
  */
+@Entity
+@Table(name = "users")
 public class User
 {
+    @Id
+    @Column(name = "id")
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "email")
     private String email;
+
+    @Column(name = "password")
     private String password;
+
+    private User()
+    {
+    }
 
     public User(String email, String password)
     {
-
-        this.email = email;
-        this.password = password;
+        setEmail(email);
+        setPassword(password);
     }
 
     public User(Long id, String email, String password)
     {
         this(email, password);
-        this.id = id;
+        setId(id);
     }
 
     public Long getId()
@@ -42,6 +59,7 @@ public class User
         this.email = email;
     }
 
+    @JsonIgnore
     public String getPassword()
     {
         return password;

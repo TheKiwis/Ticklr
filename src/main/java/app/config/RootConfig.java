@@ -1,10 +1,11 @@
 package app.config;
 
-import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.FilterType;
+import app.config.environment.DevelopmentProfile;
+import app.config.environment.EnvironmentConfig;
+import app.config.environment.TestProfile;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.*;
+import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.web.servlet.config.annotation.EnableWebMvc;
 
@@ -18,25 +19,17 @@ import javax.sql.DataSource;
         basePackages = "app",
         excludeFilters = {@ComponentScan.Filter(type = FilterType.ANNOTATION, value = EnableWebMvc.class)} // exclude the WebConfig
 )
+@Import({EnvironmentConfig.class, TransactionManagersConfig.class})
 public class RootConfig
 {
     @Bean
-    public LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean()
+    @Autowired
+    public LocalContainerEntityManagerFactoryBean localContainerEntityManagerFactoryBean(DataSource dataSource, JpaVendorAdapter jpaVendorAdapter)
     {
         LocalContainerEntityManagerFactoryBean emfb = new LocalContainerEntityManagerFactoryBean();
-        //emfb.setDataSource();
-        //emfb.setJpaVendorAdapter(null);
+        emfb.setDataSource(dataSource);
+        emfb.setJpaVendorAdapter(jpaVendorAdapter);
         emfb.setPackagesToScan(new String[] { "app.data" });
         return emfb;
-    }
-
-    @Bean(destroyMethod = "")
-    public DataSource dataSource()
-    {
-        MysqlDataSource ds = new MysqlDataSource();
-        //ds.setUrl("");
-        //ds.setUser("");
-        //ds.setPassword("");
-        return ds;
     }
 }

@@ -1,8 +1,5 @@
 package app.config;
 
-/**
- * @author ngnmhieu
- */
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 /**
