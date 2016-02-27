@@ -22,7 +22,6 @@ import java.util.Map;
 /**
  * @author ngnmhieu
  */
-//@RestController
 @RestController
 @RequestMapping("/users")
 public class UserController
