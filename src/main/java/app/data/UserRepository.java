@@ -52,7 +52,6 @@ public class UserRepository
         return (User) query.getSingleResult();
     }
 
-    // todo integration test
     // todo test transaction fail
     public User save(User user)
     {

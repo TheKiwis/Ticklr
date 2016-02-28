@@ -1,8 +1,6 @@
 package app.config;
 
-import app.config.environment.DevelopmentProfile;
 import app.config.environment.EnvironmentConfig;
-import app.config.environment.TestProfile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.orm.jpa.JpaVendorAdapter;

@@ -1,6 +1,7 @@
 package app.config.environment;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -9,13 +10,14 @@ import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
 import javax.sql.DataSource;
+import java.util.Properties;
 
 /**
  * @author ngnmhieu
  */
 @Configuration
 @Profile("dev")
-public class DevelopmentProfile
+public class DevelopmentEnvironment
 {
     @Bean
     public DataSource dataSource()
@@ -31,10 +33,22 @@ public class DevelopmentProfile
     public JpaVendorAdapter jpaVendorAdapter()
     {
         HibernateJpaVendorAdapter jpaVendorAdapter = new HibernateJpaVendorAdapter();
-        jpaVendorAdapter.setShowSql(true);;
+        jpaVendorAdapter.setShowSql(true);
         jpaVendorAdapter.setDatabase(Database.MYSQL);
         jpaVendorAdapter.setGenerateDdl(false);
         return jpaVendorAdapter;
+    }
+
+    @Bean
+    public PropertyPlaceholderConfigurer propertyPlaceholderConfigurer()
+    {
+        Properties properties = new Properties();
+        properties.setProperty("auth.secret", "dev_secret");
+
+        PropertyPlaceholderConfigurer placeholderConfigurer = new PropertyPlaceholderConfigurer();
+        placeholderConfigurer.setProperties(properties);
+
+        return placeholderConfigurer;
     }
 
 }

@@ -1,14 +1,11 @@
 package app.integration;
-import static org.junit.Assert.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import app.config.RootConfig;
 import app.config.WebConfig;
-import org.dbunit.DBTestCase;
 import org.dbunit.DataSourceBasedDBTestCase;
-import org.dbunit.assertion.DbUnitAssert;
 import org.dbunit.dataset.DefaultDataSet;
 import org.dbunit.dataset.IDataSet;
 import org.flywaydb.test.annotation.FlywayTest;
@@ -31,8 +28,6 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import javax.sql.DataSource;
-import javax.validation.groups.Default;
-import javax.xml.crypto.Data;
 
 /**
  * @author ngnmhieu
@@ -51,7 +46,7 @@ public class UserManipulationIT extends DataSourceBasedDBTestCase
     @Autowired
     DataSource dataSource;
 
-    // todo integration test with database fixture
+    // todo integration test with database fixtures
     @PersistenceContext
     EntityManager em;
 
@@ -67,7 +62,7 @@ public class UserManipulationIT extends DataSourceBasedDBTestCase
     }
 
     @Test
-    public void testSaveUser() throws Exception
+    public void shouldSaveUser() throws Exception
     {
         Query query;
 

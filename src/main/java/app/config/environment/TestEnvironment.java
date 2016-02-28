@@ -4,6 +4,8 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import org.apache.commons.dbcp.BasicDataSource;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.PlaceholderConfigurerSupport;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
@@ -12,13 +14,14 @@ import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 import javax.sql.DataSource;
+import java.util.Properties;
 
 /**
  * @author ngnmhieu
  */
 @Configuration
 @Profile("test")
-public class TestProfile
+public class TestEnvironment
 {
     @Bean
     public DataSource dataSource()
@@ -49,5 +52,17 @@ public class TestProfile
         flyway.setLocations("filesystem:./migrations");
 
         return flyway;
+    }
+
+    @Bean
+    public PropertyPlaceholderConfigurer propertyPlaceholderConfigurer()
+    {
+        Properties properties = new Properties();
+        properties.setProperty("auth.secret", "test_secret");
+
+        PropertyPlaceholderConfigurer placeholderConfigurer = new PropertyPlaceholderConfigurer();
+        placeholderConfigurer.setProperties(properties);
+
+        return placeholderConfigurer;
     }
 }

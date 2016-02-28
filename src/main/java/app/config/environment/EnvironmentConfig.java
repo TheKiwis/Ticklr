@@ -7,7 +7,7 @@ import org.springframework.context.annotation.Import;
  * @author ngnmhieu
  */
 @Configuration
-@Import({DevelopmentProfile.class, TestProfile.class})
+@Import({DevelopmentEnvironment.class, TestEnvironment.class})
 public class EnvironmentConfig
 {
 }

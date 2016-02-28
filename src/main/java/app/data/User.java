@@ -1,6 +1,7 @@
 package app.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.persistence.*;
 
@@ -22,7 +23,7 @@ public class User
     @Column(name = "password")
     private String password;
 
-    private User()
+    protected User()
     {
     }
 
@@ -88,5 +89,17 @@ public class User
         int result = id != null ? id.hashCode() : 0;
         result = 31 * result + email.hashCode();
         return result;
+    }
+
+    /**
+     * Authenticate current user with a plain password
+     * @param inputPassword
+     * @return
+     */
+    // todo test this
+    public boolean authenticate(String inputPassword)
+    {
+        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
+        return encoder.matches(inputPassword, password);
     }
 }
