@@ -3,25 +3,16 @@ package app.web;
 import app.data.User;
 import app.data.UserRepository;
 import app.web.forms.UserForm;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import app.web.authenticator.JwtAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.token.DefaultToken;
 import org.springframework.security.core.token.Token;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.PersistenceException;
 import javax.validation.Valid;
-import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
-
-import org.hibernate.exception.ConstraintViolationException;
 
 /**
  * @author ngnmhieu
@@ -32,13 +23,13 @@ public class UserController
 {
     private UserRepository repo;
 
-    private String authSecret;
+    private JwtAuthenticator jwtAuthenticator;
 
     @Autowired
-    public UserController(UserRepository repo, @Value("${auth.secret}") String authSecret)
+    public UserController(UserRepository repo, JwtAuthenticator jwtAuthenticator)
     {
         this.repo = repo;
-        this.authSecret = authSecret;
+        this.jwtAuthenticator = jwtAuthenticator;
     }
 
     @RequestMapping(method = RequestMethod.POST)
@@ -71,11 +62,7 @@ public class UserController
         Token token = null;
         HttpStatus status;
         if (user != null && user.authenticate(form.getPassword())) {
-            String jwtToken = Jwts.builder()
-                    .setHeaderParam("typ", "JWT")
-                    .setSubject(form.getEmail())
-                    .signWith(SignatureAlgorithm.HS256, authSecret.getBytes(StandardCharsets.UTF_8)).compact();
-            token = new DefaultToken(jwtToken, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC), "");
+            token = jwtAuthenticator.generateToken(form.getEmail());
             status = HttpStatus.OK;
         } else {
             status = HttpStatus.UNAUTHORIZED;

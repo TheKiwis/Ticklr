@@ -3,6 +3,7 @@ package app.web;
 import app.data.User;
 import app.data.UserRepository;
 import app.web.forms.UserForm;
+import app.web.authenticator.JwtAuthenticator;
 import io.jsonwebtoken.Jwts;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,6 +31,9 @@ public class UserControllerTest
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     UserRepository userRepository;
 
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    JwtAuthenticator jwtAuthenticator;
+
     UserController controller;
 
     // Signature Secret for JWT
@@ -38,7 +42,7 @@ public class UserControllerTest
     @Before
     public void setup()
     {
-        controller = new UserController(userRepository, authSecret);
+        controller = new UserController(userRepository, jwtAuthenticator);
     }
 
     @Test
@@ -102,6 +106,8 @@ public class UserControllerTest
                 .findByEmail(anyString())
                 .authenticate(anyString())
         ).thenReturn(true);
+        Token token = mock(Token.class);
+        when(jwtAuthenticator.generateToken(anyString())).thenReturn(token);
 
         UserForm form = mock(UserForm.class);
         when(form.getEmail()).thenReturn("user@example.com");
@@ -110,7 +116,7 @@ public class UserControllerTest
         ResponseEntity response = controller.login(form);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals("user@example.com", Jwts.parser().setSigningKey(authSecret.getBytes()).parseClaimsJws(((Token) response.getBody()).getKey()).getBody().getSubject());
+        assertEquals(token, response.getBody());
     }
 
     @Test

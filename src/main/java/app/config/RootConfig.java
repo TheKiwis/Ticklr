@@ -17,7 +17,7 @@ import javax.sql.DataSource;
         basePackages = "app",
         excludeFilters = {@ComponentScan.Filter(type = FilterType.ANNOTATION, value = EnableWebMvc.class)} // exclude the WebConfig
 )
-@Import({EnvironmentConfig.class, TransactionManagersConfig.class})
+@Import({EnvironmentConfig.class, TransactionManagersConfig.class, BeansConfig.class})
 public class RootConfig
 {
     @Bean
