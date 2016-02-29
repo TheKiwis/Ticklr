@@ -15,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 
 /**
  * @author ngnmhieu
@@ -35,7 +36,7 @@ public class UserRepositoryTest
     }
 
     @Test
-    public void testFindById() throws Exception
+    public void findById_Should() throws Exception
     {
         when(em.find(User.class, 123)).thenReturn(user);
 
@@ -44,7 +45,7 @@ public class UserRepositoryTest
     }
 
     @Test
-    public void testFindByEmail() throws Exception
+    public void findByEmail_ShouldReturnUser() throws Exception
     {
         when(em.createQuery(anyString())
                 .setParameter(anyString(), anyString())
@@ -53,5 +54,18 @@ public class UserRepositoryTest
 
         UserRepository repo = new UserRepository(em);
         assertEquals(user, repo.findByEmail("someEmail@gmail.com"));
+    }
+
+    @Test
+    public void findByEmail_ShouldReturnNullIfNoUserFound() throws Exception
+    {
+        when(em.createQuery(anyString())
+                .setParameter(anyString(), anyString())
+                .getSingleResult()
+        ).thenThrow(NoResultException.class);
+
+        UserRepository repo = new UserRepository(em);
+
+        assertNull(repo.findByEmail("non_existent_email@gmail.com"));
     }
 }

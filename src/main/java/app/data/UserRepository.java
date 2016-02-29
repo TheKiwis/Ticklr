@@ -4,10 +4,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceException;
-import javax.persistence.Query;
+import javax.persistence.*;
 
 import javax.validation.Constraint;
 import javax.validation.ConstraintValidator;
@@ -19,6 +16,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import static java.lang.annotation.ElementType.*;
+
 /**
  * @author ngnmhieu
  */
@@ -39,7 +37,7 @@ public class UserRepository
     }
 
     /**
-     * find an user by the given id
+     * Finds an user by the given id
      *
      * @param id the given id
      * @return User who assigned to the given Id
@@ -51,20 +49,27 @@ public class UserRepository
 
 
     /**
-     * find an user by the given email
+     * Finds an user by the given email
      *
      * @param email search for by given email
-     * @return
+     * @return null if no user with the given email found
      */
     public User findByEmail(String email)
     {
         Query query = em.createQuery("SELECT u FROM User u WHERE u.email=:email").setParameter("email", email);
-        // todo try catch return null
-        return (User) query.getSingleResult();
+
+        User user = null;
+        try {
+            user = (User) query.getSingleResult();
+        } catch (NoResultException e) {
+        }
+
+        return user;
     }
 
     /**
-     * Save user to the database
+     * Saves user to the database
+     *
      * @param user
      * @return
      * @throws PersistenceException if user already existed (email should be unique)
