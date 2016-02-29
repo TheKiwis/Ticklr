@@ -7,15 +7,12 @@ import io.jsonwebtoken.Jwts;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
- import org.mockito.Answers;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.token.DefaultToken;
 import org.springframework.security.core.token.Token;
-import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.junit.Assert.*;
@@ -37,10 +34,12 @@ public class UserControllerTest
 
     UserController controller;
 
+    private static final String authSecret = "test_secret";
+
     @Before
     public void setup()
     {
-        controller = new UserController(userRepository, "test_secret");
+        controller = new UserController(userRepository, authSecret);
         mockMvc = standaloneSetup(controller).build();
     }
 
@@ -91,8 +90,6 @@ public class UserControllerTest
 
         assertEquals(response.getStatusCode(), HttpStatus.OK);
 
-        assertEquals("user@example.com", Jwts.parser().setSigningKey("test_secret").parseClaimsJws(((Token)response.getBody()).getKey()).getBody().getSubject());
+        assertEquals("user@example.com", Jwts.parser().setSigningKey(authSecret.getBytes()).parseClaimsJws(((Token)response.getBody()).getKey()).getBody().getSubject());
     }
-
-    // todo test unauthenticated 401
 }
