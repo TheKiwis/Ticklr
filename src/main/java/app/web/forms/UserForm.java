@@ -15,11 +15,11 @@ public class UserForm
 {
     @NotNull
     @Email(regexp = "^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$")
-    // todo unique email
+    @Length(max=255)
     private String email;
 
     @NotNull
-    @Length(min=8)
+    @Length(min=8, max=255)
     private String password;
 
     public String getEmail()

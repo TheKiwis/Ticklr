@@ -3,6 +3,7 @@ package app.web;
 import app.data.User;
 import app.data.UserRepository;
 import app.web.forms.UserForm;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.springframework.beans.factory.annotation.Autowired;

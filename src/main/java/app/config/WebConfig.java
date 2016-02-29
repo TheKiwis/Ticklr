@@ -25,4 +25,10 @@ public class WebConfig extends WebMvcConfigurerAdapter
     {
         configurer.enable();
     }
+
+    @Override
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters)
+    {
+        super.extendMessageConverters(converters);
+    }
 }
