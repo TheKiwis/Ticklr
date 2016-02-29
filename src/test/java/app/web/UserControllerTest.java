@@ -112,4 +112,25 @@ public class UserControllerTest
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals("user@example.com", Jwts.parser().setSigningKey(authSecret.getBytes()).parseClaimsJws(((Token) response.getBody()).getKey()).getBody().getSubject());
     }
+
+    @Test
+    public void login_shouldReturnHttpStatusUnauthorizedStatus()
+    {
+
+        // mock objects
+
+        when(userRepository
+            .findByEmail(anyString())
+            .authenticate(anyString())
+        ).thenReturn(false);
+
+        UserForm form = mock(UserForm.class);
+        when(form.getEmail()).thenReturn("user@example.com");
+
+        // test Object
+        ResponseEntity response = controller.login(form);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+
+    }
 }
