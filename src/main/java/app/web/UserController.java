@@ -71,7 +71,7 @@ public class UserController
 
         Token token = null;
         HttpStatus status;
-        if (user.authenticate(form.getPassword())) {
+        if (user != null && user.authenticate(form.getPassword())) {
             String jwtToken = Jwts.builder()
                     .setHeaderParam("typ", "JWT")
                     .setSubject(form.getEmail())

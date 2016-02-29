@@ -116,9 +116,7 @@ public class UserControllerTest
     @Test
     public void login_shouldReturnHttpStatusUnauthorizedStatus()
     {
-
         // mock objects
-
         when(userRepository
             .findByEmail(anyString())
             .authenticate(anyString())
@@ -126,6 +124,23 @@ public class UserControllerTest
 
         UserForm form = mock(UserForm.class);
         when(form.getEmail()).thenReturn("user@example.com");
+
+        // test Object
+        ResponseEntity response = controller.login(form);
+
+        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
+    }
+
+    @Test
+    public void login_shouldReturnHttpStatusUnauthorizedStatusForNonExistentUser()
+    {
+        // mock objects
+        when(userRepository
+                .findByEmail(anyString())
+        ).thenReturn(null);
+
+        UserForm form = mock(UserForm.class);
+        when(form.getEmail()).thenReturn("nonexistentuser@example.com");
 
         // test Object
         ResponseEntity response = controller.login(form);

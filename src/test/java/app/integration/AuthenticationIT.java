@@ -71,6 +71,19 @@ public class AuthenticationIT extends DataSourceBasedDBTestCase
                 .andExpect(jsonPath("$.key").value("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIn0.x3iQ7s9QYz40aUxkY7hc2t6sWgyU1sXIrS2AP9CnjJk"));
     }
 
+    @Test
+    public void shouldRespondWithUnauthroziedWhenProvidedWithNonExistentUser() throws Exception
+    {
+        String email = "nonexistentuser@example.com";
+        long userCount = (long) em.createQuery("SELECT COUNT(u) FROM User u WHERE u.email = :email").setParameter("email", email).getSingleResult();
+        assertEquals(0, userCount);
+
+        mockMvc.perform(
+                post("/users/login")
+                        .param("email", email)
+                        .param("password", "123456789"))
+                .andExpect(status().isUnauthorized());
+    }
 
     @PersistenceContext
     EntityManager em;
