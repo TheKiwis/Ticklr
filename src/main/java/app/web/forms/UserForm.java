@@ -27,9 +27,10 @@ public class UserForm
         return email;
     }
 
-    public void setEmail(String email)
+    public UserForm setEmail(String email)
     {
         this.email = email;
+        return this;
     }
 
     public String getPassword()
@@ -37,9 +38,10 @@ public class UserForm
         return password;
     }
 
-    public void setPassword(String password)
+    public UserForm setPassword(String password)
     {
         this.password = password;
+        return this;
     }
 
     public User getUser()

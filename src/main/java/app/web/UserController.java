@@ -42,7 +42,7 @@ public class UserController
     public ResponseEntity processRegistration(@Valid UserForm userForm, BindingResult bindingResult)
     {
         HttpStatus status;
-        if (!bindingResult.hasErrors()) {
+        if (!bindingResult.hasFieldErrors()) {
             repo.save(userForm.getUser());
             status = HttpStatus.CREATED;
         } else {

@@ -13,13 +13,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.token.Token;
-import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+
+import java.util.*;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standaloneSetup;
 
 /**
  * @author ngnmhieu
@@ -27,39 +27,51 @@ import static org.springframework.test.web.servlet.setup.MockMvcBuilders.standal
 @RunWith(MockitoJUnitRunner.class)
 public class UserControllerTest
 {
-    MockMvc mockMvc;
-
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     UserRepository userRepository;
 
     UserController controller;
 
+    // Signature Secret for JWT
     private static final String authSecret = "test_secret";
 
     @Before
     public void setup()
     {
         controller = new UserController(userRepository, authSecret);
-        mockMvc = standaloneSetup(controller).build();
     }
 
     @Test
     public void processRegistration_ShouldRespondWith201HTTPStatus() throws Exception
     {
-        mockMvc.perform(
-                post("/users/")
-                        .param("email", "user@gmail.com")
-                        .param("password", "123456789")
-        ).andExpect(status().isCreated());
+        // mock objects
+        UserForm userForm = new UserForm();
+        userForm.setEmail("user@email.com").setPassword("123456789");
+
+        BindingResult bindingResult = mock(BindingResult.class);
+        when(bindingResult.hasFieldErrors()).thenReturn(false);
+        when(bindingResult.getFieldErrors()).thenReturn(new ArrayList<FieldError>());
+
+        // test object
+        ResponseEntity response = controller.processRegistration(userForm, bindingResult);
+
+        assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertTrue(((List) response.getBody()).isEmpty());
     }
 
     @Test
     public void processRegistration_ShouldSaveUser() throws Exception
     {
-        mockMvc.perform(
-                post("/users/")
-                        .param("email", "user@gmail.com")
-                        .param("password", "123456789"));
+        // mock objects
+        UserForm userForm = new UserForm();
+        userForm.setEmail("email").setPassword("123456789");
+
+        BindingResult bindingResult = mock(BindingResult.class);
+        when(bindingResult.hasFieldErrors()).thenReturn(false);
+        when(bindingResult.getFieldErrors()).thenReturn(new ArrayList<FieldError>());
+
+        // test object
+        controller.processRegistration(userForm, bindingResult);
 
         verify(userRepository, atLeastOnce()).save(any(User.class));
     }
@@ -67,17 +79,25 @@ public class UserControllerTest
     @Test
     public void processRegistration_ShouldRespondWith400HTTPStatusOnInvalidInput() throws Exception
     {
-        mockMvc.perform(
-                post("/users/")
-                        .param("email", "invalid email")
-                        .param("password", "123456789"))
-                .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$").isNotEmpty());
+        // mock objects
+        UserForm userForm = new UserForm();
+        userForm.setEmail("invalid email").setPassword("123456789");
+
+        BindingResult bindingResult = mock(BindingResult.class);
+        when(bindingResult.hasFieldErrors()).thenReturn(true);
+        when(bindingResult.getFieldErrors()).thenReturn(Arrays.asList(new FieldError[]{new FieldError("", "", "")}));
+
+        // test object
+        ResponseEntity response = controller.processRegistration(userForm, bindingResult);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertFalse(((List) response.getBody()).isEmpty());
     }
 
     @Test
     public void login_shouldReturnAuthenticationToken() throws Exception
     {
+        // mock objects
         when(userRepository
                 .findByEmail(anyString())
                 .authenticate(anyString())
@@ -86,10 +106,10 @@ public class UserControllerTest
         UserForm form = mock(UserForm.class);
         when(form.getEmail()).thenReturn("user@example.com");
 
+        // test object
         ResponseEntity response = controller.login(form);
 
-        assertEquals(response.getStatusCode(), HttpStatus.OK);
-
-        assertEquals("user@example.com", Jwts.parser().setSigningKey(authSecret.getBytes()).parseClaimsJws(((Token)response.getBody()).getKey()).getBody().getSubject());
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals("user@example.com", Jwts.parser().setSigningKey(authSecret.getBytes()).parseClaimsJws(((Token) response.getBody()).getKey()).getBody().getSubject());
     }
 }
