@@ -72,6 +72,16 @@ public class AuthenticationIT extends DataSourceBasedDBTestCase
     }
 
     @Test
+    public void shouldRespondWithJWTTokenWhenProvidedWithInvalidCredential() throws Exception
+    {
+        mockMvc.perform(
+                post("/users/login")
+                        .param("email", "user@example.com")
+                        .param("password", "wrong_pasword"))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     public void shouldRespondWithUnauthroziedWhenProvidedWithNonExistentUser() throws Exception
     {
         String email = "nonexistentuser@example.com";

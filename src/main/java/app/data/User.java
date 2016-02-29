@@ -97,7 +97,6 @@ public class User
      * @param inputPassword
      * @return
      */
-    // todo test this
     public boolean authenticate(String inputPassword)
     {
         BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();

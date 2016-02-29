@@ -66,7 +66,6 @@ public class UserController
     @RequestMapping(value="/login", method = RequestMethod.POST)
     public ResponseEntity login(UserForm form)
     {
-        // todo handle exception
         User user = repo.findByEmail(form.getEmail());
 
         Token token = null;
