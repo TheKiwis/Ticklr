@@ -3,6 +3,7 @@ package app.integration;
 import app.config.RootConfig;
 import app.config.WebConfig;
 import app.data.User;
+import io.jsonwebtoken.Jwts;
 import org.dbunit.DataSourceBasedDBTestCase;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSet;
@@ -68,7 +69,6 @@ public class AuthenticationIT extends DataSourceBasedDBTestCase
                         .param("password", "123456789"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.key").value("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIn0.x3iQ7s9QYz40aUxkY7hc2t6sWgyU1sXIrS2AP9CnjJk"));
-
     }
 
 
@@ -107,7 +107,6 @@ public class AuthenticationIT extends DataSourceBasedDBTestCase
     @Override
     protected IDataSet getDataSet() throws Exception
     {
-
         return new FlatXmlDataSetBuilder().build(getClass().getResourceAsStream("/fixtures/user_dataset.xml"));
     }
 }

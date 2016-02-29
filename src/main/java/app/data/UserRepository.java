@@ -6,8 +6,19 @@ import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceException;
 import javax.persistence.Query;
 
+import javax.validation.Constraint;
+import javax.validation.ConstraintValidator;
+import javax.validation.ConstraintValidatorContext;
+import javax.validation.Payload;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+import static java.lang.annotation.ElementType.*;
 /**
  * @author ngnmhieu
  */
@@ -43,19 +54,23 @@ public class UserRepository
      * find an user by the given email
      *
      * @param email search for by given email
-     * @return 
+     * @return
      */
-    // todo integration test
     public User findByEmail(String email)
     {
         Query query = em.createQuery("SELECT u FROM User u WHERE u.email=:email").setParameter("email", email);
+        // todo try catch return null
         return (User) query.getSingleResult();
     }
 
-    // todo test transaction fail
-    public User save(User user)
+    /**
+     * Save user to the database
+     * @param user
+     * @return
+     * @throws PersistenceException if user already existed (email should be unique)
+     */
+    public void save(User user) throws PersistenceException
     {
         em.persist(user);
-        return user;
     }
 }

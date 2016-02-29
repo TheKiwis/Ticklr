@@ -14,10 +14,13 @@ import org.springframework.security.core.token.Token;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import javax.persistence.PersistenceException;
 import javax.validation.Valid;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+
+import org.hibernate.exception.ConstraintViolationException;
 
 /**
  * @author ngnmhieu
@@ -43,8 +46,15 @@ public class UserController
     {
         HttpStatus status;
         if (!bindingResult.hasFieldErrors()) {
-            repo.save(userForm.getUser());
+
             status = HttpStatus.CREATED;
+
+            try {
+                repo.save(userForm.getUser());
+            } catch (PersistenceException e) {
+                status = HttpStatus.CONFLICT; // duplicated email found
+            }
+
         } else {
             status = HttpStatus.BAD_REQUEST;
         }

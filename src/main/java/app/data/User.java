@@ -17,7 +17,7 @@ public class User
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "email")
+    @Column(name = "email", unique = true)
     private String email;
 
     @Column(name = "password")
@@ -93,6 +93,7 @@ public class User
 
     /**
      * Authenticate current user with a plain password
+     *
      * @param inputPassword
      * @return
      */
