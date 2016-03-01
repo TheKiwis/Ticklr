@@ -3,7 +3,7 @@ package app.web;
 import app.data.User;
 import app.data.UserRepository;
 import app.web.forms.UserForm;
-import app.web.authenticator.JwtAuthenticator;
+import app.web.authentication.JwtAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,6 +19,7 @@ import javax.validation.Valid;
  */
 @RestController
 @RequestMapping("/users")
+// todo write comment
 public class UserController
 {
     private UserRepository repo;

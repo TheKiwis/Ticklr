@@ -1,4 +1,4 @@
-package app.web.authenticator;
+package app.web.authentication;
 
 import org.junit.Test;
 import org.springframework.security.core.token.Token;

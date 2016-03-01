@@ -1,6 +1,7 @@
 package app.config;
 
 import app.config.environment.EnvironmentConfig;
+import app.config.environment.SecurityConfig;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.*;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -17,7 +18,7 @@ import javax.sql.DataSource;
         basePackages = "app",
         excludeFilters = {@ComponentScan.Filter(type = FilterType.ANNOTATION, value = EnableWebMvc.class)} // exclude the WebConfig
 )
-@Import({EnvironmentConfig.class, TransactionManagersConfig.class, BeansConfig.class})
+@Import({EnvironmentConfig.class, TransactionManagersConfig.class, SecurityConfig.class, BeansConfig.class})
 public class RootConfig
 {
     @Bean

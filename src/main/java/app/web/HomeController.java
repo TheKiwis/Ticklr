@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.ResponseBody;
 @Controller
 public class HomeController
 {
-    @RequestMapping("/")
+    @RequestMapping("/admin")
     public @ResponseBody String homepage()
     {
         return "Default Homepage";
