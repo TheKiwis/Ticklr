@@ -29,46 +29,12 @@ import org.springframework.web.context.WebApplicationContext;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
-import javax.sql.DataSource;
 
 /**
  * @author ngnmhieu
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {RootConfig.class, WebConfig.class})
-@WebAppConfiguration("src/main/java/")
-@TestExecutionListeners({
-        DependencyInjectionTestExecutionListener.class,
-        FlywayTestExecutionListener.class
-})
-@ActiveProfiles("test")
-@FlywayTest
-public class UserManipulationIT extends DataSourceBasedDBTestCase
+public class UserManipulationIT extends CommonIntegrationTest
 {
-    @Autowired
-    DataSource dataSource;
-
-    @PersistenceContext
-    EntityManager em;
-
-    @Autowired
-    WebApplicationContext wac;
-
-    private MockMvc mockMvc;
-
-    @Before
-    public void setUp() throws Exception
-    {
-        super.setUp();
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).build();
-    }
-
-    @Override
-    public void tearDown() throws Exception
-    {
-        super.tearDown();
-    }
-
     @Test
     public void shouldSaveUser() throws Exception
     {
@@ -127,13 +93,6 @@ public class UserManipulationIT extends DataSourceBasedDBTestCase
     {
         User u = (User) em.createQuery("SELECT u FROM User u WHERE u.email = 'user@example.com'").getSingleResult();
         assertEquals("user@example.com", u.getEmail());
-    }
-
-
-    @Override
-    protected DataSource getDataSource()
-    {
-        return dataSource;
     }
 
     @Override

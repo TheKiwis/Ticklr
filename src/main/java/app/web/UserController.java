@@ -48,7 +48,6 @@ public class UserController
      * @return
      */
     @RequestMapping(method = RequestMethod.POST)
-    // todo accept other types of request content-type like json, xml (not only x-www-form-urlencoded)
     public ResponseEntity processRegistration(@Valid UserForm userForm, BindingResult bindingResult)
     {
         HttpStatus status;

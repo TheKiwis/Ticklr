@@ -16,19 +16,9 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.token.Token;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.TestExecutionListeners;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.support.DependencyInjectionTestExecutionListener;
-import org.springframework.test.context.web.WebAppConfiguration;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.web.context.WebApplicationContext;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.sql.DataSource;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -39,16 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author ngnmhieu
  */
-@RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {RootConfig.class, WebConfig.class})
-@WebAppConfiguration("src/main/java")
-@TestExecutionListeners({
-        DependencyInjectionTestExecutionListener.class,
-        FlywayTestExecutionListener.class
-})
-@ActiveProfiles("test")
-@FlywayTest
-public class AuthenticationIT extends DataSourceBasedDBTestCase
+public class AuthenticationIT extends CommonIntegrationTest
 {
     @Value("${auth.secret}")
     private String authSecret;
@@ -111,38 +92,6 @@ public class AuthenticationIT extends DataSourceBasedDBTestCase
     {
         mockMvc.perform(get("/admin"))
                 .andExpect(status().isForbidden());
-    }
-
-    @PersistenceContext
-    EntityManager em;
-
-    @Autowired
-    private WebApplicationContext wac;
-
-    @Autowired
-    DataSource dataSource;
-
-    private MockMvc mockMvc;
-
-    @Before
-    @Override
-    public void setUp() throws Exception
-    {
-        super.setUp();
-        mockMvc = MockMvcBuilders.webAppContextSetup(wac).apply(springSecurity()).build();
-    }
-
-    @After
-    @Override
-    public void tearDown() throws Exception
-    {
-        super.tearDown();
-    }
-
-    @Override
-    protected DataSource getDataSource()
-    {
-        return dataSource;
     }
 
     @Override
