@@ -24,7 +24,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ConfigurationIT extends CommonIntegrationTest
 {
     @Test
-    public void shouldServeResourceAsXML() throws Exception
+    public void sshouldServeResourceAsXML() throws Exception
     {
         mockMvc.perform(
                 get("/users/profile").accept(MediaType.APPLICATION_XML))
@@ -41,11 +41,11 @@ public class ConfigurationIT extends CommonIntegrationTest
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
     }
 
+    @Test
     public void testServeResourceAsJsonByDefault() throws Exception
     {
-
         mockMvc.perform(
-                get("/users/profile").accept(MediaType.APPLICATION_JSON, MediaType.APPLICATION_XML))
+                get("/users/profile").accept(MediaType.ALL))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
     }
