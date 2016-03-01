@@ -4,6 +4,8 @@ import app.config.RootConfig;
 import app.config.WebConfig;
 import app.data.User;
 import app.web.authentication.JwtAuthenticator;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.dbunit.DataSourceBasedDBTestCase;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
@@ -19,6 +21,10 @@ import org.springframework.security.core.token.Token;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+
+import java.nio.charset.StandardCharsets;
+import java.util.Calendar;
+import java.util.Date;
 
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -44,12 +50,22 @@ public class AuthenticationIT extends CommonIntegrationTest
     @Test
     public void shouldRespondWithJWTTokenWhenProvidedWithValidCredential() throws Exception
     {
+        String email = "user@example.com";
+
+        Date expiredDate = getExpiredDate(JwtAuthenticator.DEFAULT_EXPIRED_DAYS);
+
+        String jwtToken = Jwts.builder()
+                .setHeaderParam("typ", "JWT")
+                .setSubject(email)
+                .setExpiration(expiredDate)
+                .signWith(SignatureAlgorithm.HS256,authSecret.getBytes(StandardCharsets.UTF_8)).compact();
+
         mockMvc.perform(
                 post("/users/request-auth-token")
-                        .param("email", "user@example.com")
+                        .param("email", email)
                         .param("password", "123456789"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.key").value("eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIn0.x3iQ7s9QYz40aUxkY7hc2t6sWgyU1sXIrS2AP9CnjJk"));
+                .andExpect(jsonPath("$.key").value(jwtToken));
     }
 
     @Test
@@ -98,5 +114,17 @@ public class AuthenticationIT extends CommonIntegrationTest
     protected IDataSet getDataSet() throws Exception
     {
         return new FlatXmlDataSetBuilder().build(getClass().getResourceAsStream("/fixtures/user_dataset.xml"));
+    }
+
+    private Date getExpiredDate(int expiredInDays)
+    {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.add(Calendar.DATE,expiredInDays);
+        return cal.getTime();
     }
 }

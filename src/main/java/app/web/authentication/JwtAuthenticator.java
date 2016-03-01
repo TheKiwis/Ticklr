@@ -1,21 +1,23 @@
 package app.web.authentication;
 
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
-import io.jsonwebtoken.SignatureAlgorithm;
+import io.jsonwebtoken.*;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.token.DefaultToken;
 import org.springframework.security.core.token.Token;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.time.ZoneOffset;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  *
  */
 public class JwtAuthenticator
 {
-    private String authSecret;
+    public static final int DEFAULT_EXPIRED_DAYS = 7;
+    private byte[] authSecretBytes;
 
     /**
      *
@@ -23,7 +25,7 @@ public class JwtAuthenticator
      */
     public JwtAuthenticator(String authSecret)
     {
-        this.authSecret = authSecret;
+        this.authSecretBytes = authSecret.getBytes(StandardCharsets.UTF_8);
     }
 
     /**
@@ -40,22 +42,62 @@ public class JwtAuthenticator
     // todo check expiration, check require claims
     public Claims authenticate(String token)
     {
-        return Jwts.parser().setSigningKey(authSecret.getBytes(StandardCharsets.UTF_8)).parseClaimsJws(token).getBody();
+        Claims claims  = null;
+        try {
+            claims = Jwts.parser()
+                    .setSigningKey(authSecretBytes)
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            // check expiration claim
+
+            if (claims.getExpiration() == null){
+                throw new BadCredentialsException("Missing expiration claim");
+            }
+
+        }catch (UnsupportedJwtException|MalformedJwtException|SignatureException|ExpiredJwtException|MissingClaimException e){
+            throw new BadCredentialsException("JWT token is not valid");
+        }
+
+
+        return  claims;
     }
 
     /**
      * Generates a JWT Token with provided information and signs it with authSecret
      *
      * @param email subject claim
+     * @param expiredInDays
      * @return JWT Token
      */
-    public Token generateToken(String email)
+    public Token generateToken(String email , int expiredInDays)
     {
+
+        Date expiredDate = getExpiredDate(expiredInDays);
+
         String jwtToken = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .setSubject(email)
-                .signWith(SignatureAlgorithm.HS256, authSecret.getBytes(StandardCharsets.UTF_8)).compact();
+                .setExpiration(expiredDate)
+                .signWith(SignatureAlgorithm.HS256, authSecretBytes).compact();
         DefaultToken token = new DefaultToken(jwtToken, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC), "");
         return token;
+    }
+
+    public Token generateToken(String email)
+    {
+       return this.generateToken(email, DEFAULT_EXPIRED_DAYS);
+    }
+
+    private Date getExpiredDate(int expiredInDays)
+    {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(new Date());
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MILLISECOND, 0);
+        cal.add(Calendar.DATE,expiredInDays);
+        return cal.getTime();
     }
 }
