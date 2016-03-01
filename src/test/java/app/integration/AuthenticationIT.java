@@ -114,7 +114,7 @@ public class AuthenticationIT extends CommonIntegrationTest
     public void shouldNotReturnResouceWhenProviedWithMalformtoken() throws Exception
     {
         mockMvc.perform(get("/admin")
-                .header("Authorization", "Bearer " + "erggdfsyserysdghsrty.sdfghsdyyydfhys"))
+                .header("Authorization", "Bearer erggdfsyserysdghsrty.sdfghsdyyydfhys"))
                 .andExpect(status().isForbidden());
     }
 
@@ -134,7 +134,7 @@ public class AuthenticationIT extends CommonIntegrationTest
 
 
         mockMvc.perform(get("/admin")
-                .header("Authorization", "Bearer " +jwtToken ))
+                .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isForbidden());
     }
 

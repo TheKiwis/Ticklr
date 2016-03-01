@@ -21,7 +21,7 @@ public class JwtAuthenticator
 
     /**
      *
-     * @param authSecret // todo authSecret used in jwt is byte[] array, consider taking byte array instead of String
+     * @param authSecret
      */
     public JwtAuthenticator(String authSecret)
     {
@@ -39,7 +39,6 @@ public class JwtAuthenticator
      *             - missing required claims (subject, expiration)
      *             - expired token
      */
-    // todo check expiration, check require claims
     public Claims authenticate(String token)
     {
         Claims claims  = null;
