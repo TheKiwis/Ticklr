@@ -50,9 +50,12 @@ public class JwtAuthenticator
                     .getBody();
 
             // check expiration claim
-
             if (claims.getExpiration() == null){
                 throw new BadCredentialsException("Missing expiration claim");
+            }
+
+            if(claims.getSubject() == null){
+                throw new BadCredentialsException("Missing subject claim");
             }
 
         }catch (UnsupportedJwtException|MalformedJwtException|SignatureException|ExpiredJwtException|MissingClaimException e){

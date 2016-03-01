@@ -110,6 +110,53 @@ public class AuthenticationIT extends CommonIntegrationTest
                 .andExpect(status().isForbidden());
     }
 
+    @Test
+    public void shouldNotReturnResouceWhenProviedWithMalformtoken() throws Exception
+    {
+        mockMvc.perform(get("/admin")
+                .header("Authorization", "Bearer " + "erggdfsyserysdghsrty.sdfghsdyyydfhys"))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void shouldNotReturnResouceWhenProvidedWithTokenSignedWithInvalidSecrete() throws Exception
+    {
+
+        String email = "user@example.com";
+        String anotherSecret = "another_Secret";
+        Date expiredDate = getExpiredDate(JwtAuthenticator.DEFAULT_EXPIRED_DAYS);
+
+        String jwtToken = Jwts.builder()
+                .setHeaderParam("typ", "JWT")
+                .setSubject(email)
+                .setExpiration(expiredDate)
+                .signWith(SignatureAlgorithm.HS256,anotherSecret.getBytes(StandardCharsets.UTF_8)).compact();
+
+
+        mockMvc.perform(get("/admin")
+                .header("Authorization", "Bearer " +jwtToken ))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void shouldNotReturnResouceWhenProvidedWithExpiredToken() throws Exception
+    {
+        String email = "user@example.com";
+
+        Date expiredDate = getExpiredDate(-2);
+
+        String jwtToken = Jwts.builder()
+                .setHeaderParam("typ", "JWT")
+                .setSubject(email)
+                .setExpiration(expiredDate)
+                .signWith(SignatureAlgorithm.HS256,authSecret.getBytes(StandardCharsets.UTF_8)).compact();
+
+
+        mockMvc.perform(get("/admin")
+                .header("Authorization", "Bearer " +jwtToken ))
+                .andExpect(status().isForbidden());
+    }
+
     @Override
     protected IDataSet getDataSet() throws Exception
     {

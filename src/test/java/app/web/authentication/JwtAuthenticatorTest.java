@@ -113,7 +113,7 @@ public class JwtAuthenticatorTest
     }
 
 
-    public static Date getExpiredDate(int expiredInDays)
+    private Date getExpiredDate(int expiredInDays)
     {
         Calendar cal = Calendar.getInstance();
         cal.setTime(new Date());
