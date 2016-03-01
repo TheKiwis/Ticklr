@@ -112,7 +112,7 @@ public class UserControllerTest
         when(form.getEmail()).thenReturn("user@example.com");
 
         // test object
-        ResponseEntity response = controller.login(form);
+        ResponseEntity response = controller.requestAuthToken(form);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(token, response.getBody());
@@ -131,7 +131,7 @@ public class UserControllerTest
         when(form.getEmail()).thenReturn("user@example.com");
 
         // test Object
-        ResponseEntity response = controller.login(form);
+        ResponseEntity response = controller.requestAuthToken(form);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
@@ -148,7 +148,7 @@ public class UserControllerTest
         when(form.getEmail()).thenReturn("nonexistentuser@example.com");
 
         // test Object
-        ResponseEntity response = controller.login(form);
+        ResponseEntity response = controller.requestAuthToken(form);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
 

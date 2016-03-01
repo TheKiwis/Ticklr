@@ -64,7 +64,7 @@ public class AuthenticationIT extends DataSourceBasedDBTestCase
     public void shouldRespondWithJWTTokenWhenProvidedWithValidCredential() throws Exception
     {
         mockMvc.perform(
-                post("/users/login")
+                post("/users/request-auth-token")
                         .param("email", "user@example.com")
                         .param("password", "123456789"))
                 .andExpect(status().isOk())
@@ -75,7 +75,7 @@ public class AuthenticationIT extends DataSourceBasedDBTestCase
     public void shouldRespondWithJWTTokenWhenProvidedWithInvalidCredential() throws Exception
     {
         mockMvc.perform(
-                post("/users/login")
+                post("/users/request-auth-token")
                         .param("email", "user@example.com")
                         .param("password", "wrong_pasword"))
                 .andExpect(status().isUnauthorized());
@@ -89,7 +89,7 @@ public class AuthenticationIT extends DataSourceBasedDBTestCase
         assertEquals(0, userCount);
 
         mockMvc.perform(
-                post("/users/login")
+                post("/users/request-auth-token")
                         .param("email", email)
                         .param("password", "123456789"))
                 .andExpect(status().isUnauthorized());

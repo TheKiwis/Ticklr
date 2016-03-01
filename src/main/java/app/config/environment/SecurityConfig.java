@@ -12,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
@@ -44,6 +45,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     }
 
     @Override
+    // todo: things to configure
+    //  - configure places that require HTTPS (requires Channels)
+    //  - configure roles (how can it work with jwtAuthenticationFilter?)
+    //  - consider if we need csrf, or jwt token is enough see: https://docs.spring.io/spring-security/site/docs/current/reference/html/csrf.html
     protected void configure(HttpSecurity http) throws Exception
     {
         http.regexMatcher("/admin.*")

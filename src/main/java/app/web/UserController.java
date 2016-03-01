@@ -15,17 +15,25 @@ import javax.persistence.PersistenceException;
 import javax.validation.Valid;
 
 /**
+ * Contains REST API Endpoints for following services:
+ *  - user registration
+ *  - authentication token request
+ *  - ...
+ *
  * @author ngnmhieu
  */
 @RestController
 @RequestMapping("/users")
-// todo write comment
 public class UserController
 {
     private UserRepository repo;
 
     private JwtAuthenticator jwtAuthenticator;
 
+    /**
+     * @param repo fetches and saves User object
+     * @param jwtAuthenticator Jwt Authentication helper object
+     */
     @Autowired
     public UserController(UserRepository repo, JwtAuthenticator jwtAuthenticator)
     {
@@ -33,6 +41,12 @@ public class UserController
         this.jwtAuthenticator = jwtAuthenticator;
     }
 
+    /**
+     * Register user
+     * @param userForm contains registration information (e.g. email and password)
+     * @param bindingResult validation information
+     * @return
+     */
     @RequestMapping(method = RequestMethod.POST)
     // todo accept other types of request content-type like json, xml (not only x-www-form-urlencoded)
     public ResponseEntity processRegistration(@Valid UserForm userForm, BindingResult bindingResult)
@@ -55,8 +69,15 @@ public class UserController
         return new ResponseEntity(bindingResult.getFieldErrors(), status);
     }
 
-    @RequestMapping(value="/login", method = RequestMethod.POST)
-    public ResponseEntity login(UserForm form)
+    /**
+     * Grants client with authentication token (with expiration)
+     * Client uses this token for subsequent requests to access authorized resources
+     *
+     * @param form contains authentication information (i.e. email and password)
+     * @return
+     */
+    @RequestMapping(value= "/request-auth-token", method = RequestMethod.POST)
+    public ResponseEntity requestAuthToken(UserForm form)
     {
         User user = repo.findByEmail(form.getEmail());
 
