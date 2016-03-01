@@ -4,16 +4,23 @@ import app.data.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.RestController;
 
 /**
  * @author ngnmhieu
  */
-@Controller
+@RestController
 public class HomeController
 {
     @RequestMapping("/admin")
-    public @ResponseBody String homepage()
+    public String homepage()
     {
         return "Default Homepage";
+    }
+
+    @RequestMapping("/users/profile")
+    public User test()
+    {
+        return new User("email@example.com", "123456789");
     }
 }
