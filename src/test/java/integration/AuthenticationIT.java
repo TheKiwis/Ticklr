@@ -1,26 +1,14 @@
-package app.integration;
+package integration;
 
-import app.config.RootConfig;
-import app.config.WebConfig;
 import app.data.User;
 import app.web.authentication.JwtAuthenticator;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
-import org.dbunit.DataSourceBasedDBTestCase;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
-import org.flywaydb.test.annotation.FlywayTest;
-import org.flywaydb.test.junit.FlywayTestExecutionListener;
-import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.token.Token;
-
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;

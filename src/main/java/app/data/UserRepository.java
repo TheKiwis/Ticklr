@@ -1,21 +1,9 @@
 package app.data;
 
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
-
-import javax.validation.Constraint;
-import javax.validation.ConstraintValidator;
-import javax.validation.ConstraintValidatorContext;
-import javax.validation.Payload;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
-import static java.lang.annotation.ElementType.*;
 
 /**
  * @author ngnmhieu
@@ -37,14 +25,18 @@ public class UserRepository
     }
 
     /**
-     * Finds an user by the given id
+     * Finds an user by the given ID
      *
-     * @param id the given id
-     * @return User who assigned to the given Id
+     * @param userId the given user's ID
+     * @return null if no user found
      */
-    public User findById(int id)
+    public User findById(int userId)
     {
-        return em.find(User.class, id);
+        try {
+            return em.find(User.class, userId);
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 
 

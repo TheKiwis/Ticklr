@@ -1,8 +1,5 @@
 package app.data;
 
-import app.data.User;
-import app.data.UserRepository;
-
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.mock;
@@ -36,12 +33,23 @@ public class UserRepositoryTest
     }
 
     @Test
-    public void findById_Should() throws Exception
+    public void findById_shouldReturnTheCorrectUser() throws Exception
     {
         when(em.find(User.class, 123)).thenReturn(user);
 
         UserRepository repo = new UserRepository(em);
         assertEquals(user, repo.findById(123));
+    }
+
+    @Test
+    public void findById_shouldReturnNullIfNoUserFound() throws Exception
+    {
+        when(em.find(User.class, 123)
+        ).thenThrow(NoResultException.class);
+
+        UserRepository repo = new UserRepository(em);
+
+        assertNull(repo.findById(123));
     }
 
     @Test
@@ -68,4 +76,6 @@ public class UserRepositoryTest
 
         assertNull(repo.findByEmail("non_existent_email@gmail.com"));
     }
+
+    // save
 }

@@ -39,11 +39,6 @@ public class User
         setId(id);
     }
 
-    public Long getId()
-    {
-        return id;
-    }
-
     public void setId(Long id)
     {
         this.id = id;
@@ -81,14 +76,6 @@ public class User
         if (id != null ? !id.equals(user.id) : user.id != null) return false;
         return email.equals(user.email);
 
-    }
-
-    @Override
-    public int hashCode()
-    {
-        int result = id != null ? id.hashCode() : 0;
-        result = 31 * result + email.hashCode();
-        return result;
     }
 
     /**

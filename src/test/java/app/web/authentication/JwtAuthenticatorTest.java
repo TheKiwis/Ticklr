@@ -6,13 +6,9 @@ import io.jsonwebtoken.SignatureAlgorithm;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.token.DefaultToken;
 import org.springframework.security.core.token.Token;
 
-import javax.sql.DataSource;
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Calendar;
 import java.util.Date;
 

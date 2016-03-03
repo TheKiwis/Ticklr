@@ -1,0 +1,3 @@
+<dataset>
+    <events id="123" title="Sample Event" description="Pool Party" visibility="PRIVATE" status="DRAFT" start_time="2015-06-30" end_time="2015-07-01" />
+</dataset>
