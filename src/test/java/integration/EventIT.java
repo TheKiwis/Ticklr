@@ -30,41 +30,44 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(status().isCreated());
     }
 
-    @Test
-    public void shouldCreateEmptyEventWithDefaultValues() throws Exception
-    {
-        MvcResult response = mockMvc.perform(post("/events")).andReturn();
-
-        Calendar cal = new GregorianCalendar();
-        cal.add(Calendar.DATE, 7);
-        String aWeekFromNow = new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime());
-
-        String location = response.getResponse().getHeader("Location");
-        mockMvc.perform(get(location))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.title").value("New Event"))
-                .andExpect(jsonPath("$.description").value(""))
-                //.andExpect(jsonPath("$.startTime").value(startsWith((aWeekFromNow))))
-                //.andExpect(jsonPath("$.endTime").value(startsWith(aWeekFromNow)))
-                .andExpect(jsonPath("$.status").value("DRAFT"))
-                .andExpect(jsonPath("$.visibility").value("PRIVATE"));
-    }
-
-    // create with provided value
+    //@Test
+    //public void shouldCreateEmptyEventWithDefaultValues() throws Exception
+    //{
+    //    MvcResult response = mockMvc.perform(post("/events")).andReturn();
+    //
+    //    Calendar cal = new GregorianCalendar();
+    //    cal.add(Calendar.DATE, 7);
+    //    String aWeekFromNow = new SimpleDateFormat("yyyy-MM-dd").format(cal.getTime());
+    //
+    //    String location = response.getResponse().getHeader("Location");
+    //    mockMvc.perform(get(location))
+    //            .andExpect(status().isOk())
+    //            .andExpect(jsonPath("$.id").isNotEmpty())
+    //            .andExpect(jsonPath("$.title").value("New Event"))
+    //            .andExpect(jsonPath("$.description").value(""))
+    //            //.andExpect(jsonPath("$.startTime").value(startsWith((aWeekFromNow))))
+    //            //.andExpect(jsonPath("$.endTime").value(startsWith(aWeekFromNow)))
+    //            .andExpect(jsonPath("$.status").value("DRAFT"))
+    //            .andExpect(jsonPath("$.visibility").value("PRIVATE"));
+    //}
 
     @Test
     public void shouldReturnAnEvent() throws Exception
     {
+        Calendar cal = new GregorianCalendar(2015, 6, 30);
+        String expectedStartTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(cal.getTime());
+        cal = new GregorianCalendar(2015, 7, 1);
+        String expectedEndTime = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ").format(cal.getTime());
+
         mockMvc.perform(get("/events/123"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(123))
                 .andExpect(jsonPath("$.title").value("Sample Event"))
                 .andExpect(jsonPath("$.description").value("Pool Party"))
                 .andExpect(jsonPath("$.status").value("DRAFT"))
-                //.andExpect(jsonPath("$.start_time").value())
-                //.andExpect(jsonPath("$.end_time").value())
-                .andExpect(jsonPath("$.visibility").value("PRIVATE"));
+                .andExpect(jsonPath("$.visibility").value("PRIVATE"))
+                .andExpect(jsonPath("$.start_time").value(expectedStartTime))
+                .andExpect(jsonPath("$.end_time").value(expectedEndTime));
     }
 
     @Test
@@ -87,6 +90,8 @@ public class EventIT extends CommonIntegrationTest
         mockMvc.perform(get("/events/non_numeric"))
                 .andExpect(status().isBadRequest());
     }
+
+    // todo create with provided value
 
     // todo startTime and endTime
 

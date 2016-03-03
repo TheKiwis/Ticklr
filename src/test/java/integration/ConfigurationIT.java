@@ -13,7 +13,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 public class ConfigurationIT extends CommonIntegrationTest
 {
     @Test
-    public void sshouldServeResourceAsXML() throws Exception
+    public void shouldServeResourceAsXML() throws Exception
     {
         mockMvc.perform(
                 get("/users/profile").accept(MediaType.APPLICATION_XML))

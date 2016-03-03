@@ -1,7 +1,7 @@
 package integration;
 
 import app.config.RootConfig;
-import app.config.WebConfig;
+import app.config.web.WebConfig;
 import org.dbunit.DataSourceBasedDBTestCase;
 import org.dbunit.dataset.DefaultDataSet;
 import org.dbunit.dataset.IDataSet;

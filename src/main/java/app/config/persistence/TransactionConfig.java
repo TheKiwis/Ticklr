@@ -1,4 +1,4 @@
-package app.config;
+package app.config.persistence;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -15,7 +15,8 @@ import javax.sql.DataSource;
  */
 @Configuration
 @EnableTransactionManagement
-public class TransactionManagersConfig {
+public class TransactionConfig
+{
     @Autowired
     private EntityManagerFactory emf;
 

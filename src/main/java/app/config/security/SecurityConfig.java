@@ -1,4 +1,4 @@
-package app.config.environment;
+package app.config.security;
 
 import app.data.UserRepository;
 import app.web.authentication.JwtAuthententicationProvider;

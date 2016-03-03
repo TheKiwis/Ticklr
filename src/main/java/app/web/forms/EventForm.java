@@ -2,6 +2,8 @@ package app.web.forms;
 
 import app.data.Event;
 
+import java.util.Calendar;
+
 /**
  * @author ngnmhieu
  */
@@ -13,8 +15,9 @@ public class EventForm
 
     private String description;
 
-    //private Calendar startTime;
-    //private Calendar endTime;
+    private Calendar startTime;
+
+    private Calendar endTime;
 
     private Event.Status status;
 
@@ -22,6 +25,6 @@ public class EventForm
 
     public Event getEvent()
     {
-        return new Event(title, description, null, null, status, visibility);
+        return new Event(title, description, startTime, endTime, status, visibility);
     }
 }
