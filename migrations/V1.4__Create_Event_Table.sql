@@ -1,5 +1,5 @@
 CREATE TABLE `events` (
-  `id` INT NULL AUTO_INCREMENT,
+  `id` INT NOT NULL AUTO_INCREMENT,
   `title` TEXT(5000) NULL,
   `start_time` DATETIME NULL,
   `end_time` DATETIME NULL,
