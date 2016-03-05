@@ -2,7 +2,6 @@ package app.web;
 
 import app.data.Event;
 import app.data.EventRepository;
-import app.web.forms.EventForm;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -11,6 +10,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.FieldError;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -38,43 +41,41 @@ public class EventControllerTest
     @Test
     public void create_shouldReturnHttpStatusCreated() throws Exception
     {
-        EventForm mockForm = mock(EventForm.class);
         Event mockEvent = mock(Event.class);
         when(eventRepository.save(any())).thenReturn(mockEvent);
+        List fieldErrors = mock(ArrayList.class);
+        when(bindingResult.getFieldErrors()).thenReturn(fieldErrors);
 
-        ResponseEntity response = controller.create(mockForm, bindingResult);
+        ResponseEntity response = controller.create(mockEvent, bindingResult);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
+        assertEquals(fieldErrors, response.getBody());
     }
 
     @Test
     public void create_shouldCreateEventViaEventRepository() throws Exception
     {
         // mocks
-        EventForm mockForm = mock(EventForm.class);
         Event mockEvent = mock(Event.class);
-        when(mockForm.getEvent()).thenReturn(mockEvent);
         when(eventRepository.save(any())).thenReturn(mockEvent);
 
         // test object
-        controller.create(mockForm, bindingResult);
+        controller.create(mockEvent, bindingResult);
         verify(eventRepository, times(1)).save(mockEvent);
     }
 
-    //@Test
-    // todo integration test for this
-    //public void create_shouldReturnHttpStatusBadRequest() throws Exception
-    //{
-    //    // mocks
-    //    EventForm mockForm = mock(EventForm.class);
-    //    when(bindingResult.hasErrors()).thenReturn(true);
-    //    when(bindingResult.hasFieldErrors()).thenReturn(true);
-    //
-    //    // test object
-    //    ResponseEntity response = controller.create(mockForm, bindingResult);
-    //    assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
-    //    // assert response body
-    //}
+    @Test
+    public void create_shouldReturnHttpStatusBadRequest() throws Exception
+    {
+        // mocks
+        Event mockEvent = mock(Event.class);
+        when(bindingResult.hasErrors()).thenReturn(true);
+        when(bindingResult.hasFieldErrors()).thenReturn(true);
+
+        // test object
+        ResponseEntity response = controller.create(mockEvent, bindingResult);
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+    }
 
 
     @Test

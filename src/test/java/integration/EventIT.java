@@ -36,7 +36,7 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldCreateEmptyEventWithDefaultValues() throws Exception
     {
-        MvcResult response = mockMvc.perform(post("/events")).andReturn();
+        MvcResult response = mockMvc.perform(post("/events")).andExpect(status().isCreated()).andReturn();
 
         String aWeekFromNow = LocalDateTime.now().plusDays(7).withNano(0).format(DateTimeFormatter.ISO_DATE);
 
@@ -50,6 +50,37 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(jsonPath("$.visibility").value("PRIVATE"))
                 .andExpect(jsonPath("$.startTime").value(startsWith((aWeekFromNow))))
                 .andExpect(jsonPath("$.endTime").value(startsWith(aWeekFromNow)));
+    }
+
+    @Test
+    public void shouldCreateAnEventWithProvidedValue() throws Exception
+    {
+        String title = "Sushi Buffet";
+        String desc = "All you can eat";
+        String status = "PUBLISHED";
+        String visibility = "PUBLIC";
+        String startTime = LocalDateTime.of(2016, Month.SEPTEMBER, 15, 16, 00).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        String endTime = LocalDateTime.of(2016, Month.SEPTEMBER, 15, 18, 00).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+        MvcResult response = mockMvc.perform(post("/events")
+                .param("title", title)
+                .param("description", desc)
+                .param("startTime", startTime)
+                .param("endTime", endTime)
+                .param("status", status)
+                .param("visibility", visibility)
+        ).andExpect(status().isCreated()).andReturn();
+
+        String location = response.getResponse().getHeader("Location");
+        mockMvc.perform(get(location))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.title").value(title))
+                .andExpect(jsonPath("$.description").value(desc))
+                .andExpect(jsonPath("$.startTime").value(startsWith(startTime)))
+                .andExpect(jsonPath("$.endTime").value(startsWith(endTime)))
+                .andExpect(jsonPath("$.visibility").value(visibility))
+                .andExpect(jsonPath("$.status").value(status));
     }
 
     @Test
@@ -68,6 +99,51 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(jsonPath("$.startTime").value(startsWith(expectedStartTime)))
                 .andExpect(jsonPath("$.endTime").value(startsWith(expectedEndTime)));
     }
+    @Test
+    public void shouldReturnHttpStatusNotFoundForNonExistentEvent() throws Exception
+    {
+        mockMvc.perform(get("/events/555"))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void shouldReturnHttpStatusBadRequestForNonNumericEventId() throws Exception
+    {
+        mockMvc.perform(get("/events/non_numeric"))
+                .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void shouldReturnBadRequestForInvalidStatusAndVisibility() throws Exception
+    {
+        mockMvc.perform(post("/events")
+                .param("title", "Title")
+                .param("description", "Desc")
+                .param("status", "Invalid Status")
+                .param("visibility", "Invalid Visibility"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$").isNotEmpty());
+    }
+
+    @Test
+    public void shouldReturnBadRequestForMalformedTime() throws Exception
+    {
+        mockMvc.perform(post("/events")
+                .param("title", "Title")
+                .param("description", "Desc")
+                .param("startTime", "2015-03-12"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$").isNotEmpty());
+
+        mockMvc.perform(post("/events")
+                .param("title", "Title")
+                .param("description", "Desc")
+                .param("startTime", "Invalid time"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$").isNotEmpty());
+    }
+
+    // todo invalid startTime and endTime
 
     @Test
     public void shouldLoadTestFixture() throws Exception
@@ -88,29 +164,6 @@ public class EventIT extends CommonIntegrationTest
         assertEquals(Month.JULY, endTime.getMonth());
         assertEquals(1, endTime.getDayOfMonth());
     }
-
-    @Test
-    public void shouldReturnHttpStatusNotFoundForNonExistentEvent() throws Exception
-    {
-        mockMvc.perform(get("/events/555"))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void shouldReturnHttpStatusBadRequestForNonNumericEventId() throws Exception
-    {
-        mockMvc.perform(get("/events/non_numeric"))
-                .andExpect(status().isBadRequest());
-    }
-
-    // todo create with provided value
-
-    // todo startTime and endTime
-
-    // todo invalid startTime and endTime
-
-    // todo invalid status and visibility
-
 
     @Override
     protected IDataSet getDataSet() throws Exception

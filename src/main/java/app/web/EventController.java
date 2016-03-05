@@ -1,18 +1,19 @@
 package app.web;
 
 import app.data.Event;
+import app.data.Event.Visibility;
+import app.data.Event.Status;
 import app.data.EventRepository;
-import app.web.forms.EventForm;
+import com.sun.beans.editors.EnumEditor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.WebDataBinder;
+import org.springframework.web.bind.annotation.*;
 
+import java.beans.PropertyEditorSupport;
 import java.net.URI;
 
 @RestController
@@ -30,23 +31,32 @@ public class EventController
         this.eventRepository = eventRepository;
     }
 
+    @InitBinder
+    public void initBinder(WebDataBinder binder)
+    {
+        binder.registerCustomEditor(Visibility.class, new EnumEditor(Visibility.class));
+        binder.registerCustomEditor(Status.class, new EnumEditor(Status.class));
+    }
+
     /**
-     *
-     * @param eventForm
+     * @param requestEvent
      * @param bindingResult
      * @return
      */
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity create(EventForm eventForm, BindingResult bindingResult)
+    public ResponseEntity create(Event requestEvent, BindingResult bindingResult)
     {
-        Event event = eventRepository.save(eventForm.getEvent());
-
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(URI.create("/events/" + event.getId()));
+        HttpStatus status = HttpStatus.CREATED;
 
-        ResponseEntity response = new ResponseEntity("", headers, HttpStatus.CREATED);
+        if (!bindingResult.hasFieldErrors()) {
+            Event event = eventRepository.save(requestEvent);
+            headers.setLocation(URI.create("/events/" + event.getId()));
+        } else {
+            status = HttpStatus.BAD_REQUEST;
+        }
 
-        return response;
+        return new ResponseEntity(bindingResult.getFieldErrors(), headers, status);
     }
 
     @RequestMapping(value = "/{eventId}", method = RequestMethod.GET)
