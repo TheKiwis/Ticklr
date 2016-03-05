@@ -25,6 +25,7 @@ public class EventForm
 
     public Event getEvent()
     {
-        return new Event(title, description, startTime, endTime, status, visibility);
+        //return new Event(title, description, startTime, endTime, status, visibility);
+        return new Event();
     }
 }

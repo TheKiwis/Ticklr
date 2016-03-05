@@ -1,7 +1,5 @@
-package app.config.web;
+package app.config;
 
-import app.config.RootConfig;
-import app.config.web.WebConfig;
 import org.springframework.web.servlet.support.AbstractAnnotationConfigDispatcherServletInitializer;
 
 /**

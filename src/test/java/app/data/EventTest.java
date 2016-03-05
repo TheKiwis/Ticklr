@@ -2,6 +2,9 @@ package app.data;
 
 import org.junit.Test;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.Month;
 import java.util.Calendar;
 import java.util.GregorianCalendar;
 
@@ -22,17 +25,15 @@ public class EventTest
         assertEquals(Event.Visibility.PRIVATE, event.getVisibility());
         assertEquals(Event.Status.DRAFT, event.getStatus());
 
-        Calendar startTime = event.getStartTime();
-        Calendar endTime = event.getEndTime();
+        LocalDateTime expected = LocalDateTime.now().plusDays(7);
+        LocalDateTime startTime = event.getStartTime();
+        LocalDateTime endTime = event.getEndTime();
 
-        Calendar expected = new GregorianCalendar();
-        expected.add(Calendar.DATE, 7);
-
-        assertEquals(expected.get(Calendar.YEAR),  startTime.get(Calendar.YEAR));
-        assertEquals(expected.get(Calendar.MONTH), startTime.get(Calendar.MONTH));
-        assertEquals(expected.get(Calendar.DATE),  startTime.get(Calendar.DATE));
-        assertEquals(expected.get(Calendar.YEAR),  endTime.get(Calendar.YEAR));
-        assertEquals(expected.get(Calendar.MONTH), endTime.get(Calendar.MONTH));
-        assertEquals(expected.get(Calendar.DATE),  endTime.get(Calendar.DATE));
+        assertEquals(expected.getYear(), startTime.getYear());
+        assertEquals(expected.getMonth(), startTime.getMonth());
+        assertEquals(expected.getDayOfMonth(), startTime.getDayOfMonth());
+        assertEquals(expected.getYear(), endTime.getYear());
+        assertEquals(expected.getMonth(), endTime.getMonth());
+        assertEquals(expected.getDayOfMonth(), endTime.getDayOfMonth());
     }
 }

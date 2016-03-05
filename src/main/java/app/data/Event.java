@@ -1,8 +1,12 @@
 package app.data;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
+
 import javax.persistence.*;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
+import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * @author ngnmhieu
@@ -25,10 +29,12 @@ public class Event
     private String description;
 
     @Column(name = "start_time")
-    private Calendar startTime;
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private LocalDateTime startTime;
 
     @Column(name = "end_time")
-    private Calendar endTime;
+    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS")
+    private LocalDateTime endTime;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
@@ -45,8 +51,7 @@ public class Event
     {
         this("New Event", "", null, null, Status.DRAFT, Visibility.PRIVATE);
 
-        Calendar aWeekLater = new GregorianCalendar();
-        aWeekLater.add(Calendar.DATE, DEFAULT_START_DAYS_OFFSET);
+        LocalDateTime aWeekLater = LocalDateTime.now().plusDays(7);
         setStartTime(aWeekLater);
         setEndTime(aWeekLater);
     }
@@ -59,7 +64,7 @@ public class Event
      * @param status status of the event @see Status
      * @param visibility visibility of the event @see Visibility
      */
-    public Event(String title, String description, Calendar startTime, Calendar endTime, Status status, Visibility visibility)
+    public Event(String title, String description, LocalDateTime startTime, LocalDateTime endTime, Status status, Visibility visibility)
     {
         this.title = title;
         this.description = description;
@@ -89,22 +94,22 @@ public class Event
         this.status = status;
     }
 
-    public Calendar getEndTime()
+    public LocalDateTime getEndTime()
     {
         return endTime;
     }
 
-    public void setEndTime(Calendar endTime)
+    public void setEndTime(LocalDateTime endTime)
     {
         this.endTime = endTime;
     }
 
-    public Calendar getStartTime()
+    public LocalDateTime getStartTime()
     {
         return startTime;
     }
 
-    public void setStartTime(Calendar startTime)
+    public void setStartTime(LocalDateTime startTime)
     {
         this.startTime = startTime;
     }
