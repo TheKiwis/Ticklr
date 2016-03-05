@@ -2,6 +2,7 @@ package app.web;
 
 import app.data.Event;
 import app.data.EventRepository;
+import app.data.validation.EventValidator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -32,10 +33,13 @@ public class EventControllerTest
     @Mock
     BindingResult bindingResult;
 
+    @Mock
+    EventValidator validator;
+
     @Before
     public void setUp()
     {
-        controller = new EventController(eventRepository);
+        controller = new EventController(eventRepository, validator);
     }
 
     @Test

@@ -4,6 +4,7 @@ import app.data.Event;
 import app.data.Event.Visibility;
 import app.data.Event.Status;
 import app.data.EventRepository;
+import app.data.validation.EventValidator;
 import app.supports.converter.EnumConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -21,13 +22,17 @@ public class EventController
 {
     private EventRepository eventRepository;
 
+    private EventValidator validator;
+
     /**
-     * @param eventRepository
+     * @param eventRepository Manage Event entities
+     * @param validator performs validation on Event entity
      */
     @Autowired
-    public EventController(EventRepository eventRepository)
+    public EventController(EventRepository eventRepository, EventValidator validator)
     {
         this.eventRepository = eventRepository;
+        this.validator = validator;
     }
 
     @InitBinder
@@ -47,6 +52,8 @@ public class EventController
     {
         HttpHeaders headers = new HttpHeaders();
         HttpStatus status = HttpStatus.CREATED;
+
+        validator.validate(requestEvent, bindingResult);
 
         if (!bindingResult.hasFieldErrors()) {
             Event event = eventRepository.save(requestEvent);

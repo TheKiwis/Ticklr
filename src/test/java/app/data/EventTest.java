@@ -25,15 +25,16 @@ public class EventTest
         assertEquals(Event.Visibility.PRIVATE, event.getVisibility());
         assertEquals(Event.Status.DRAFT, event.getStatus());
 
-        LocalDateTime expected = LocalDateTime.now().plusDays(7);
+        LocalDateTime expectedStart = LocalDateTime.now().plusDays(7);
+        LocalDateTime expectedEnd = expectedStart.plusHours(1);
         LocalDateTime startTime = event.getStartTime();
         LocalDateTime endTime = event.getEndTime();
 
-        assertEquals(expected.getYear(), startTime.getYear());
-        assertEquals(expected.getMonth(), startTime.getMonth());
-        assertEquals(expected.getDayOfMonth(), startTime.getDayOfMonth());
-        assertEquals(expected.getYear(), endTime.getYear());
-        assertEquals(expected.getMonth(), endTime.getMonth());
-        assertEquals(expected.getDayOfMonth(), endTime.getDayOfMonth());
+        assertEquals(expectedStart.getYear(), startTime.getYear());
+        assertEquals(expectedStart.getMonth(), startTime.getMonth());
+        assertEquals(expectedStart.getDayOfMonth(), startTime.getDayOfMonth());
+        assertEquals(expectedEnd.getYear(), endTime.getYear());
+        assertEquals(expectedEnd.getMonth(), endTime.getMonth());
+        assertEquals(expectedEnd.getDayOfMonth(), endTime.getDayOfMonth());
     }
 }

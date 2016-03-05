@@ -15,8 +15,6 @@ import java.time.LocalDateTime;
 @Table(name = "events")
 public class Event
 {
-    private static final int DEFAULT_START_DAYS_OFFSET = 7;
-
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -46,14 +44,19 @@ public class Event
 
     /**
      * Default Constructor assigns default values to fields
+     *  - title = New Event
+     *  - description is empty
+     *  - startTime = now + 7 days
+     *  - endTime = startTime + 1 hours
+     *  - status = DRAFT
+     *  - visibility = PRIVATE
      */
     public Event()
     {
         this("New Event", "", null, null, Status.DRAFT, Visibility.PRIVATE);
 
-        LocalDateTime aWeekLater = LocalDateTime.now().plusDays(7);
-        setStartTime(aWeekLater);
-        setEndTime(aWeekLater);
+        setStartTime(LocalDateTime.now().plusDays(7));
+        setEndTime(startTime.plusHours(1));
     }
 
     /**
