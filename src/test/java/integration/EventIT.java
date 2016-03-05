@@ -143,7 +143,17 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(jsonPath("$").isNotEmpty());
     }
 
-    // todo invalid startTime and endTime
+    @Test
+    public void shouldReturnBadRequestWhenEndTimeBeforeStartTime() throws Exception
+    {
+        mockMvc.perform(post("/events")
+                .param("title", "Title")
+                .param("description", "Desc")
+                .param("startTime", "2015-03-12T20:00:00")
+                .param("endTime", "2015-03-12T19:00:00"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$").isNotEmpty());
+    }
 
     @Test
     public void shouldLoadTestFixture() throws Exception

@@ -4,7 +4,7 @@ import app.data.Event;
 import app.data.Event.Visibility;
 import app.data.Event.Status;
 import app.data.EventRepository;
-import com.sun.beans.editors.EnumEditor;
+import app.supports.converter.EnumConverter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -13,7 +13,6 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import java.beans.PropertyEditorSupport;
 import java.net.URI;
 
 @RestController
@@ -34,8 +33,8 @@ public class EventController
     @InitBinder
     public void initBinder(WebDataBinder binder)
     {
-        binder.registerCustomEditor(Visibility.class, new EnumEditor(Visibility.class));
-        binder.registerCustomEditor(Status.class, new EnumEditor(Status.class));
+        binder.registerCustomEditor(Visibility.class, new EnumConverter(Visibility.class));
+        binder.registerCustomEditor(Status.class, new EnumConverter(Status.class));
     }
 
     /**
