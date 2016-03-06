@@ -1,6 +1,7 @@
 package app.data;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import org.springframework.cglib.core.Local;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
@@ -15,29 +16,32 @@ public class Event
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    protected Long id;
 
     @Column(name = "title")
-    private String title;
+    protected String title;
 
     @Column(name = "description")
-    private String description;
+    protected String description;
 
     @Column(name = "start_time")
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS")
-    private LocalDateTime startTime;
+    protected LocalDateTime startTime;
 
     @Column(name = "end_time")
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS")
-    private LocalDateTime endTime;
+    protected LocalDateTime endTime;
 
     @Column(name = "status")
     @Enumerated(EnumType.STRING)
-    private Status status;
+    protected Status status;
 
     @Column(name = "visibility")
     @Enumerated(EnumType.STRING)
-    private Visibility visibility;
+    protected Visibility visibility;
+
+    @Column(name = "canceled")
+    protected boolean canceled;
 
     /**
      * Default Constructor assigns default values to fields
@@ -47,10 +51,11 @@ public class Event
      *  - endTime = startTime + 1 hours
      *  - status = DRAFT
      *  - visibility = PRIVATE
+     *  - canceled = false
      */
     public Event()
     {
-        this("New Event", "", null, null, Status.DRAFT, Visibility.PRIVATE);
+        this("New Event", "", null, null, Status.DRAFT, Visibility.PRIVATE, false);
 
         setStartTime(LocalDateTime.now().plusDays(7));
         setEndTime(startTime.plusHours(1));
@@ -64,7 +69,7 @@ public class Event
      * @param status status of the event @see Status
      * @param visibility visibility of the event @see Visibility
      */
-    public Event(String title, String description, LocalDateTime startTime, LocalDateTime endTime, Status status, Visibility visibility)
+    public Event(String title, String description, LocalDateTime startTime, LocalDateTime endTime, Status status, Visibility visibility, boolean canceled)
     {
         this.title = title;
         this.description = description;
@@ -72,6 +77,7 @@ public class Event
         this.endTime = endTime;
         this.status = status;
         this.visibility = visibility;
+        this.canceled = canceled;
     }
 
     public Visibility getVisibility()
@@ -140,18 +146,53 @@ public class Event
     }
 
     /**
+     * @return true if the event is canceled. Default to false
+     */
+    public boolean isCanceled()
+    {
+        return canceled;
+    }
+
+    /**
+     * Set canceled state of event
+     * @param canceled
+     */
+    public void setCanceled(boolean canceled)
+    {
+        this.canceled = canceled;
+    }
+
+    /**
      * Takes over attributes of other event (except ID)
      * @param other
      * @return a new event with ID of this instance and other attributes of other event
      */
     public Event merge(Event other)
     {
-        Event event = new Event(other.title, other.description, other.startTime, other.endTime, other.status, other.visibility);
+        Event event = new Event(other.title, other.description, other.startTime, other.endTime, other.status, other.visibility, other.canceled);
 
         event.id = this.id;
 
         return event;
     }
+
+    /**
+     * @return is this a past event
+     */
+    public boolean isExpired()
+    {
+        return LocalDateTime.now().isAfter(endTime);
+    }
+
+    /**
+     * @return is this event happening
+     */
+    public boolean isHappening()
+    {
+        LocalDateTime now = LocalDateTime.now();
+        return now.isAfter(startTime) && now.isBefore(endTime);
+    }
+
 
     /**
      * Possible statuses of an event

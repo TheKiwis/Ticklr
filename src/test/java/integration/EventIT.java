@@ -5,6 +5,7 @@ import static org.hamcrest.CoreMatchers.*;
 import app.data.Event;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.test.web.servlet.MvcResult;
@@ -20,6 +21,27 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 public class EventIT extends CommonIntegrationTest
 {
+    private Event preloadedEvent;
+    private String sampleTitle;
+    private String sampleDesc;
+    private String sampleVisibility;
+    private String sampleStartTime;
+    private String sampleEndTime;
+    private Boolean sampleCanceled;
+
+    @Before
+    public void sampleInput()
+    {
+        preloadedEvent = (Event) em.createQuery("SELECT e FROM Event e WHERE e.id = 123").getSingleResult();
+
+        sampleTitle = preloadedEvent.getTitle();
+        sampleDesc = preloadedEvent.getDescription();
+        sampleVisibility = preloadedEvent.getVisibility().toString();
+        sampleStartTime = preloadedEvent.getStartTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        sampleEndTime = preloadedEvent.getEndTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        sampleCanceled = preloadedEvent.isCanceled();
+    }
+
 
     @Test
     public void shouldReturnWithHttpStatusCreatedAndALocationHeader() throws Exception
@@ -42,95 +64,75 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.title").value("New Event"))
                 .andExpect(jsonPath("$.description").value(""))
-                .andExpect(jsonPath("$.status").value("DRAFT"))
+                .andExpect(jsonPath("$.canceled").value(false))
                 .andExpect(jsonPath("$.visibility").value("PRIVATE"))
                 .andExpect(jsonPath("$.startTime").value(startsWith((aWeekFromNow))))
-                .andExpect(jsonPath("$.endTime").value(startsWith(aWeekFromNow)));
+                .andExpect(jsonPath("$.endTime").value(startsWith(aWeekFromNow)))
+                .andExpect(jsonPath("$.expired").value(false))
+                .andExpect(jsonPath("$.happening").value(false));
     }
 
     @Test
     public void shouldCreateAnEventWithProvidedValue() throws Exception
     {
-        String title = "Sushi Buffet";
-        String desc = "All you can eat";
-        String status = "PUBLISHED";
-        String visibility = "PUBLIC";
-        String startTime = LocalDateTime.of(2016, Month.SEPTEMBER, 15, 16, 00).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        String endTime = LocalDateTime.of(2016, Month.SEPTEMBER, 15, 18, 00).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-
         MvcResult response = mockMvc.perform(post("/events")
-                .param("title", title)
-                .param("description", desc)
-                .param("startTime", startTime)
-                .param("endTime", endTime)
-                .param("status", status)
-                .param("visibility", visibility)
+                .param("title", sampleTitle)
+                .param("description", sampleDesc)
+                .param("startTime", sampleStartTime)
+                .param("endTime", sampleEndTime)
+                .param("canceled", "true")
+                .param("visibility", sampleVisibility)
         ).andExpect(status().isCreated()).andReturn();
 
         String location = response.getResponse().getHeader("Location");
         mockMvc.perform(get(location))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.title").value(title))
-                .andExpect(jsonPath("$.description").value(desc))
-                .andExpect(jsonPath("$.startTime").value(startsWith(startTime)))
-                .andExpect(jsonPath("$.endTime").value(startsWith(endTime)))
-                .andExpect(jsonPath("$.visibility").value(visibility))
-                .andExpect(jsonPath("$.status").value(status));
+                .andExpect(jsonPath("$.title").value(sampleTitle))
+                .andExpect(jsonPath("$.description").value(sampleDesc))
+                .andExpect(jsonPath("$.startTime").value(startsWith(sampleStartTime)))
+                .andExpect(jsonPath("$.endTime").value(startsWith(sampleEndTime)))
+                .andExpect(jsonPath("$.canceled").value(sampleCanceled))
+                .andExpect(jsonPath("$.visibility").value(sampleVisibility));
     }
 
     @Test
     public void shouldUpdateAnExistingEvent() throws Exception
     {
-        String title = "Sushi Buffet";
-        String desc = "All you can eat";
-        String status = "PUBLISHED";
-        String visibility = "PUBLIC";
-        String startTime = LocalDateTime.of(2016, Month.SEPTEMBER, 15, 16, 00).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        String endTime = LocalDateTime.of(2016, Month.SEPTEMBER, 15, 18, 00).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-
         MvcResult response = mockMvc.perform(put("/events/123")
-                .param("title", title)
-                .param("description", desc)
-                .param("startTime", startTime)
-                .param("endTime", endTime)
-                .param("status", status)
-                .param("visibility", visibility)
+                .param("title", sampleTitle)
+                .param("description", sampleDesc)
+                .param("startTime", sampleStartTime)
+                .param("endTime", sampleEndTime)
+                .param("canceled", sampleCanceled ? "true" : "false")
+                .param("visibility", sampleVisibility)
         ).andExpect(status().isNoContent()).andReturn();
 
         String location = response.getResponse().getHeader("Location");
         mockMvc.perform(get(location))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.title").value(title))
-                .andExpect(jsonPath("$.description").value(desc))
-                .andExpect(jsonPath("$.startTime").value(startsWith(startTime)))
-                .andExpect(jsonPath("$.endTime").value(startsWith(endTime)))
-                .andExpect(jsonPath("$.visibility").value(visibility))
-                .andExpect(jsonPath("$.status").value(status));
+                .andExpect(jsonPath("$.title").value(sampleTitle))
+                .andExpect(jsonPath("$.description").value(sampleDesc))
+                .andExpect(jsonPath("$.startTime").value(startsWith(sampleStartTime)))
+                .andExpect(jsonPath("$.endTime").value(startsWith(sampleEndTime)))
+                .andExpect(jsonPath("$.canceled").value(sampleCanceled))
+                .andExpect(jsonPath("$.visibility").value(sampleVisibility));
     }
 
     @Test
     public void shouldCreateNewResourceIfUpdateCannotFindResource() throws Exception
     {
-        String title = "Sushi Buffet";
-        String desc = "All you can eat";
-        String status = "PUBLISHED";
-        String visibility = "PUBLIC";
-        String startTime = LocalDateTime.of(2016, Month.SEPTEMBER, 15, 16, 00).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        String endTime = LocalDateTime.of(2016, Month.SEPTEMBER, 15, 18, 00).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-
         // Event with ID 345 doesn't exist
         assertNull(em.find(Event.class, 345l));
 
         // put operation should create a new one (with a different ID)
         mockMvc.perform(put("/events/345")
-                .param("title", title)
-                .param("description", desc)
-                .param("startTime", startTime)
-                .param("endTime", endTime)
-                .param("status", status)
-                .param("visibility", visibility))
+                .param("title", sampleTitle)
+                .param("description", sampleDesc)
+                .param("startTime", sampleStartTime)
+                .param("endTime", sampleEndTime)
+                .param("visibility", sampleVisibility))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", startsWith("/events/")));
 
@@ -144,7 +146,7 @@ public class EventIT extends CommonIntegrationTest
         mockMvc.perform(put("/events/123")
                 .param("title", "Title")
                 .param("description", "Desc")
-                .param("status", "Invalid Status"))
+                .param("visibility", "Invalid Visibility"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").isNotEmpty());
 
@@ -156,18 +158,15 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldReturnAnEvent() throws Exception
     {
-        String expectedStartTime = LocalDateTime.of(2015, Month.JUNE, 30, 0, 0, 0).format(DateTimeFormatter.ISO_DATE_TIME);
-        String expectedEndTime = LocalDateTime.of(2015, Month.JULY, 1, 0, 0, 0).format(DateTimeFormatter.ISO_DATE_TIME);
-
-        mockMvc.perform(get("/events/123"))
+        mockMvc.perform(get("/events/" + preloadedEvent.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(123))
-                .andExpect(jsonPath("$.title").value("Sample Event"))
-                .andExpect(jsonPath("$.description").value("Pool Party"))
-                .andExpect(jsonPath("$.status").value("DRAFT"))
-                .andExpect(jsonPath("$.visibility").value("PRIVATE"))
-                .andExpect(jsonPath("$.startTime").value(startsWith(expectedStartTime)))
-                .andExpect(jsonPath("$.endTime").value(startsWith(expectedEndTime)));
+                .andExpect(jsonPath("$.id").value(preloadedEvent.getId().intValue()))
+                .andExpect(jsonPath("$.title").value(sampleTitle))
+                .andExpect(jsonPath("$.description").value(sampleDesc))
+                .andExpect(jsonPath("$.canceled").value(sampleCanceled))
+                .andExpect(jsonPath("$.visibility").value(sampleVisibility))
+                .andExpect(jsonPath("$.startTime").value(startsWith(sampleStartTime)))
+                .andExpect(jsonPath("$.endTime").value(startsWith(sampleEndTime)));
     }
 
     @Test
@@ -190,7 +189,6 @@ public class EventIT extends CommonIntegrationTest
         mockMvc.perform(post("/events")
                 .param("title", "Title")
                 .param("description", "Desc")
-                .param("status", "Invalid Status")
                 .param("visibility", "Invalid Visibility"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").isNotEmpty());
@@ -229,21 +227,7 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldLoadTestFixture() throws Exception
     {
-        Event u = (Event) em.createQuery("SELECT e FROM Event e WHERE e.id = 123").getSingleResult();
-        assertEquals("Sample Event", u.getTitle());
-        assertEquals("Pool Party", u.getDescription());
-        assertEquals(Event.Visibility.PRIVATE, u.getVisibility());
-        assertEquals(Event.Status.DRAFT, u.getStatus());
-
-        LocalDateTime startTime = u.getStartTime();
-        assertEquals(2015, startTime.getYear());
-        assertEquals(Month.JUNE, startTime.getMonth());
-        assertEquals(30, startTime.getDayOfMonth());
-
-        LocalDateTime endTime = u.getEndTime();
-        assertEquals(2015, endTime.getYear());
-        assertEquals(Month.JULY, endTime.getMonth());
-        assertEquals(1, endTime.getDayOfMonth());
+        assertNotNull(em.createQuery("SELECT e FROM Event e WHERE e.id = 123").getSingleResult());
     }
 
     @Override
