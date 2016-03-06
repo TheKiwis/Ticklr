@@ -19,6 +19,7 @@ public class EventRepository
 
     /**
      * Construct an instance of EventRepository
+     *
      * @param em manages ORM Entities
      */
     public EventRepository(EntityManager em)
@@ -31,17 +32,26 @@ public class EventRepository
     }
 
     /**
-     * Create a new event
+     * Create a new event or update an existing one
      * @param event
      */
-    public Event save(Event event)
+    public Event saveOrUpdate(Event event)
     {
-        em.persist(event);
+        // EntityManager#persist is called on new or managed entity,
+        if (event.getId() == null || em.contains(event)) {
+            em.persist(event);
+        } else { // event is a detached entity (em.contains returns false)
+            event = em.merge(event);
+        }
+
+        em.flush();
+
         return event;
     }
 
     /**
      * Finds an event by it's ID
+     *
      * @param eventId
      * @return null if no event is found
      */
@@ -52,5 +62,10 @@ public class EventRepository
         } catch (NoResultException e) {
             return null;
         }
+    }
+
+    public Event update(Event event)
+    {
+        return em.merge(event);
     }
 }

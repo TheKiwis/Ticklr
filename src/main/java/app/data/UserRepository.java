@@ -66,8 +66,10 @@ public class UserRepository
      * @return
      * @throws PersistenceException if user already existed (email should be unique)
      */
-    public void save(User user) throws PersistenceException
+    public User save(User user) throws PersistenceException
     {
         em.persist(user);
+        em.flush();
+        return user;
     }
 }

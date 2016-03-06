@@ -3,9 +3,6 @@ package app.data;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
 import javax.persistence.*;
-import java.text.SimpleDateFormat;
-import java.time.DayOfWeek;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 /**
@@ -18,7 +15,7 @@ public class Event
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @Column(name = "title")
     private String title;
@@ -137,22 +134,23 @@ public class Event
         this.title = title;
     }
 
-    public long getId()
+    public Long getId()
     {
         return id;
     }
 
-    @Override
-    public boolean equals(Object o)
+    /**
+     * Takes over attributes of other event (except ID)
+     * @param other
+     * @return a new event with ID of this instance and other attributes of other event
+     */
+    public Event merge(Event other)
     {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        Event event = new Event(other.title, other.description, other.startTime, other.endTime, other.status, other.visibility);
 
-        Event event = (Event) o;
+        event.id = this.id;
 
-        if (id != event.id) return false;
-
-        return true;
+        return event;
     }
 
     /**
@@ -169,5 +167,22 @@ public class Event
     public static enum Visibility
     {
         PUBLIC, PRIVATE
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Event event = (Event) o;
+
+        if (title != null ? !title.equals(event.title) : event.title != null) return false;
+        if (description != null ? !description.equals(event.description) : event.description != null) return false;
+        if (startTime != null ? !startTime.equals(event.startTime) : event.startTime != null) return false;
+        if (endTime != null ? !endTime.equals(event.endTime) : event.endTime != null) return false;
+        if (status != event.status) return false;
+        return visibility == event.visibility;
+
     }
 }

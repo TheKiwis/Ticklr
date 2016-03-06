@@ -11,7 +11,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.validation.FieldError;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -46,7 +45,7 @@ public class EventControllerTest
     public void create_shouldReturnHttpStatusCreated() throws Exception
     {
         Event mockEvent = mock(Event.class);
-        when(eventRepository.save(any())).thenReturn(mockEvent);
+        when(eventRepository.saveOrUpdate(any())).thenReturn(mockEvent);
         List fieldErrors = mock(ArrayList.class);
         when(bindingResult.getFieldErrors()).thenReturn(fieldErrors);
 
@@ -61,11 +60,11 @@ public class EventControllerTest
     {
         // mocks
         Event mockEvent = mock(Event.class);
-        when(eventRepository.save(any())).thenReturn(mockEvent);
+        when(eventRepository.saveOrUpdate(any())).thenReturn(mockEvent);
 
         // test object
         controller.create(mockEvent, bindingResult);
-        verify(eventRepository, times(1)).save(mockEvent);
+        verify(eventRepository, times(1)).saveOrUpdate(mockEvent);
     }
 
     @Test

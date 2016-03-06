@@ -7,14 +7,10 @@ import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.junit.Test;
 
-import org.springframework.cglib.core.Local;
 import org.springframework.test.web.servlet.MvcResult;
 
-import java.text.SimpleDateFormat;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -84,6 +80,80 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
+    public void shouldUpdateAnExistingEvent() throws Exception
+    {
+        String title = "Sushi Buffet";
+        String desc = "All you can eat";
+        String status = "PUBLISHED";
+        String visibility = "PUBLIC";
+        String startTime = LocalDateTime.of(2016, Month.SEPTEMBER, 15, 16, 00).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        String endTime = LocalDateTime.of(2016, Month.SEPTEMBER, 15, 18, 00).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+        MvcResult response = mockMvc.perform(put("/events/123")
+                .param("title", title)
+                .param("description", desc)
+                .param("startTime", startTime)
+                .param("endTime", endTime)
+                .param("status", status)
+                .param("visibility", visibility)
+        ).andExpect(status().isNoContent()).andReturn();
+
+        String location = response.getResponse().getHeader("Location");
+        mockMvc.perform(get(location))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.title").value(title))
+                .andExpect(jsonPath("$.description").value(desc))
+                .andExpect(jsonPath("$.startTime").value(startsWith(startTime)))
+                .andExpect(jsonPath("$.endTime").value(startsWith(endTime)))
+                .andExpect(jsonPath("$.visibility").value(visibility))
+                .andExpect(jsonPath("$.status").value(status));
+    }
+
+    @Test
+    public void shouldCreateNewResourceIfUpdateCannotFindResource() throws Exception
+    {
+        String title = "Sushi Buffet";
+        String desc = "All you can eat";
+        String status = "PUBLISHED";
+        String visibility = "PUBLIC";
+        String startTime = LocalDateTime.of(2016, Month.SEPTEMBER, 15, 16, 00).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        String endTime = LocalDateTime.of(2016, Month.SEPTEMBER, 15, 18, 00).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+
+        // Event with ID 345 doesn't exist
+        assertNull(em.find(Event.class, 345l));
+
+        // put operation should create a new one (with a different ID)
+        mockMvc.perform(put("/events/345")
+                .param("title", title)
+                .param("description", desc)
+                .param("startTime", startTime)
+                .param("endTime", endTime)
+                .param("status", status)
+                .param("visibility", visibility))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", startsWith("/events/")));
+
+    }
+
+    @Test
+    public void shouldNotUpdateEventOnInvalidRequest() throws Exception
+    {
+        Event beforePut = em.find(Event.class, 123l);
+
+        mockMvc.perform(put("/events/123")
+                .param("title", "Title")
+                .param("description", "Desc")
+                .param("status", "Invalid Status"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$").isNotEmpty());
+
+        Event afterPut = em.find(Event.class, 123l);
+
+        assertTrue(afterPut.equals(beforePut));
+    }
+
+    @Test
     public void shouldReturnAnEvent() throws Exception
     {
         String expectedStartTime = LocalDateTime.of(2015, Month.JUNE, 30, 0, 0, 0).format(DateTimeFormatter.ISO_DATE_TIME);
@@ -99,6 +169,7 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(jsonPath("$.startTime").value(startsWith(expectedStartTime)))
                 .andExpect(jsonPath("$.endTime").value(startsWith(expectedEndTime)));
     }
+
     @Test
     public void shouldReturnHttpStatusNotFoundForNonExistentEvent() throws Exception
     {

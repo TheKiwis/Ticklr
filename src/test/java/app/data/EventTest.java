@@ -19,7 +19,7 @@ public class EventTest
     public void shouldHaveDefaultValues() throws Exception
     {
         Event event = new Event();
-        assertEquals(0, event.getId());
+        assertEquals(null, event.getId());
         assertEquals("New Event", event.getTitle());
         assertEquals("", event.getDescription());
         assertEquals(Event.Visibility.PRIVATE, event.getVisibility());

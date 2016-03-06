@@ -56,8 +56,40 @@ public class EventController
         validator.validate(requestEvent, bindingResult);
 
         if (!bindingResult.hasFieldErrors()) {
-            Event event = eventRepository.save(requestEvent);
+            Event event = eventRepository.saveOrUpdate(requestEvent);
             headers.setLocation(URI.create("/events/" + event.getId()));
+        } else {
+            status = HttpStatus.BAD_REQUEST;
+        }
+
+        return new ResponseEntity(bindingResult.getFieldErrors(), headers, status);
+    }
+
+    /**
+     * @param requestEvent
+     * @param bindingResult
+     * @return
+     */
+    @RequestMapping(value = "/{eventId}", method = RequestMethod.PUT)
+    public ResponseEntity update(@PathVariable Long eventId, Event requestEvent, BindingResult bindingResult)
+    {
+        HttpHeaders headers = new HttpHeaders();
+        HttpStatus status = HttpStatus.NO_CONTENT;
+
+        validator.validate(requestEvent, bindingResult);
+
+        if (!bindingResult.hasFieldErrors()) {
+
+            Event event = eventRepository.findById(eventId);
+
+            // no event with the given eventId found, a new one should be created
+            if (event == null)
+                return create(requestEvent, bindingResult);
+
+            // update existing event
+            Event updatedEvent = eventRepository.saveOrUpdate(event.merge(requestEvent));
+
+            headers.setLocation(URI.create("/events/" + updatedEvent.getId()));
         } else {
             status = HttpStatus.BAD_REQUEST;
         }
@@ -77,4 +109,6 @@ public class EventController
 
         return new ResponseEntity(event, status);
     }
+
+
 }

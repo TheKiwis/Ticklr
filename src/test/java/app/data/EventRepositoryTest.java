@@ -32,11 +32,23 @@ public class EventRepositoryTest
     }
 
     @Test
-    public void save_ShouldCreateNewEvent() throws Exception
+    public void saveOrUpdate_ShouldCreateNewEvent() throws Exception
     {
         Event mockEvent = mock(Event.class);
-        eventRepository.save(mockEvent);
+        when(mockEvent.getId()).thenReturn(null);
+        assertEquals(mockEvent, eventRepository.saveOrUpdate(mockEvent));
         verify(em, times(1)).persist(mockEvent);
+    }
+
+    @Test
+    public void saveOrUpdate_ShouldUpdateExistingEvent() throws Exception
+    {
+        Event inputEvent = mock(Event.class);
+        Event managedEvent = mock(Event.class);
+        when(em.merge(inputEvent)).thenReturn(managedEvent);
+
+        assertEquals(managedEvent, eventRepository.update(inputEvent));
+        verify(em, times(1)).merge(inputEvent);
     }
 
     @Test
@@ -45,8 +57,7 @@ public class EventRepositoryTest
         Event event = mock(Event.class);
         when(em.find(Event.class, 123l)).thenReturn(event);
 
-        EventRepository repo = new EventRepository(em);
-        assertEquals(event, repo.findById(123l));
+        assertEquals(event, eventRepository.findById(123l));
     }
 
     @Test
@@ -55,8 +66,6 @@ public class EventRepositoryTest
         when(em.find(Event.class, 123l)
         ).thenThrow(NoResultException.class);
 
-        EventRepository repo = new EventRepository(em);
-
-        assertNull(repo.findById(123l));
+        assertNull(eventRepository.findById(123l));
     }
 }

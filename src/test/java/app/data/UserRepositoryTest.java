@@ -2,9 +2,9 @@ package app.data;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
@@ -26,10 +26,12 @@ public class UserRepositoryTest
     @Mock
     User user;
 
-    @Test
-    public void shouldExistUserRepository() throws Exception
+    protected UserRepository userRepository;
+
+    @Before
+    public void setUp()
     {
-        assertNotNull(new UserRepository(null));
+        userRepository = new UserRepository(em);
     }
 
     @Test
@@ -37,8 +39,7 @@ public class UserRepositoryTest
     {
         when(em.find(User.class, 123)).thenReturn(user);
 
-        UserRepository repo = new UserRepository(em);
-        assertEquals(user, repo.findById(123));
+        assertEquals(user, userRepository.findById(123));
     }
 
     @Test
@@ -47,9 +48,7 @@ public class UserRepositoryTest
         when(em.find(User.class, 123)
         ).thenThrow(NoResultException.class);
 
-        UserRepository repo = new UserRepository(em);
-
-        assertNull(repo.findById(123));
+        assertNull(userRepository.findById(123));
     }
 
     @Test
@@ -72,10 +71,17 @@ public class UserRepositoryTest
                 .getSingleResult()
         ).thenThrow(NoResultException.class);
 
-        UserRepository repo = new UserRepository(em);
 
-        assertNull(repo.findByEmail("non_existent_email@gmail.com"));
+        assertNull(userRepository.findByEmail("non_existent_email@gmail.com"));
     }
 
-    // save
+    @Test
+    public void save_ShouldCreateNewUser() throws Exception
+    {
+        User mockUser = mock(User.class);
+        assertEquals(mockUser, userRepository.save(mockUser));
+        verify(em, times(1)).persist(mockUser);
+    }
+
+    // todo saveOrUpdate fail
 }
