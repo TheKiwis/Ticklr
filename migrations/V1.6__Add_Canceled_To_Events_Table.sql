@@ -1,2 +1,0 @@
-ALTER TABLE `events` 
-ADD COLUMN `canceled` BIT(1) NULL DEFAULT 0;

@@ -2,7 +2,6 @@ package app.web;
 
 import app.data.Event;
 import app.data.Event.Visibility;
-import app.data.Event.Status;
 import app.data.EventRepository;
 import app.data.validation.EventValidator;
 import app.supports.converter.EnumConverter;
@@ -39,7 +38,6 @@ public class EventController
     public void initBinder(WebDataBinder binder)
     {
         binder.registerCustomEditor(Visibility.class, new EnumConverter(Visibility.class));
-        binder.registerCustomEditor(Status.class, new EnumConverter(Status.class));
     }
 
     /**

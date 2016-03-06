@@ -32,10 +32,6 @@ public class Event
     @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS")
     protected LocalDateTime endTime;
 
-    @Column(name = "status")
-    @Enumerated(EnumType.STRING)
-    protected Status status;
-
     @Column(name = "visibility")
     @Enumerated(EnumType.STRING)
     protected Visibility visibility;
@@ -55,7 +51,7 @@ public class Event
      */
     public Event()
     {
-        this("New Event", "", null, null, Status.DRAFT, Visibility.PRIVATE, false);
+        this("New Event", "", null, null, Visibility.PRIVATE, false);
 
         setStartTime(LocalDateTime.now().plusDays(7));
         setEndTime(startTime.plusHours(1));
@@ -66,16 +62,15 @@ public class Event
      * @param description event's description
      * @param startTime time when the event starts
      * @param endTime time when the event ends
-     * @param status status of the event @see Status
      * @param visibility visibility of the event @see Visibility
+     * @param canceled has this event been canceled
      */
-    public Event(String title, String description, LocalDateTime startTime, LocalDateTime endTime, Status status, Visibility visibility, boolean canceled)
+    public Event(String title, String description, LocalDateTime startTime, LocalDateTime endTime, Visibility visibility, boolean canceled)
     {
         this.title = title;
         this.description = description;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.status = status;
         this.visibility = visibility;
         this.canceled = canceled;
     }
@@ -88,16 +83,6 @@ public class Event
     public void setVisibility(Visibility visibility)
     {
         this.visibility = visibility;
-    }
-
-    public Status getStatus()
-    {
-        return status;
-    }
-
-    public void setStatus(Status status)
-    {
-        this.status = status;
     }
 
     public LocalDateTime getEndTime()
@@ -169,7 +154,7 @@ public class Event
      */
     public Event merge(Event other)
     {
-        Event event = new Event(other.title, other.description, other.startTime, other.endTime, other.status, other.visibility, other.canceled);
+        Event event = new Event(other.title, other.description, other.startTime, other.endTime, other.visibility, other.canceled);
 
         event.id = this.id;
 
@@ -193,15 +178,6 @@ public class Event
         return now.isAfter(startTime) && now.isBefore(endTime);
     }
 
-
-    /**
-     * Possible statuses of an event
-     */
-    public static enum Status
-    {
-        DRAFT, PUBLISHED, DELETED, CANCELED
-    }
-
     /**
      * Possible visibilities of an event
      */
@@ -222,7 +198,7 @@ public class Event
         if (description != null ? !description.equals(event.description) : event.description != null) return false;
         if (startTime != null ? !startTime.equals(event.startTime) : event.startTime != null) return false;
         if (endTime != null ? !endTime.equals(event.endTime) : event.endTime != null) return false;
-        if (status != event.status) return false;
+        if (canceled != event.canceled) return false;
         return visibility == event.visibility;
 
     }
