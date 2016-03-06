@@ -53,7 +53,7 @@ public class Event
     {
         this("New Event", "", null, null, Visibility.PRIVATE, false);
 
-        setStartTime(LocalDateTime.now().plusDays(7));
+        setStartTime(LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0).plusDays(7));
         setEndTime(startTime.plusHours(1));
     }
 

@@ -56,7 +56,8 @@ public class EventIT extends CommonIntegrationTest
     {
         MvcResult response = mockMvc.perform(post("/events")).andExpect(status().isCreated()).andReturn();
 
-        String aWeekFromNow = LocalDateTime.now().plusDays(7).withNano(0).format(DateTimeFormatter.ISO_DATE);
+        String expectedStartTime = LocalDateTime.now().plusDays(7).withHour(0).withMinute(0).withSecond(0).withNano(0).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        String expectedEndTime   = LocalDateTime.now().plusDays(7).withHour(0).withMinute(0).withSecond(0).withNano(0).plusHours(1).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
         String location = response.getResponse().getHeader("Location");
         mockMvc.perform(get(location))
@@ -66,8 +67,8 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(jsonPath("$.description").value(""))
                 .andExpect(jsonPath("$.canceled").value(false))
                 .andExpect(jsonPath("$.visibility").value("PRIVATE"))
-                .andExpect(jsonPath("$.startTime").value(startsWith((aWeekFromNow))))
-                .andExpect(jsonPath("$.endTime").value(startsWith(aWeekFromNow)))
+                .andExpect(jsonPath("$.startTime").value(startsWith(expectedStartTime)))
+                .andExpect(jsonPath("$.endTime").value(startsWith(expectedEndTime)))
                 .andExpect(jsonPath("$.expired").value(false))
                 .andExpect(jsonPath("$.happening").value(false));
     }
