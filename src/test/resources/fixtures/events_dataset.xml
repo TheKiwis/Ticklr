@@ -1,3 +1,6 @@
 <dataset>
-    <events id="123" title="Sample Event" description="Pool Party" visibility="PUBLIC" start_time="2015-09-15 00:00:00" end_time="2015-09-15 00:00:00" canceled="1" />
+    <events id="123" title="Sample Event" description="Pool Party" visibility="PUBLIC" start_time="2015-09-15 00:00:00" end_time="2015-09-15 00:00:00" canceled="1"  user_id="1"/>
+
+    <!-- Owner of events -->
+    <users id="1" email="user@example.com" password="$2a$10$7DiTrG0atup/drERomar.eg4N0yVhRDvd7VHmAGKpxZP.XTzwCq16"/>
 </dataset>

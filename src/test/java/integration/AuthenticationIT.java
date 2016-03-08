@@ -92,7 +92,7 @@ public class AuthenticationIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldNotReturnResourceWhenProvidedWithoutJwtAuthenticationToken() throws Exception
+    public void shouldReturnForbiddenAccessIfNoJwtAuthenticationTokenProvided() throws Exception
     {
         mockMvc.perform(get("/admin"))
                 .andExpect(status().isForbidden());
@@ -103,7 +103,7 @@ public class AuthenticationIT extends CommonIntegrationTest
     {
         mockMvc.perform(get("/admin")
                 .header("Authorization", "Bearer erggdfsyserysdghsrty.sdfghsdyyydfhys"))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -123,7 +123,7 @@ public class AuthenticationIT extends CommonIntegrationTest
 
         mockMvc.perform(get("/admin")
                 .header("Authorization", "Bearer " + jwtToken))
-                .andExpect(status().isForbidden());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
@@ -141,8 +141,8 @@ public class AuthenticationIT extends CommonIntegrationTest
 
 
         mockMvc.perform(get("/admin")
-                .header("Authorization", "Bearer " +jwtToken ))
-                .andExpect(status().isForbidden());
+                .header("Authorization", "Bearer " + jwtToken ))
+                .andExpect(status().isUnauthorized());
     }
 
     @Override

@@ -2,11 +2,7 @@ package app.data;
 
 import org.junit.Test;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.time.Month;
-import java.util.Calendar;
-import java.util.GregorianCalendar;
 
 import static org.junit.Assert.*;
 
@@ -24,6 +20,7 @@ public class EventTest
         assertEquals("", event.getDescription());
         assertEquals(Event.Visibility.PRIVATE, event.getVisibility());
         assertEquals(false, event.isCanceled());
+        assertNull(event.getUser());
 
         LocalDateTime expectedStart = LocalDateTime.now().plusDays(7);
         LocalDateTime expectedEnd = expectedStart.plusHours(1);

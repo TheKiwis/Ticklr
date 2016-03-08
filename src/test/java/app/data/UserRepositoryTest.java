@@ -37,18 +37,18 @@ public class UserRepositoryTest
     @Test
     public void findById_shouldReturnTheCorrectUser() throws Exception
     {
-        when(em.find(User.class, 123)).thenReturn(user);
+        when(em.find(User.class, 123l)).thenReturn(user);
 
-        assertEquals(user, userRepository.findById(123));
+        assertEquals(user, userRepository.findById(123l));
     }
 
     @Test
     public void findById_shouldReturnNullIfNoUserFound() throws Exception
     {
-        when(em.find(User.class, 123)
+        when(em.find(User.class, 123l)
         ).thenThrow(NoResultException.class);
 
-        assertNull(userRepository.findById(123));
+        assertNull(userRepository.findById(123l));
     }
 
     @Test

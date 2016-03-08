@@ -112,7 +112,7 @@ public class JwtAuthenticationFilterTest
     }
 
     @Test
-    public void shouldRejectRequestWithoutAuthorizationHeader() throws Exception
+    public void shouldContinueIfNoAuthorizationHeaderFound() throws Exception
     {
         when(servletRequest.getHeader("Authorization")).thenReturn(null);
 
@@ -121,21 +121,8 @@ public class JwtAuthenticationFilterTest
 
         filter.doFilter(servletRequest, servletResponse, filterChain);
 
-        verify(filterChain, never()).doFilter(any(), any());
-        verify(entryPoint, times(1)).commence(any(), any(), any());
-    }
-
-    @Test
-    public void shouldRejectRequestWithInvalidAuthorizationHeader() throws Exception
-    {
-        // mock invalid authentication header
-        when(servletRequest.getHeader("Authorization")).thenReturn("Basic ");
-        Filter filter = new JwtAuthenticationFilter(authenticationManager, entryPoint);
-
-        filter.doFilter(servletRequest, servletResponse, filterChain);
-
-        verify(filterChain, never()).doFilter(any(), any());
-        verify(entryPoint, times(1)).commence(any(), any(), any());
+        verify(filterChain, times(1)).doFilter(any(), any());
+        verify(entryPoint, never()).commence(any(), any(), any());
     }
 
     @Test
