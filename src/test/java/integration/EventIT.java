@@ -3,11 +3,20 @@ package integration;
 import static org.hamcrest.CoreMatchers.*;
 
 import app.data.Event;
+import app.data.User;
+import app.web.authentication.JwtAuthenticationToken;
+import app.web.authentication.JwtAuthenticator;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.token.DefaultToken;
+import org.springframework.security.core.token.Token;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.time.*;
@@ -21,7 +30,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 public class EventIT extends CommonIntegrationTest
 {
-    private Event preloadedEvent;
+    // loaded fixtures from database
+    private User sampleUser;
+    private Event sampleEvent;
+
     private String sampleTitle;
     private String sampleDesc;
     private String sampleVisibility;
@@ -29,38 +41,90 @@ public class EventIT extends CommonIntegrationTest
     private String sampleEndTime;
     private Boolean sampleCanceled;
 
-    @Before
-    public void sampleInput()
-    {
-        preloadedEvent = (Event) em.createQuery("SELECT e FROM Event e WHERE e.id = 123").getSingleResult();
+    // Authentication token is put in Authorization header in each request
+    private String loginString;
 
-        sampleTitle = preloadedEvent.getTitle();
-        sampleDesc = preloadedEvent.getDescription();
-        sampleVisibility = preloadedEvent.getVisibility().toString();
-        sampleStartTime = preloadedEvent.getStartTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        sampleEndTime = preloadedEvent.getEndTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        sampleCanceled = preloadedEvent.isCanceled();
+    @Value("${auth.secret}")
+    private String authSecret;
+
+    private String eventUrl(Integer userId, Integer eventId)
+    {
+        return "/users/" + userId + "/events/" + (eventId != null ? eventId : "");
     }
 
+    private String eventUrl(Integer userId)
+    {
+        assertNotNull(userId);
+        return eventUrl(userId, null);
+    }
+
+    @Before
+    public void sampleInput() throws Exception
+    {
+        sampleEvent = em.find(Event.class, 123l);
+        sampleUser = sampleEvent.getUser();
+
+        sampleTitle = sampleEvent.getTitle();
+        sampleDesc = sampleEvent.getDescription();
+        sampleVisibility = sampleEvent.getVisibility().toString();
+        sampleStartTime = sampleEvent.getStartTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        sampleEndTime = sampleEvent.getEndTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        sampleCanceled = sampleEvent.isCanceled();
+
+        loginString = "Bearer " + login();
+    }
+
+    private String login() throws Exception
+    {
+        MvcResult result = mockMvc.perform(post("/users/request-auth-token")
+                .param("email", "user@example.com")
+                .param("password", "123456789")
+        ).andReturn();
+
+        return new JwtAuthenticator(authSecret).generateToken("user@example.com").getKey();
+    }
+
+    /*************************************************
+     * Happy Path
+     *************************************************/
+
+    @Test
+    public void shouldReturnAnEvent() throws Exception
+    {
+        mockMvc.perform(get(eventUrl(sampleUser.getId().intValue(), sampleEvent.getId().intValue()))
+                .header("Authorization", loginString))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(sampleEvent.getId().intValue()))
+                .andExpect(jsonPath("$.title").value(sampleTitle))
+                .andExpect(jsonPath("$.description").value(sampleDesc))
+                .andExpect(jsonPath("$.canceled").value(sampleCanceled))
+                .andExpect(jsonPath("$.visibility").value(sampleVisibility))
+                .andExpect(jsonPath("$.startTime").value(startsWith(sampleStartTime)))
+                .andExpect(jsonPath("$.endTime").value(startsWith(sampleEndTime)));
+    }
 
     @Test
     public void shouldReturnWithHttpStatusCreatedAndALocationHeader() throws Exception
     {
-        mockMvc.perform(post("/events"))
-                .andExpect(header().string("Location", startsWith("/events")))
+        mockMvc.perform(post(eventUrl(1))
+                .header("Authorization", loginString))
+                .andExpect(header().string("Location", startsWith(eventUrl(1))))
                 .andExpect(status().isCreated());
     }
 
     @Test
     public void shouldCreateEmptyEventWithDefaultValues() throws Exception
     {
-        MvcResult response = mockMvc.perform(post("/events")).andExpect(status().isCreated()).andReturn();
+        MvcResult response = mockMvc.perform(
+                post(eventUrl(1))
+                .header("Authorization", loginString)
+        ).andExpect(status().isCreated()).andReturn();
 
         String expectedStartTime = LocalDateTime.now().plusDays(7).withHour(0).withMinute(0).withSecond(0).withNano(0).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        String expectedEndTime   = LocalDateTime.now().plusDays(7).withHour(0).withMinute(0).withSecond(0).withNano(0).plusHours(1).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        String expectedEndTime = LocalDateTime.now().plusDays(7).withHour(0).withMinute(0).withSecond(0).withNano(0).plusHours(1).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
         String location = response.getResponse().getHeader("Location");
-        mockMvc.perform(get(location))
+        mockMvc.perform(get(location).header("Authorization", loginString))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.title").value("New Event"))
@@ -76,7 +140,8 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldCreateAnEventWithProvidedValue() throws Exception
     {
-        MvcResult response = mockMvc.perform(post("/events")
+        MvcResult response = mockMvc.perform(post(eventUrl(1))
+                .header("Authorization", loginString)
                 .param("title", sampleTitle)
                 .param("description", sampleDesc)
                 .param("startTime", sampleStartTime)
@@ -86,7 +151,7 @@ public class EventIT extends CommonIntegrationTest
         ).andExpect(status().isCreated()).andReturn();
 
         String location = response.getResponse().getHeader("Location");
-        mockMvc.perform(get(location))
+        mockMvc.perform(get(location).header("Authorization", loginString))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.title").value(sampleTitle))
@@ -100,7 +165,8 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldUpdateAnExistingEvent() throws Exception
     {
-        MvcResult response = mockMvc.perform(put("/events/123")
+        MvcResult response = mockMvc.perform(put(eventUrl(1, 123))
+                .header("Authorization", loginString)
                 .param("title", sampleTitle)
                 .param("description", sampleDesc)
                 .param("startTime", sampleStartTime)
@@ -110,7 +176,7 @@ public class EventIT extends CommonIntegrationTest
         ).andExpect(status().isNoContent()).andReturn();
 
         String location = response.getResponse().getHeader("Location");
-        mockMvc.perform(get(location))
+        mockMvc.perform(get(location).header("Authorization", loginString))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.title").value(sampleTitle))
@@ -128,23 +194,42 @@ public class EventIT extends CommonIntegrationTest
         assertNull(em.find(Event.class, 345l));
 
         // put operation should create a new one (with a different ID)
-        mockMvc.perform(put("/events/345")
+        mockMvc.perform(put(eventUrl(1, 345))
+                .header("Authorization", loginString)
                 .param("title", sampleTitle)
                 .param("description", sampleDesc)
                 .param("startTime", sampleStartTime)
                 .param("endTime", sampleEndTime)
                 .param("visibility", sampleVisibility))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", startsWith("/events/")));
+                .andExpect(header().string("Location", startsWith("/users/1/events/")));
 
     }
+
+    @Test
+    public void shouldReturnHttpNotFoundIfNoUserFound() throws Exception
+    {
+        // User with ID 234 doesn't exist
+        assertNull(em.find(User.class, 234l));
+
+        mockMvc.perform(put(eventUrl(234, 123)).header("Authorization", loginString))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(get(eventUrl(234, 123)).header("Authorization", loginString))
+                .andExpect(status().isNotFound());
+    }
+
+    /*************************************************
+     * Sad Path
+     *************************************************/
 
     @Test
     public void shouldNotUpdateEventOnInvalidRequest() throws Exception
     {
         Event beforePut = em.find(Event.class, 123l);
 
-        mockMvc.perform(put("/events/123")
+        mockMvc.perform(put(eventUrl(1, 123))
+                .header("Authorization", loginString)
                 .param("title", "Title")
                 .param("description", "Desc")
                 .param("visibility", "Invalid Visibility"))
@@ -157,37 +242,24 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldReturnAnEvent() throws Exception
-    {
-        mockMvc.perform(get("/events/" + preloadedEvent.getId()))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(preloadedEvent.getId().intValue()))
-                .andExpect(jsonPath("$.title").value(sampleTitle))
-                .andExpect(jsonPath("$.description").value(sampleDesc))
-                .andExpect(jsonPath("$.canceled").value(sampleCanceled))
-                .andExpect(jsonPath("$.visibility").value(sampleVisibility))
-                .andExpect(jsonPath("$.startTime").value(startsWith(sampleStartTime)))
-                .andExpect(jsonPath("$.endTime").value(startsWith(sampleEndTime)));
-    }
-
-    @Test
     public void shouldReturnHttpStatusNotFoundForNonExistentEvent() throws Exception
     {
-        mockMvc.perform(get("/events/555"))
+        mockMvc.perform(get(eventUrl(1, 555)).header("Authorization", loginString))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     public void shouldReturnHttpStatusBadRequestForNonNumericEventId() throws Exception
     {
-        mockMvc.perform(get("/events/non_numeric"))
+        mockMvc.perform(get("/users/1/events/non_numeric").header("Authorization", loginString))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void shouldReturnBadRequestForInvalidStatusAndVisibility() throws Exception
     {
-        mockMvc.perform(post("/events")
+        mockMvc.perform(post(eventUrl(1))
+                .header("Authorization", loginString)
                 .param("title", "Title")
                 .param("description", "Desc")
                 .param("visibility", "Invalid Visibility"))
@@ -198,14 +270,16 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldReturnBadRequestForMalformedTime() throws Exception
     {
-        mockMvc.perform(post("/events")
+        mockMvc.perform(post(eventUrl(1))
+                .header("Authorization", loginString)
                 .param("title", "Title")
                 .param("description", "Desc")
                 .param("startTime", "2015-03-12"))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").isNotEmpty());
 
-        mockMvc.perform(post("/events")
+        mockMvc.perform(post(eventUrl(1))
+                .header("Authorization", loginString)
                 .param("title", "Title")
                 .param("description", "Desc")
                 .param("startTime", "Invalid time"))
@@ -216,7 +290,8 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldReturnBadRequestWhenEndTimeBeforeStartTime() throws Exception
     {
-        mockMvc.perform(post("/events")
+        mockMvc.perform(post(eventUrl(1))
+                .header("Authorization", loginString)
                 .param("title", "Title")
                 .param("description", "Desc")
                 .param("startTime", "2015-03-12T20:00:00")
@@ -224,6 +299,12 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").isNotEmpty());
     }
+
+    // todo should return forbidden for event that's does not belong to a user
+
+    /*******************
+     * Fixture
+     *******************/
 
     @Test
     public void shouldLoadTestFixture() throws Exception

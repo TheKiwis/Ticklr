@@ -30,7 +30,7 @@ public class UserRepository
      * @param userId the given user's ID
      * @return null if no user found
      */
-    public User findById(int userId)
+    public User findById(long userId)
     {
         try {
             return em.find(User.class, userId);

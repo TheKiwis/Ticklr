@@ -50,8 +50,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
         String header = request.getHeader("Authorization");
 
         if (header == null || !header.startsWith("Bearer ")) {
-            success = false;
-            authenticationException = new BadCredentialsException("No valid Authorization Header found.");
+            filterChain.doFilter(request, response);
+            return;
         }
 
         if (success) { // Authorization header found

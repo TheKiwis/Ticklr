@@ -50,6 +50,25 @@ public class EventRepository
     }
 
     /**
+     * Finds an event by it's ID and it's owner
+     *
+     * @param userId ID of the user that owns the event
+     * @param eventId
+     * @return null if no event is found
+     */
+    public Event findByIdAndUserId(long userId, long eventId)
+    {
+        try {
+            return (Event) em.createQuery("SELECT e FROM Event e WHERE e.id = :eventId AND e.user.id = :userId ")
+                    .setParameter("eventId", eventId)
+                    .setParameter("userId", userId)
+                    .getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    /**
      * Finds an event by it's ID
      *
      * @param eventId

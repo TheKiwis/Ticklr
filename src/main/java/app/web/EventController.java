@@ -3,6 +3,8 @@ package app.web;
 import app.data.Event;
 import app.data.Event.Visibility;
 import app.data.EventRepository;
+import app.data.User;
+import app.data.UserRepository;
 import app.data.validation.EventValidator;
 import app.supports.converter.EnumConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,21 +18,24 @@ import org.springframework.web.bind.annotation.*;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/events")
+@RequestMapping("/users/{userId}/events")
 public class EventController
 {
     private EventRepository eventRepository;
+
+    private UserRepository userRepository;
 
     private EventValidator validator;
 
     /**
      * @param eventRepository Manage Event entities
-     * @param validator performs validation on Event entity
+     * @param validator       performs validation on Event entity
      */
     @Autowired
-    public EventController(EventRepository eventRepository, EventValidator validator)
+    public EventController(EventRepository eventRepository, UserRepository userRepository, EventValidator validator)
     {
         this.eventRepository = eventRepository;
+        this.userRepository = userRepository;
         this.validator = validator;
     }
 
@@ -46,18 +51,31 @@ public class EventController
      * @return
      */
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity create(Event requestEvent, BindingResult bindingResult)
+    public ResponseEntity create(@PathVariable Long userId, Event requestEvent, BindingResult bindingResult)
     {
         HttpHeaders headers = new HttpHeaders();
+
         HttpStatus status = HttpStatus.CREATED;
 
-        validator.validate(requestEvent, bindingResult);
+        User user = userRepository.findById(userId);
 
-        if (!bindingResult.hasFieldErrors()) {
-            Event event = eventRepository.saveOrUpdate(requestEvent);
-            headers.setLocation(URI.create("/events/" + event.getId()));
+        if (user != null) {
+
+            validator.validate(requestEvent, bindingResult);
+
+            if (!bindingResult.hasFieldErrors()) {
+
+                requestEvent.setUser(user);
+
+                Event event = eventRepository.saveOrUpdate(requestEvent);
+
+                headers.setLocation(URI.create("/users/" + userId + "/events/" + event.getId()));
+            } else {
+                status = HttpStatus.BAD_REQUEST;
+            }
+
         } else {
-            status = HttpStatus.BAD_REQUEST;
+            status = HttpStatus.NOT_FOUND;
         }
 
         return new ResponseEntity(bindingResult.getFieldErrors(), headers, status);
@@ -69,7 +87,7 @@ public class EventController
      * @return
      */
     @RequestMapping(value = "/{eventId}", method = RequestMethod.PUT)
-    public ResponseEntity update(@PathVariable Long eventId, Event requestEvent, BindingResult bindingResult)
+    public ResponseEntity update(@PathVariable Long userId, @PathVariable Long eventId, Event requestEvent, BindingResult bindingResult)
     {
         HttpHeaders headers = new HttpHeaders();
         HttpStatus status = HttpStatus.NO_CONTENT;
@@ -78,16 +96,16 @@ public class EventController
 
         if (!bindingResult.hasFieldErrors()) {
 
-            Event event = eventRepository.findById(eventId);
+            Event event = eventRepository.findByIdAndUserId(userId, eventId);
 
             // no event with the given eventId found, a new one should be created
             if (event == null)
-                return create(requestEvent, bindingResult);
+                return create(userId, requestEvent, bindingResult);
 
             // update existing event
             Event updatedEvent = eventRepository.saveOrUpdate(event.merge(requestEvent));
 
-            headers.setLocation(URI.create("/events/" + updatedEvent.getId()));
+            headers.setLocation(URI.create("/users/" + userId + "/events/" + updatedEvent.getId()));
         } else {
             status = HttpStatus.BAD_REQUEST;
         }
@@ -96,9 +114,9 @@ public class EventController
     }
 
     @RequestMapping(value = "/{eventId}", method = RequestMethod.GET)
-    public ResponseEntity show(@PathVariable long eventId)
+    public ResponseEntity show(@PathVariable Long userId, @PathVariable Long eventId)
     {
-        Event event = eventRepository.findById(eventId);
+        Event event = eventRepository.findByIdAndUserId(userId, eventId);
 
         HttpStatus status = HttpStatus.OK;
 
