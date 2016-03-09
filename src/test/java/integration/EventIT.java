@@ -76,10 +76,10 @@ public class EventIT extends CommonIntegrationTest
 
     private String login() throws Exception
     {
-        MvcResult result = mockMvc.perform(post("/users/request-auth-token")
-                .param("email", "user@example.com")
-                .param("password", "123456789")
-        ).andReturn();
+//        MvcResult result = mockMvc.perform(post("/users/request-auth-token")
+//                .param("email", "user@example.com")
+//                .param("password", "123456789")
+//        ).andReturn();
 
         return new JwtAuthenticator(authSecret).generateToken("user@example.com").getKey();
     }

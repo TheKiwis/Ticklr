@@ -43,6 +43,8 @@ public class Event
     @JoinColumn(name = "user_id", nullable = false)
     protected User user;
 
+    // todo created_time and updated_time
+
     /**
      * Default Constructor assigns default values to fields
      *  - title = New Event

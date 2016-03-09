@@ -1,0 +1,12 @@
+<dataset>
+    <users id="123" email="user_with_basket@example.com" password="$2a$10$7DiTrG0atup/drERomar.eg4N0yVhRDvd7VHmAGKpxZP.XTzwCq16"/>
+        <baskets id="456" user_id="123"/>
+        <basket_items basket_id="456" unit_price="1000" quantity="1000"/>
+        <basket_items basket_id="456" unit_price="1000" quantity="1000"/>
+
+
+    <users id="124" email="user_with_out_basket@example.com" password="$2a$10$7DiTrG0atup/drERomar.eg4N0yVhRDvd7VHmAGKpxZP.XTzwCq16"/>
+        <ticket_sets id="1" price="25.00" title="Single ticket" />
+        <baskets id="567" user_id="124"/>
+
+</dataset>
