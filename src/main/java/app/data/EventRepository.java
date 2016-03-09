@@ -37,10 +37,9 @@ public class EventRepository
      */
     public Event saveOrUpdate(Event event)
     {
-        // EntityManager#persist is called on new or managed entity,
-        if (event.getId() == null || em.contains(event)) {
+        if (event.getId() == null) {
             em.persist(event);
-        } else { // event is a detached entity (em.contains returns false)
+        } else {
             event = em.merge(event);
         }
 

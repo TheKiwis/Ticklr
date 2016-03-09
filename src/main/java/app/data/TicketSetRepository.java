@@ -61,9 +61,9 @@ public class TicketSetRepository
      */
     public TicketSet saveOrUpdate(TicketSet ticketSet)
     {
-        if (ticketSet.getId() == null || em.contains(ticketSet)) {
+        if (ticketSet.getId() == null) {
             em.persist(ticketSet);
-        } else { // ticketSet is a detached entity (em.contains returns false)
+        } else {
             ticketSet = em.merge(ticketSet);
         }
 
