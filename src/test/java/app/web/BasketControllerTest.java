@@ -97,7 +97,7 @@ public class BasketControllerTest
 
         ResponseEntity responseEntity = basketController.addItem(123l, basketItemForm, bindingResult);
 
-        verify(basketRepository, times(1)).save(mockBasket);
+        verify(basketRepository, times(1)).saveOrUpdate(mockBasket);
         verify(mockBasket, times(1)).addItem(any());
         assertEquals(HttpStatus.CREATED, responseEntity.getStatusCode());
     }
@@ -116,7 +116,7 @@ public class BasketControllerTest
 
         basketController.addItem(123l, basketItemForm, bindingResult);
 
-        verify(basketRepository, times(1)).save(any());
+        verify(basketRepository, times(1)).saveOrUpdate(any());
     }
 
     @Test
