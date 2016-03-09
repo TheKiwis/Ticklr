@@ -27,9 +27,9 @@ public class BasketItem
     @JoinColumn(name = "basket_id", nullable = false)
     protected Basket basket;
 
-//    @ManyToOne
-//    @JoinColumn(name = "ticket_set_id")
-//    protected TicketSet ticketSet;
+    @ManyToOne
+    @JoinColumn(name = "ticket_set_id")
+    protected TicketSet ticketSet;
 
     @Column(name = "quantity")
     protected Integer quantity;
@@ -85,16 +85,15 @@ public class BasketItem
         this.basket = basket;
     }
 
+    public void setTicketSet(TicketSet ticketSet)
+    {
+        this.ticketSet = ticketSet;
+    }
 
-    //public void setTicketSet(TicketSet ticketSet)
-    //{
-    //    this.ticketSet = ticketSet;
-    //}
-    //
-    //public TicketSet getTicketSet()
-    //{
-    //    return ticketSet;
-    //}
+    public TicketSet getTicketSet()
+    {
+        return ticketSet;
+    }
 
     /**
      * @return amount of the associated ticket set

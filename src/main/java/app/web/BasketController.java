@@ -58,6 +58,9 @@ public class BasketController
     }
 
 
+    // todo validation
+    // todo do not create new item if there's already an item with the same ticket_set_id in basket
+    // todo use saveOrUpdate to save/update basket (persist is only for new entity) more info read: https://dzone.com/articles/saving_detatched_entities
     @RequestMapping(value = "/items", method = RequestMethod.POST)
     public ResponseEntity addItem(@PathVariable Long userId, BasketItemForm basketItemForm, BindingResult bindingResult)
     {
@@ -80,6 +83,7 @@ public class BasketController
         if (basket == null) { // if basket doesn't existed yet, then create new one
             basket = new Basket(user);
         }
+
         basket.addItem(item);
 
         basketRepository.save(basket);

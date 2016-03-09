@@ -188,7 +188,7 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldCreateNewResourceIfUpdateCannotFindResource() throws Exception
+    public void shouldReturnHttpStatusNotFoundIfUpdateCannotFindResource() throws Exception
     {
         // Event with ID 345 doesn't exist
         assertNull(em.find(Event.class, 345l));
@@ -201,8 +201,7 @@ public class EventIT extends CommonIntegrationTest
                 .param("startTime", sampleStartTime)
                 .param("endTime", sampleEndTime)
                 .param("visibility", sampleVisibility))
-                .andExpect(status().isCreated())
-                .andExpect(header().string("Location", startsWith("/users/1/events/")));
+                .andExpect(status().isNotFound());
 
     }
 

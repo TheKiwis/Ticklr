@@ -1,8 +1,10 @@
 <dataset>
     <users id="123" email="user_with_basket@example.com" password="$2a$10$7DiTrG0atup/drERomar.eg4N0yVhRDvd7VHmAGKpxZP.XTzwCq16"/>
         <baskets id="456" user_id="123"/>
-        <basket_items basket_id="456" unit_price="1000" quantity="1000"/>
-        <basket_items basket_id="456" unit_price="1000" quantity="1000"/>
+        <ticket_sets id="2" price="30.00" title="Couple ticket" />
+        <ticket_sets id="3" price="20.00" title="Couple ticket" />
+        <basket_items basket_id="456" unit_price="30.0" quantity="8" ticket_set_id="2" />
+        <basket_items basket_id="456" unit_price="20.0" quantity="5" ticket_set_id="3" />
 
 
     <users id="124" email="user_with_out_basket@example.com" password="$2a$10$7DiTrG0atup/drERomar.eg4N0yVhRDvd7VHmAGKpxZP.XTzwCq16"/>

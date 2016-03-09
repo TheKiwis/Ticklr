@@ -89,6 +89,12 @@ public class EventController
     @RequestMapping(value = "/{eventId}", method = RequestMethod.PUT)
     public ResponseEntity update(@PathVariable Long userId, @PathVariable Long eventId, Event requestEvent, BindingResult bindingResult)
     {
+        Event event = eventRepository.findByIdAndUserId(userId, eventId);
+
+        // no event with the given eventId belongs to user with userId found
+        if (event == null)
+            return new ResponseEntity(null, HttpStatus.NOT_FOUND);
+
         HttpHeaders headers = new HttpHeaders();
         HttpStatus status = HttpStatus.NO_CONTENT;
 
@@ -96,13 +102,6 @@ public class EventController
 
         if (!bindingResult.hasFieldErrors()) {
 
-            Event event = eventRepository.findByIdAndUserId(userId, eventId);
-
-            // no event with the given eventId found, a new one should be created
-            if (event == null)
-                return create(userId, requestEvent, bindingResult);
-
-            // update existing event
             Event updatedEvent = eventRepository.saveOrUpdate(event.merge(requestEvent));
 
             headers.setLocation(URI.create("/users/" + userId + "/events/" + updatedEvent.getId()));

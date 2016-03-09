@@ -1,6 +1,7 @@
 package app.data;
 
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
 
@@ -8,6 +9,7 @@ import javax.persistence.*;
  * Created by DucNguyenMinh on 08.03.16.
  */
 @Repository
+@Transactional
 public class BasketRepository
 {
     @PersistenceContext
@@ -18,7 +20,9 @@ public class BasketRepository
         this.em = em;
     }
 
-    protected BasketRepository(){}
+    protected BasketRepository()
+    {
+    }
 
     /**
      * @param userId ID of the user who owns the basket
@@ -34,22 +38,20 @@ public class BasketRepository
 
         try {
             basket = (Basket) query.getSingleResult();
-        } catch (NoResultException e){
+        } catch (NoResultException e) {
         }
 
         return basket;
     }
 
-
-
     /**
      * @param basket
      * @return
      */
-    public Basket save(Basket basket) throws PersistenceException
+    public Basket save(Basket basket)
     {
         em.persist(basket);
         em.flush();
-        return  basket;
+        return basket;
     }
 }
