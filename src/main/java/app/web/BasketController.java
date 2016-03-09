@@ -58,7 +58,7 @@ public class BasketController
     }
 
 
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(value = "/items", method = RequestMethod.POST)
     public ResponseEntity addItem(@PathVariable Long userId, BasketItemForm basketItemForm, BindingResult bindingResult)
     {
         User user = userRepository.findById(userId);
@@ -71,7 +71,6 @@ public class BasketController
             return new ResponseEntity(null, HttpStatus.BAD_REQUEST);
         }
 
-        HttpHeaders headers = null;
         HttpStatus status = HttpStatus.CREATED;
 
         Basket basket = basketRepository.findByUserId(userId);

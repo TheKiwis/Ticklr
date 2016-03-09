@@ -20,6 +20,10 @@ public class BasketItemForm
         this.ticketSetId = ticketSetId;
     }
 
+    protected BasketItemForm()
+    {
+    }
+
     public Integer getQuantity()
     {
         return quantity;

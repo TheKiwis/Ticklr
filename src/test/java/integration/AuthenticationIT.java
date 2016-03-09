@@ -92,13 +92,6 @@ public class AuthenticationIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldReturnForbiddenAccessIfNoJwtAuthenticationTokenProvided() throws Exception
-    {
-        mockMvc.perform(get("/admin"))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
     public void shouldNotReturnResouceWhenProviedWithMalformtoken() throws Exception
     {
         mockMvc.perform(get("/admin")

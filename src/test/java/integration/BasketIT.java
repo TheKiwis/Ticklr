@@ -30,8 +30,8 @@ public class BasketIT extends CommonIntegrationTest
                 .param("quantity", "10")
                 .param("ticketSetId", "1")
         ).andExpect(status().isCreated())
-        .andExpect(jsonPath("$.basketItems").isArray())
-        .andExpect(jsonPath("$.basketItems").isNotEmpty());
+                .andExpect(jsonPath("$.basketItems").isArray())
+                .andExpect(jsonPath("$.basketItems").isNotEmpty());
     }
 
     /*******************
@@ -44,6 +44,7 @@ public class BasketIT extends CommonIntegrationTest
         assertNotNull(em.createQuery("SELECT u FROM User u WHERE u.id = 123").getSingleResult());
         assertNotNull(em.createQuery("SELECT b FROM Basket b WHERE b.id = 456").getSingleResult());
     }
+
     @Override
     protected IDataSet getDataSet() throws Exception
     {
