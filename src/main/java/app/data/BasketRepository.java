@@ -54,4 +54,17 @@ public class BasketRepository
         em.flush();
         return basket;
     }
+
+    public Basket saveOrUpdate(Basket basket){
+
+        if (basket.getId() == null) {
+            em.persist(basket);
+        } else {
+            basket = em.merge(basket);
+        }
+
+        em.flush();
+
+        return basket;
+    }
 }

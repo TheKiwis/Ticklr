@@ -79,7 +79,7 @@ public class BasketController
 
         Basket basket = basketRepository.findByUserId(userId);
 
-        BasketItem item = new BasketItem(basket, basketItemForm.getQuantity(), ticketSet.getPrice());
+        BasketItem item = new BasketItem(basket, ticketSet, basketItemForm.getQuantity(), ticketSet.getPrice());
 
         if (basket == null) { // if basket doesn't existed yet, then create new one
             basket = new Basket(user);
@@ -87,7 +87,7 @@ public class BasketController
 
         basket.addItem(item);
 
-        basketRepository.save(basket);
+        basketRepository.saveOrUpdate(basket);
 
         return new ResponseEntity(null, status);
     }

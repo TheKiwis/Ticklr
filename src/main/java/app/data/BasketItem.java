@@ -53,9 +53,10 @@ public class BasketItem
     {
     }
 
-    public BasketItem(Basket basket, Integer quantity, BigDecimal unitPrice)
+    public BasketItem(Basket basket, TicketSet ticketSet, Integer quantity, BigDecimal unitPrice)
     {
         this.basket = basket;
+        this.ticketSet = ticketSet;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
     }

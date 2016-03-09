@@ -62,4 +62,25 @@ public class BasketRepositoryTest
         verify(em, atLeastOnce()).persist(mockBasket);
     }
 
+    @Test
+    public void saveOrUpdate_shouldReturnTheSameBasket()
+    {
+
+        BasketRepository basketRepository = new BasketRepository(em);
+        Basket mockBasket = mock(Basket.class);
+
+        basketRepository.saveOrUpdate(mockBasket);
+
+        verify(em, atLeastOnce()).merge(mockBasket);
+
+        mockBasket = mock(Basket.class);
+
+        when(mockBasket.getId()).thenReturn(null);
+
+        basketRepository.saveOrUpdate(mockBasket);
+
+        verify(em, atLeastOnce()).persist(mockBasket);
+
+    }
+
 }

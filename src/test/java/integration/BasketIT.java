@@ -29,9 +29,7 @@ public class BasketIT extends CommonIntegrationTest
         mockMvc.perform(post("/users/124/basket/items")
                 .param("quantity", "10")
                 .param("ticketSetId", "1"))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.basketItems").isArray())
-                .andExpect(jsonPath("$.basketItems").isNotEmpty());
+                .andExpect(status().isCreated());
     }
 
     /*******************
