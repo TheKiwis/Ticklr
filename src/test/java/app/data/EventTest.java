@@ -5,6 +5,9 @@ import org.junit.Test;
 import java.time.LocalDateTime;
 
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 
 /**
  * @author ngnmhieu
@@ -22,7 +25,7 @@ public class EventTest
         assertEquals(false, event.isCanceled());
         assertNull(event.getUser());
 
-        LocalDateTime expectedStart = LocalDateTime.now().plusDays(7);
+        LocalDateTime expectedStart = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0).plusDays(7);
         LocalDateTime expectedEnd = expectedStart.plusHours(1);
         LocalDateTime startTime = event.getStartTime();
         LocalDateTime endTime = event.getEndTime();
@@ -75,5 +78,21 @@ public class EventTest
         event.setStartTime(LocalDateTime.now().minusHours(1));
         event.setEndTime(event.getStartTime().plusHours(2));
         assertTrue(event.isHappening());
+    }
+
+    @Test
+    public void testAddTicketSet() throws Exception
+    {
+        TicketSet mockTicketSet = mock(TicketSet.class);
+
+        Event event = new Event();
+
+        int count = event.getTicketSets().size();
+
+        event.addTicketSet(mockTicketSet);
+
+        assertEquals(count + 1, event.getTicketSets().size());
+        assertTrue(event.getTicketSets().contains(mockTicketSet));
+        verify(mockTicketSet, atLeastOnce()).setEvent(event);
     }
 }

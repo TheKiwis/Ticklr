@@ -2,9 +2,17 @@ package app.data;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.*;
 
 import javax.persistence.*;
+import javax.persistence.CascadeType;
+import javax.persistence.Entity;
+import javax.persistence.Table;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Date;
 
 /**
  * @author ngnmhieu
@@ -13,6 +21,11 @@ import java.time.LocalDateTime;
 @Table(name = "events")
 public class Event
 {
+    /* todo: validation
+     *     - title should not be empty
+     *     - start_time should not be in the past
+     */
+
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -43,7 +56,20 @@ public class Event
     @JoinColumn(name = "user_id", nullable = false)
     protected User user;
 
-    // todo created_time and updated_time
+    @OneToMany(mappedBy = "event", fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    protected Collection<TicketSet> ticketSets = new ArrayList<>();
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "created_time", updatable = false)
+    @CreationTimestamp
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    protected Date createdTime;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "updated_time", insertable = false, updatable = false)
+    @Generated(GenerationTime.ALWAYS)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
+    protected Date updatedTime;
 
     /**
      * Default Constructor assigns default values to fields
@@ -192,6 +218,23 @@ public class Event
     }
 
     /**
+     * @return the ticket sets created for this event
+     */
+    public Collection<TicketSet> getTicketSets()
+    {
+        return Collections.unmodifiableCollection(ticketSets);
+    }
+
+    /**
+     * @param ticketSet new ticket set
+     */
+    public void addTicketSet(TicketSet ticketSet)
+    {
+        ticketSets.add(ticketSet);
+        ticketSet.setEvent(this);
+    }
+
+    /**
      * @return true if the event is canceled. Default to false
      */
     public boolean isCanceled()
@@ -239,6 +282,16 @@ public class Event
     {
         LocalDateTime now = LocalDateTime.now();
         return now.isAfter(startTime) && now.isBefore(endTime);
+    }
+
+    public Date getCreatedTime()
+    {
+        return createdTime;
+    }
+
+    public Date getUpdatedTime()
+    {
+        return updatedTime;
     }
 
     /**

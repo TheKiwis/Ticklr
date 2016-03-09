@@ -6,4 +6,6 @@ CREATE TABLE `events` (
   `description` LONGTEXT NULL,
   `visibility` VARCHAR(45) NULL COMMENT 'possible values: public, private',
   `canceled` BIT(1) NULL DEFAULT 0,
+  `created_time` DATETIME NULL,
+  `updated_time` DATETIME NULL,
   PRIMARY KEY (`id`));

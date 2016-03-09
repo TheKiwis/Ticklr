@@ -1,10 +1,7 @@
 package app.web;
 
-import app.data.Event;
+import app.data.*;
 import app.data.Event.Visibility;
-import app.data.EventRepository;
-import app.data.User;
-import app.data.UserRepository;
 import app.data.validation.EventValidator;
 import app.supports.converter.EnumConverter;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,6 +12,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import java.net.URI;
 
 @RestController
@@ -27,15 +25,18 @@ public class EventController
 
     private EventValidator validator;
 
+    private TicketSetRepository ticketSetRepository;
+
     /**
      * @param eventRepository Manage Event entities
      * @param validator       performs validation on Event entity
      */
     @Autowired
-    public EventController(EventRepository eventRepository, UserRepository userRepository, EventValidator validator)
+    public EventController(EventRepository eventRepository, UserRepository userRepository, TicketSetRepository ticketSetRepository, EventValidator validator)
     {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
+        this.ticketSetRepository = ticketSetRepository;
         this.validator = validator;
     }
 
@@ -93,7 +94,7 @@ public class EventController
 
         // no event with the given eventId belongs to user with userId found
         if (event == null)
-            return new ResponseEntity(null, HttpStatus.NOT_FOUND);
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
 
         HttpHeaders headers = new HttpHeaders();
         HttpStatus status = HttpStatus.NO_CONTENT;
@@ -125,5 +126,38 @@ public class EventController
         return new ResponseEntity(event, status);
     }
 
+    @RequestMapping(value = "/{eventId}/ticket-sets", method = RequestMethod.POST)
+    public ResponseEntity addItem(@PathVariable Long userId, @PathVariable Long eventId, @Valid TicketSet ticketSet, BindingResult bindingResult)
+    {
+        Event event = eventRepository.findByIdAndUserId(userId, eventId);
 
+        if (event == null)
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+
+        if (bindingResult.hasFieldErrors())
+            return new ResponseEntity(bindingResult.getFieldErrors(), HttpStatus.BAD_REQUEST);
+
+        event.addTicketSet(ticketSet);
+
+        eventRepository.saveOrUpdate(event);
+
+        return new ResponseEntity(HttpStatus.CREATED);
+    }
+
+    @RequestMapping(value = "/{eventId}/ticket-sets/{ticketSetId}", method = RequestMethod.PUT)
+    public ResponseEntity updateTicketSet(@PathVariable long userId, @PathVariable long eventId,
+                                          @PathVariable long ticketSetId, @Valid TicketSet updatedTicketSet, BindingResult bindingResult)
+    {
+        TicketSet ticketSet = ticketSetRepository.findByIdAndUserIdAndEventId(ticketSetId, userId, eventId);
+
+        if (ticketSet == null)
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+
+        if (bindingResult.hasFieldErrors())
+            return new ResponseEntity(bindingResult.getFieldErrors(), HttpStatus.BAD_REQUEST);
+
+        ticketSetRepository.saveOrUpdate(ticketSet.merge(updatedTicketSet));
+
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
 }

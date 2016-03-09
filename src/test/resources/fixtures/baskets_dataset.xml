@@ -1,14 +1,16 @@
 <dataset>
     <users id="123" email="user_with_basket@example.com" password="$2a$10$7DiTrG0atup/drERomar.eg4N0yVhRDvd7VHmAGKpxZP.XTzwCq16"/>
-        <baskets id="456" user_id="123"/>
-        <ticket_sets id="2" price="30.00" title="Couple ticket" />
-        <ticket_sets id="3" price="20.00" title="Couple ticket" />
+        <events id="1" title="Sample Event" description="Pool Party" visibility="PUBLIC" start_time="2015-09-15 00:00:00" end_time="2015-09-15 00:00:00" canceled="1"  user_id="123"/>
+        <baskets id="456" user_id="123" />
+        <ticket_sets id="2" price="30.00" title="Couple ticket" event_id="1"/>
+        <ticket_sets id="3" price="20.00" title="Couple ticket" event_id="1"/>
         <basket_items basket_id="456" unit_price="30.0" quantity="8" ticket_set_id="2" />
         <basket_items basket_id="456" unit_price="20.0" quantity="5" ticket_set_id="3" />
 
 
     <users id="124" email="user_with_out_basket@example.com" password="$2a$10$7DiTrG0atup/drERomar.eg4N0yVhRDvd7VHmAGKpxZP.XTzwCq16"/>
-        <ticket_sets id="1" price="25.00" title="Single ticket" />
+        <events id="2" title="Sample Event" description="Pool Party" visibility="PUBLIC" start_time="2015-09-15 00:00:00" end_time="2015-09-15 00:00:00" canceled="1"  user_id="123"/>
+        <ticket_sets id="1" price="25.00" title="Single ticket" event_id="2" />
         <baskets id="567" user_id="124"/>
 
 </dataset>

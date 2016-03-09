@@ -3,22 +3,18 @@ package integration;
 import static org.hamcrest.CoreMatchers.*;
 
 import app.data.Event;
+import app.data.TicketSet;
 import app.data.User;
-import app.web.authentication.JwtAuthenticationToken;
 import app.web.authentication.JwtAuthenticator;
-import com.fasterxml.jackson.databind.JavaType;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.type.TypeFactory;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.junit.Before;
 import org.junit.Test;
 
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.token.DefaultToken;
-import org.springframework.security.core.token.Token;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.math.BigDecimal;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 
@@ -47,15 +43,15 @@ public class EventIT extends CommonIntegrationTest
     @Value("${auth.secret}")
     private String authSecret;
 
-    private String eventUrl(Integer userId, Integer eventId)
+
+    private String ticketSetUrl(int userId, int eventId, Integer ticketSetId)
     {
-        return "/users/" + userId + "/events/" + (eventId != null ? eventId : "");
+        return eventUrl(userId, eventId) + "/ticket-sets/" + (ticketSetId == null ? "" : ticketSetId);
     }
 
-    private String eventUrl(Integer userId)
+    private String eventUrl(int userId, Integer eventId)
     {
-        assertNotNull(userId);
-        return eventUrl(userId, null);
+        return "/users/" + userId + "/events/" + (eventId != null ? eventId : "");
     }
 
     @Before
@@ -76,11 +72,6 @@ public class EventIT extends CommonIntegrationTest
 
     private String login() throws Exception
     {
-//        MvcResult result = mockMvc.perform(post("/users/request-auth-token")
-//                .param("email", "user@example.com")
-//                .param("password", "123456789")
-//        ).andReturn();
-
         return new JwtAuthenticator(authSecret).generateToken("user@example.com").getKey();
     }
 
@@ -106,9 +97,9 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldReturnWithHttpStatusCreatedAndALocationHeader() throws Exception
     {
-        mockMvc.perform(post(eventUrl(1))
+        mockMvc.perform(post(eventUrl(1, null))
                 .header("Authorization", loginString))
-                .andExpect(header().string("Location", startsWith(eventUrl(1))))
+                .andExpect(header().string("Location", startsWith(eventUrl(1, null))))
                 .andExpect(status().isCreated());
     }
 
@@ -116,8 +107,8 @@ public class EventIT extends CommonIntegrationTest
     public void shouldCreateEmptyEventWithDefaultValues() throws Exception
     {
         MvcResult response = mockMvc.perform(
-                post(eventUrl(1))
-                .header("Authorization", loginString)
+                post(eventUrl(1, null))
+                        .header("Authorization", loginString)
         ).andExpect(status().isCreated()).andReturn();
 
         String expectedStartTime = LocalDateTime.now().plusDays(7).withHour(0).withMinute(0).withSecond(0).withNano(0).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
@@ -140,7 +131,7 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldCreateAnEventWithProvidedValue() throws Exception
     {
-        MvcResult response = mockMvc.perform(post(eventUrl(1))
+        MvcResult response = mockMvc.perform(post(eventUrl(1, null))
                 .header("Authorization", loginString)
                 .param("title", sampleTitle)
                 .param("description", sampleDesc)
@@ -187,6 +178,42 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(jsonPath("$.visibility").value(sampleVisibility));
     }
 
+
+    @Test
+    public void shouldCreateNewTicketSet() throws Exception
+    {
+        String query = "SELECT count(ts) FROM TicketSet ts WHERE ts.event.id = :event_id";
+
+        long count = (long) em.createQuery(query).setParameter("event_id", 123l).getSingleResult();
+
+        mockMvc.perform(post(ticketSetUrl(1, 123, null))
+                .header("Authorization", loginString)
+                .param("title", "Early Bird")
+                .param("price", "25.00"))
+                .andExpect(status().isCreated());
+
+        assertEquals(count+1, (long) em.createQuery(query).setParameter("event_id", 123l).getSingleResult());
+    }
+
+    @Test
+    public void shouldUpdateTicketSet() throws Exception
+    {
+        mockMvc.perform(put(ticketSetUrl(1, 123, 10))
+                .header("Authorization", loginString)
+                .param("title", "Updated title")
+                .param("price", "30.00"))
+                .andExpect(status().isNoContent());
+
+        TicketSet ticketSet = (TicketSet) em.createQuery("SELECT ts FROM TicketSet ts WHERE ts.id = 10").getSingleResult();
+        assertEquals(new TicketSet("Updated title", new BigDecimal(30)), ticketSet);
+    }
+
+    // todo validation ticket-set title not empty, price not negative
+
+    /*************************************************
+     * Sad Path
+     *************************************************/
+
     @Test
     public void shouldReturnHttpStatusNotFoundIfUpdateCannotFindResource() throws Exception
     {
@@ -218,9 +245,6 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(status().isNotFound());
     }
 
-    /*************************************************
-     * Sad Path
-     *************************************************/
 
     @Test
     public void shouldNotUpdateEventOnInvalidRequest() throws Exception
@@ -257,7 +281,7 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldReturnBadRequestForInvalidStatusAndVisibility() throws Exception
     {
-        mockMvc.perform(post(eventUrl(1))
+        mockMvc.perform(post(eventUrl(1, null))
                 .header("Authorization", loginString)
                 .param("title", "Title")
                 .param("description", "Desc")
@@ -269,7 +293,7 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldReturnBadRequestForMalformedTime() throws Exception
     {
-        mockMvc.perform(post(eventUrl(1))
+        mockMvc.perform(post(eventUrl(1, null))
                 .header("Authorization", loginString)
                 .param("title", "Title")
                 .param("description", "Desc")
@@ -277,7 +301,7 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").isNotEmpty());
 
-        mockMvc.perform(post(eventUrl(1))
+        mockMvc.perform(post(eventUrl(1, null))
                 .header("Authorization", loginString)
                 .param("title", "Title")
                 .param("description", "Desc")
@@ -289,7 +313,7 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldReturnBadRequestWhenEndTimeBeforeStartTime() throws Exception
     {
-        mockMvc.perform(post(eventUrl(1))
+        mockMvc.perform(post(eventUrl(1, null))
                 .header("Authorization", loginString)
                 .param("title", "Title")
                 .param("description", "Desc")
@@ -298,6 +322,38 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").isNotEmpty());
     }
+
+    @Test
+    public void shouldNotCreateTicketSetIfNoEventFound() throws Exception
+    {
+        // Event with ID 345 doesn't exist
+        assertNull(em.find(Event.class, 345l));
+
+        long count = (long) em.createQuery("SELECT count(ts) FROM TicketSet ts").getSingleResult();
+
+        mockMvc.perform(post(ticketSetUrl(1, 345, null))
+                .header("Authorization", loginString))
+                .andExpect(status().isNotFound());
+
+        assertEquals(count, (long) em.createQuery("SELECT count(ts) FROM TicketSet ts").getSingleResult());
+    }
+
+    @Test
+    public void shouldNotCreateTicketSetAndReturnBadRequestIfInputIsInvalid() throws Exception
+    {
+        mockMvc.perform(post(ticketSetUrl(1, 123, null))
+                .header("Authorization", loginString)
+                .param("title", "Sample title")
+                .param("price", "-25.00"))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(post(ticketSetUrl(1, 123, null))
+                .header("Authorization", loginString)
+                .param("title", "")
+                .param("price", "25.00"))
+                .andExpect(status().isBadRequest());
+    }
+
 
     // todo should return forbidden for event that's does not belong to a user
 

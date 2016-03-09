@@ -82,9 +82,4 @@ public class EventRepository
             return null;
         }
     }
-
-    public Event update(Event event)
-    {
-        return em.merge(event);
-    }
 }

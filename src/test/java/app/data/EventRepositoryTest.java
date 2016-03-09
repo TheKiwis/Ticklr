@@ -48,7 +48,7 @@ public class EventRepositoryTest
         Event managedEvent = mock(Event.class);
         when(em.merge(inputEvent)).thenReturn(managedEvent);
 
-        assertEquals(managedEvent, eventRepository.update(inputEvent));
+        assertEquals(managedEvent, eventRepository.saveOrUpdate(inputEvent));
         verify(em, times(1)).merge(inputEvent);
     }
 

@@ -41,6 +41,7 @@ public class Basket
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     protected Date updated_time;
 
+    // todo cascade = should be PERSIST and MERGE (entitymanager.merge is used to update the basket)
     @OneToMany(mappedBy = "basket", fetch = FetchType.EAGER, cascade = CascadeType.PERSIST)
     protected Collection<BasketItem> basketItems = new ArrayList<>();
 

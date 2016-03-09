@@ -66,12 +66,13 @@ public class BasketController
     {
         User user = userRepository.findById(userId);
         if (user == null) {
-            return new ResponseEntity(null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
 
         TicketSet ticketSet = ticketSetRepository.findById(basketItemForm.getTicketSetId());
+
         if (ticketSet == null) {
-            return new ResponseEntity(null, HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
 
         HttpStatus status = HttpStatus.CREATED;
