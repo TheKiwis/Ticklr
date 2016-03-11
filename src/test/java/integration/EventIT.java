@@ -177,6 +177,23 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(jsonPath("$.visibility").value(sampleVisibility));
     }
 
+    @Test
+    public void shouldCancelEvent() throws Exception
+    {
+        mockMvc.perform(delete(eventUrl(1, 123)).header("Authorization", loginString))
+                .andExpect(status().isNoContent());
+
+        boolean canceled = (Boolean) em.createQuery("SELECT e.canceled FROM Event e WHERE e.id = :event_id").setParameter("event_id", 123l).getSingleResult();
+
+        assertTrue(canceled);
+    }
+
+    @Test
+    public void shouldNotCancelEventAndReturnNotFound() throws Exception
+    {
+        mockMvc.perform(delete(eventUrl(1, 234)).header("Authorization", loginString))
+                .andExpect(status().isNotFound());
+    }
 
     @Test
     public void shouldCreateNewTicketSet() throws Exception

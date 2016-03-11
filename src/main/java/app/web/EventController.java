@@ -126,8 +126,23 @@ public class EventController
         return new ResponseEntity(event, status);
     }
 
+    @RequestMapping(value = "/{eventId}", method = RequestMethod.DELETE)
+    public ResponseEntity cancelEvent(@PathVariable Long userId, @PathVariable Long eventId)
+    {
+        Event event = eventRepository.findByIdAndUserId(userId, eventId);
+
+        if (event == null)
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+
+        event.setCanceled(true);
+
+        eventRepository.saveOrUpdate(event);
+
+        return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
     @RequestMapping(value = "/{eventId}/ticket-sets", method = RequestMethod.POST)
-    public ResponseEntity addItem(@PathVariable Long userId, @PathVariable Long eventId, @Valid TicketSet ticketSet, BindingResult bindingResult)
+    public ResponseEntity addTicketSet(@PathVariable Long userId, @PathVariable Long eventId, @Valid TicketSet ticketSet, BindingResult bindingResult)
     {
         Event event = eventRepository.findByIdAndUserId(userId, eventId);
 

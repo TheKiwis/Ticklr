@@ -149,7 +149,7 @@ public class EventControllerTest
 
         when(eventRepository.findByIdAndUserId(userId, eventId)).thenReturn(mockEvent);
 
-        ResponseEntity response = controller.addItem(userId, eventId, ticketSet, bindingResult);
+        ResponseEntity response = controller.addTicketSet(userId, eventId, ticketSet, bindingResult);
 
         verify(mockEvent, times(1)).addTicketSet(ticketSet);
 
@@ -165,7 +165,7 @@ public class EventControllerTest
 
         when(eventRepository.findByIdAndUserId(userId, eventId)).thenReturn(null);
 
-        ResponseEntity response = controller.addItem(userId, eventId, ticketSet, bindingResult);
+        ResponseEntity response = controller.addTicketSet(userId, eventId, ticketSet, bindingResult);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
