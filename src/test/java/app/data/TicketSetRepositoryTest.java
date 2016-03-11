@@ -85,6 +85,9 @@ public class TicketSetRepositoryTest
     {
         TicketSet mockTicketSet = mock(TicketSet.class);
 
+        when(em.merge(mockTicketSet)).thenReturn(mockTicketSet);
+        when(mockTicketSet.getEvent()).thenReturn(mock(Event.class));
+
         ticketSetRepository.delete(mockTicketSet);
 
         verify(em, times(1)).remove(mockTicketSet);
