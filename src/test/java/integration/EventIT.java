@@ -55,6 +55,12 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Before
+    public void login() throws Exception
+    {
+        loginString = "Bearer " + new JwtAuthenticator(authSecret).generateToken("user@example.com").getKey();
+    }
+
+    @Before
     public void sampleInput() throws Exception
     {
         sampleEvent = em.find(Event.class, 123l);
@@ -66,13 +72,6 @@ public class EventIT extends CommonIntegrationTest
         sampleStartTime = sampleEvent.getStartTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         sampleEndTime = sampleEvent.getEndTime().format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         sampleCanceled = sampleEvent.isCanceled();
-
-        loginString = "Bearer " + login();
-    }
-
-    private String login() throws Exception
-    {
-        return new JwtAuthenticator(authSecret).generateToken("user@example.com").getKey();
     }
 
     /*************************************************
@@ -190,7 +189,8 @@ public class EventIT extends CommonIntegrationTest
                 .header("Authorization", loginString)
                 .param("title", "Early Bird")
                 .param("price", "25.00"))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", startsWith(ticketSetUrl(1, 123, null))));
 
         assertEquals(count+1, (long) em.createQuery(query).setParameter("event_id", 123l).getSingleResult());
     }
@@ -208,7 +208,17 @@ public class EventIT extends CommonIntegrationTest
         assertEquals(new TicketSet("Updated title", new BigDecimal(30)), ticketSet);
     }
 
-    // todo validation ticket-set title not empty, price not negative
+    @Test
+    public void shouldDeleteTicketSet() throws Exception
+    {
+        long count = (long) em.createQuery("SELECT count(ts) FROM TicketSet ts").getSingleResult();
+
+        mockMvc.perform(delete(ticketSetUrl(1, 123, 10))
+                .header("Authorization", loginString))
+                .andExpect(status().isOk());
+
+        assertEquals(count - 1, (long) em.createQuery("SELECT count(ts) FROM TicketSet ts").getSingleResult());
+    }
 
     /*************************************************
      * Sad Path
@@ -324,23 +334,35 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldNotCreateTicketSetIfNoEventFound() throws Exception
+    public void shouldNotCreateOrUpdateOrDeleteTicketSetIfNoEventFound() throws Exception
     {
         // Event with ID 345 doesn't exist
         assertNull(em.find(Event.class, 345l));
 
         long count = (long) em.createQuery("SELECT count(ts) FROM TicketSet ts").getSingleResult();
 
-        mockMvc.perform(post(ticketSetUrl(1, 345, null))
+        mockMvc.perform(post(ticketSetUrl(1, 234, null))
                 .header("Authorization", loginString))
                 .andExpect(status().isNotFound());
 
         assertEquals(count, (long) em.createQuery("SELECT count(ts) FROM TicketSet ts").getSingleResult());
+
+        assertNull(em.find(TicketSet.class, 30l));
+
+        mockMvc.perform(put(ticketSetUrl(1, 123, 30))
+                .header("Authorization", loginString))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(delete(ticketSetUrl(1, 123, 30))
+                .header("Authorization", loginString))
+                .andExpect(status().isNotFound());
     }
 
     @Test
-    public void shouldNotCreateTicketSetAndReturnBadRequestIfInputIsInvalid() throws Exception
+    public void shouldNotCreateOrUpdateTicketSetAndReturnBadRequestIfInputIsInvalid() throws Exception
     {
+        // todo consider moving validation test to another test
+
         mockMvc.perform(post(ticketSetUrl(1, 123, null))
                 .header("Authorization", loginString)
                 .param("title", "Sample title")
@@ -352,8 +374,26 @@ public class EventIT extends CommonIntegrationTest
                 .param("title", "")
                 .param("price", "25.00"))
                 .andExpect(status().isBadRequest());
-    }
 
+        // negative price
+        mockMvc.perform(put(ticketSetUrl(1, 123, 10))
+                .header("Authorization", loginString)
+                .param("title", "Sample title")
+                .param("price", "-25.00"))
+                .andExpect(status().isBadRequest());
+
+        // no title
+        mockMvc.perform(put(ticketSetUrl(1, 123, 10))
+                .header("Authorization", loginString)
+                .param("price", "25.00"))
+                .andExpect(status().isBadRequest());
+
+        // no price
+        mockMvc.perform(put(ticketSetUrl(1, 123, 10))
+                .header("Authorization", loginString)
+                .param("title", "A Title"))
+                .andExpect(status().isBadRequest());
+    }
 
     // todo should return forbidden for event that's does not belong to a user
 

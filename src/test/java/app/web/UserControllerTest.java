@@ -45,6 +45,29 @@ public class UserControllerTest
     }
 
     @Test
+    public void show_shouldReturnHttpOK() throws Exception
+    {
+        User mockUser = mock(User.class);
+
+        when(userRepository.findById(123l)).thenReturn(mockUser);
+
+        ResponseEntity response = controller.show(123l);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+        assertEquals(mockUser, response.getBody());
+    }
+
+    @Test
+    public void show_shouldReturnHttpNotFound() throws Exception
+    {
+        when(userRepository.findById(123l)).thenReturn(null);
+
+        ResponseEntity response = controller.show(123l);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
     public void processRegistration_ShouldRespondWith201HTTPStatus() throws Exception
     {
         // mock objects

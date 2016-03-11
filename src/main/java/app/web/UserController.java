@@ -5,6 +5,7 @@ import app.data.UserRepository;
 import app.web.forms.UserForm;
 import app.web.authentication.JwtAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.token.Token;
@@ -13,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.persistence.PersistenceException;
 import javax.validation.Valid;
+import java.net.URI;
 
 /**
  * Contains REST API Endpoints for following services:
@@ -41,6 +43,18 @@ public class UserController
         this.jwtAuthenticator = jwtAuthenticator;
     }
 
+    // todo only user authorization
+    @RequestMapping(value = "/{userId}", method = RequestMethod.GET)
+    public ResponseEntity show(@PathVariable long userId)
+    {
+        User user = repo.findById(userId);
+
+        if (user == null)
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+
+        return new ResponseEntity(user, HttpStatus.OK);
+    }
+
     /**
      * Register user
      * @param userForm contains registration information (e.g. email and password)
@@ -50,13 +64,16 @@ public class UserController
     @RequestMapping(method = RequestMethod.POST)
     public ResponseEntity processRegistration(@Valid UserForm userForm, BindingResult bindingResult)
     {
+        HttpHeaders headers = new HttpHeaders();
         HttpStatus status;
+
         if (!bindingResult.hasFieldErrors()) {
 
             status = HttpStatus.CREATED;
 
             try {
-                repo.save(userForm.getUser());
+                User user = repo.save(userForm.getUser());
+                headers.setLocation(URI.create("/users/" + user.getId()));
             } catch (PersistenceException e) {
                 status = HttpStatus.CONFLICT; // duplicated email found
             }
@@ -65,7 +82,7 @@ public class UserController
             status = HttpStatus.BAD_REQUEST;
         }
 
-        return new ResponseEntity(bindingResult.getFieldErrors(), status);
+        return new ResponseEntity(bindingResult.getFieldErrors(), headers, status);
     }
 
     /**

@@ -22,11 +22,11 @@ public class TicketSet
     protected Long id;
 
     @Column(name = "price")
-    @Min(0)
+    @NotNull @Min(0)
     protected BigDecimal price;
 
     @Column(name = "title")
-    @NotEmpty
+    @NotNull @NotEmpty
     protected String title;
 
     @ManyToOne

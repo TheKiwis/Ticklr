@@ -181,4 +181,28 @@ public class EventControllerTest
 
         assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
     }
+
+    @Test
+    public void deleteTicketSet_shouldReturnHttpStatusOk() throws Exception
+    {
+        TicketSet mockTicketSet = mock(TicketSet.class);
+
+        when(ticketSetRepository.findByIdAndUserIdAndEventId(ticketSetId, userId, eventId)).thenReturn(mockTicketSet);
+
+        ResponseEntity response = controller.deleteTicketSet(userId, eventId, ticketSetId);
+
+        verify(ticketSetRepository, atLeastOnce()).delete(mockTicketSet);
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    public void deleteTicketSet_shouldReturnHttpStatusNotFound() throws Exception
+    {
+        when(ticketSetRepository.findByIdAndUserIdAndEventId(ticketSetId, userId, eventId)).thenReturn(null);
+
+        ResponseEntity response = controller.deleteTicketSet(userId, eventId, ticketSetId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
 }

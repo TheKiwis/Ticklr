@@ -25,12 +25,12 @@ public class TicketSetRepositoryTest
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     EntityManager em;
 
-    private TicketSetRepository repository;
+    private TicketSetRepository ticketSetRepository;
 
     @Before
     public void setUp() throws Exception
     {
-        repository = new TicketSetRepository(em);
+        ticketSetRepository = new TicketSetRepository(em);
     }
 
     @Test
@@ -39,10 +39,10 @@ public class TicketSetRepositoryTest
         TicketSet mockTicketSet = mock(TicketSet.class);
 
         when(em.find(TicketSet.class, 123l)).thenReturn(mockTicketSet);
-        assertEquals(mockTicketSet, repository.findById(123l));
+        assertEquals(mockTicketSet, ticketSetRepository.findById(123l));
 
         when(em.find(TicketSet.class, 123l)).thenReturn(null);
-        assertNull(repository.findById(123l));
+        assertNull(ticketSetRepository.findById(123l));
     }
 
     @Test
@@ -54,10 +54,10 @@ public class TicketSetRepositoryTest
         when(mockQuery.setParameter(anyString(), any())).thenReturn(mockQuery);
 
         when(mockQuery.getSingleResult()).thenReturn(mockTicketSet);
-        assertEquals(mockTicketSet, repository.findByIdAndUserIdAndEventId(1l, 123l, 10l));
+        assertEquals(mockTicketSet, ticketSetRepository.findByIdAndUserIdAndEventId(1l, 123l, 10l));
 
         when(mockQuery.getSingleResult()).thenThrow(NoResultException.class);
-        assertNull(repository.findByIdAndUserIdAndEventId(1l, 123l, 10l));
+        assertNull(ticketSetRepository.findByIdAndUserIdAndEventId(1l, 123l, 10l));
     }
 
     @Test
@@ -65,18 +65,28 @@ public class TicketSetRepositoryTest
     {
         TicketSet mockTicketSet = mock(TicketSet.class);
         when(mockTicketSet.getId()).thenReturn(null);
-        assertEquals(mockTicketSet, repository.saveOrUpdate(mockTicketSet));
+        assertEquals(mockTicketSet, ticketSetRepository.saveOrUpdate(mockTicketSet));
         verify(em, times(1)).persist(mockTicketSet);
     }
 
     @Test
-    public void saveOrUpdate_ShouldUpdateExistingTicketSet() throws Exception
+    public void saveOrUpdate_shouldUpdateExistingTicketSet() throws Exception
     {
         TicketSet inputTicketSet = mock(TicketSet.class);
         TicketSet managedTicketSet = mock(TicketSet.class);
         when(em.merge(inputTicketSet)).thenReturn(managedTicketSet);
 
-        assertEquals(managedTicketSet, repository.saveOrUpdate(inputTicketSet));
+        assertEquals(managedTicketSet, ticketSetRepository.saveOrUpdate(inputTicketSet));
         verify(em, times(1)).merge(inputTicketSet);
+    }
+
+    @Test
+    public void testDelete() throws Exception
+    {
+        TicketSet mockTicketSet = mock(TicketSet.class);
+
+        ticketSetRepository.delete(mockTicketSet);
+
+        verify(em, times(1)).remove(mockTicketSet);
     }
 }

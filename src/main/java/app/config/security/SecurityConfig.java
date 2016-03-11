@@ -68,21 +68,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
         http.addFilterAfter(jwtAuthenticationFilter(), BasicAuthenticationFilter.class);
 
         http.authorizeRequests()
-                //.accessDecisionManager(accessDecisionManager())
-                .antMatchers("/users/*/events/**").authenticated();
+                .antMatchers(HttpMethod.GET, "/users/**").authenticated()
+                .antMatchers("/users/*/events/**", "/users/*/basket/**").authenticated();
     }
-
-    //@Bean
-    //public AccessDecisionManager accessDecisionManager()
-    //{
-    //    List<AccessDecisionVoter<? extends Object>> voters = new ArrayList<>();
-    //
-    //    voters.add(new WebExpressionVoter());
-    //
-    //    UnanimousBased unanimousBasedManager = new UnanimousBased(voters);
-    //
-    //    return unanimousBasedManager;
-    //}
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception

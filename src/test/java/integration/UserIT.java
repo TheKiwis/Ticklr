@@ -1,20 +1,60 @@
 package integration;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+
+import static org.hamcrest.CoreMatchers.startsWith;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import app.data.User;
+import app.web.authentication.JwtAuthenticator;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.test.web.servlet.MvcResult;
 
 import javax.persistence.Query;
 
 /**
  * @author ngnmhieu
  */
-public class UserManipulationIT extends CommonIntegrationTest
+public class UserIT extends CommonIntegrationTest
 {
+    @Value("${auth.secret}")
+    private String authSecret;
+
+    // authentication token
+    private String loginString;
+
+    @Before
+    public void login() throws Exception
+    {
+        loginString = "Bearer " + new JwtAuthenticator(authSecret).generateToken("user@example.com").getKey();
+    }
+
+    @Test
+    public void shouldReturnUserInformation() throws Exception
+    {
+        mockMvc.perform(get("/users/1")
+                .header("Authorization", loginString))
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.email").value("user@example.com"))
+                .andExpect(jsonPath("$.password").doesNotExist());
+    }
+
+    @Test
+
+    public void shouldReturnHttpNotFoundIfNoUserFound() throws Exception
+    {
+        assertNull(em.find(User.class, 123l));
+
+        mockMvc.perform(get("/users/123")
+                .header("Authorization", loginString))
+                .andExpect(status().isNotFound());
+    }
+
     @Test
     public void shouldSaveUser() throws Exception
     {
@@ -23,14 +63,14 @@ public class UserManipulationIT extends CommonIntegrationTest
         query = em.createQuery("SELECT COUNT(u) FROM User u");
         long count = (long) query.getSingleResult();
 
-        mockMvc.perform(
-                post("/users/")
-                        .accept("application/json")
-                        .param("email", "unique_email@gmail.com")
-                        .param("password", "123456789"));
+        mockMvc.perform(post("/users/")
+                .accept("application/json")
+                .param("email", "unique_email@gmail.com")
+                .param("password", "123456789"))
+                .andExpect(header().string("Location", startsWith("/users/")));
 
         query = em.createQuery("SELECT COUNT(u) FROM User u");
-        assertEquals((count+1), query.getSingleResult());
+        assertEquals((count + 1), query.getSingleResult());
     }
 
     @Test

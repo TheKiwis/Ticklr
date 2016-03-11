@@ -1,9 +1,10 @@
 package integration;
 
+import org.dbunit.dataset.IDataSet;
+import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.junit.Test;
 import org.springframework.http.MediaType;
 
-import static org.hamcrest.MatcherAssert.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -16,7 +17,7 @@ public class ConfigurationIT extends CommonIntegrationTest
     public void shouldServeResourceAsXML() throws Exception
     {
         mockMvc.perform(
-                get("/users/profile").accept(MediaType.APPLICATION_XML))
+                get("/test").accept(MediaType.APPLICATION_XML))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_XML));
     }
@@ -25,7 +26,7 @@ public class ConfigurationIT extends CommonIntegrationTest
     public void shouldServeResourceAsJSON() throws Exception
     {
         mockMvc.perform(
-                get("/users/profile").accept(MediaType.APPLICATION_JSON))
+                get("/test").accept(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
     }
@@ -34,10 +35,16 @@ public class ConfigurationIT extends CommonIntegrationTest
     public void testServeResourceAsJsonByDefault() throws Exception
     {
         mockMvc.perform(
-                get("/users/profile").accept(MediaType.ALL))
+                get("/test").accept(MediaType.ALL))
                 .andExpect(status().isOk())
                 .andExpect(content().contentTypeCompatibleWith(MediaType.APPLICATION_JSON));
     }
 
     // todo disable tomcat 4xx 5xx html page on production
+
+    @Override
+    protected IDataSet getDataSet() throws Exception
+    {
+        return new FlatXmlDataSetBuilder().build(getClass().getResourceAsStream("/fixtures/user_dataset.xml"));
+    }
 }

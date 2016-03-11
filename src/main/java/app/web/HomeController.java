@@ -10,14 +10,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class HomeController
 {
-    @RequestMapping("/admin")
-    public String homepage()
-    {
-        return "Default Homepage";
-    }
-
-    @RequestMapping("/users/profile")
-    public User test()
+    @RequestMapping("/test")
+    public User homepage()
     {
         return new User("email@example.com", "123456789");
     }

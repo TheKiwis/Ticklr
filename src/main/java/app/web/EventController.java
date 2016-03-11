@@ -141,7 +141,10 @@ public class EventController
 
         eventRepository.saveOrUpdate(event);
 
-        return new ResponseEntity(HttpStatus.CREATED);
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create("/users/" + userId + "/events/" + event.getId() + "/ticket-sets/" + ticketSet.getId()));
+
+        return new ResponseEntity(headers, HttpStatus.CREATED);
     }
 
     @RequestMapping(value = "/{eventId}/ticket-sets/{ticketSetId}", method = RequestMethod.PUT)
@@ -160,4 +163,19 @@ public class EventController
 
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
+
+    // todo deals with situation when basket items still reference this ticket set
+    @RequestMapping(value = "/{eventId}/ticket-sets/{ticketSetId}", method = RequestMethod.DELETE)
+    public ResponseEntity deleteTicketSet(@PathVariable long userId, @PathVariable long eventId, @PathVariable long ticketSetId)
+    {
+        TicketSet ticketSet = ticketSetRepository.findByIdAndUserIdAndEventId(ticketSetId, userId, eventId);
+
+        if (ticketSet == null)
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+
+        ticketSetRepository.delete(ticketSet);
+
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
 }

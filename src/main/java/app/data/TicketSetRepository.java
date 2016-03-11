@@ -3,10 +3,10 @@ package app.data;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.Entity;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.Query;
 
 /**
  * @author ngnmhieu
@@ -70,5 +70,19 @@ public class TicketSetRepository
         em.flush();
 
         return ticketSet;
+    }
+
+    /**
+     * Remove ticket set
+     * @param ticketSet
+     */
+    public void delete(TicketSet ticketSet)
+    {
+        // make this entity managed if needed
+        ticketSet = em.contains(ticketSet) ? ticketSet : em.merge(ticketSet);
+
+        ticketSet.getEvent().removeTicketSet(ticketSet);
+
+        em.remove(ticketSet);
     }
 }

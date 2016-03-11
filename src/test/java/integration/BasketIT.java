@@ -1,8 +1,11 @@
 package integration;
 
+import app.web.authentication.JwtAuthenticator;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.junit.Before;
 import org.junit.Test;
+import org.springframework.beans.factory.annotation.Value;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -13,20 +16,32 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 public class BasketIT extends CommonIntegrationTest
 {
+    @Value("${auth.secret}")
+    private String authSecret;
+
+    // authentication token
+    private String loginString;
+
+    @Before
+    public void login() throws Exception
+    {
+        loginString = "Bearer " + new JwtAuthenticator(authSecret).generateToken("user@example.com").getKey();
+    }
+
     @Test
     public void shouldReturnBasket() throws Exception
     {
-        mockMvc.perform(get("/users/123/basket"))
+        mockMvc.perform(get("/users/123/basket").header("Authorization", loginString))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.basketItems").isArray());
-
     }
 
     @Test
     public void shouldAddItemToBasket() throws Exception
     {
         mockMvc.perform(post("/users/124/basket/items")
+                .header("Authorization", loginString)
                 .param("quantity", "10")
                 .param("ticketSetId", "1"))
                 .andExpect(status().isCreated());

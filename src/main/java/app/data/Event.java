@@ -222,7 +222,8 @@ public class Event
      */
     public Collection<TicketSet> getTicketSets()
     {
-        return Collections.unmodifiableCollection(ticketSets);
+        //return Collections.unmodifiableCollection(ticketSets);
+        return ticketSets;
     }
 
     /**
@@ -232,6 +233,14 @@ public class Event
     {
         ticketSets.add(ticketSet);
         ticketSet.setEvent(this);
+    }
+
+    /**
+     * @param ticketSet to be removed
+     */
+    public void removeTicketSet(TicketSet ticketSet)
+    {
+        ticketSets.remove(ticketSet);
     }
 
     /**
