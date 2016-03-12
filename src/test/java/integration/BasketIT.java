@@ -47,6 +47,53 @@ public class BasketIT extends CommonIntegrationTest
                 .andExpect(status().isCreated());
     }
 
+    @Test
+    public void shouldIncrementBasketItemIfBasketItemWithTheSameTicketSetID() throws Exception
+    {
+        int quantity = (Integer) em.createQuery("SELECT i.quantity FROM BasketItem i WHERE i.id= :id").setParameter("id", 1l).getSingleResult();
+        long count = (Long) em.createQuery("SELECT count(i) FROM BasketItem i").getSingleResult();
+        mockMvc.perform(post("/users/123/basket/items")
+                .header("Authorization", loginString)
+                .param("quantity", "2")
+                .param("ticketSetId", "2"))
+                .andExpect(status().isCreated());
+
+        assertEquals(quantity + 2, em.createQuery("SELECT i.quantity FROM BasketItem i WHERE i.id= :id").setParameter("id", 1l).getSingleResult());
+        assertEquals(count, (long) em.createQuery("SELECT count(i) FROM BasketItem i").getSingleResult());
+    }
+
+    @Test
+    public void shouldValidateBasketItemForm() throws Exception
+    {
+
+        mockMvc.perform(post("/users/123/basket/items")
+                .header("Authorization", loginString)
+                .param("quantity", "-2"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(post("/users/123/basket/items")
+                .header("Authorization", loginString)
+                .param("quantity", "-2")
+                .param("ticketSetId", "13"))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(post("/users/123/basket/items")
+                .header("Authorization", loginString)
+                .param("ticketSetId", "12"))
+                .andExpect(status().isBadRequest());
+
+    }
+
+    @Test
+    public void shouldDeleteItem() throws Exception
+    {
+        assertEquals(1, (long) em.createQuery("SELECT COUNT(i) FROM BasketItem i WHERE i.id = :id").setParameter("id", 1l).getSingleResult());
+
+        mockMvc.perform(delete("/users/123/basket/items/1")
+                .header("Authorization", loginString))
+                .andExpect(status().isOk());
+
+        assertEquals(0, (long) em.createQuery("select count(i) from BasketItem i where i.id = :id").setParameter("id", 1l).getSingleResult());
+    }
+
     /*******************
      * Fixture
      *******************/

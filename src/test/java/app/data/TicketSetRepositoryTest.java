@@ -81,7 +81,7 @@ public class TicketSetRepositoryTest
     }
 
     @Test
-    public void testDelete() throws Exception
+    public void delete_shouldDeleteTicketSet() throws Exception
     {
         TicketSet mockTicketSet = mock(TicketSet.class);
 

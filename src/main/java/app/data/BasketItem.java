@@ -21,7 +21,7 @@ public class BasketItem
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String id;
+    private Long id;
 
     @ManyToOne
     @JoinColumn(name = "basket_id", nullable = false)
@@ -64,7 +64,7 @@ public class BasketItem
     /**
      * @return BasketItem's ID
      */
-    public String getId()
+    public Long getId()
     {
         return id;
     }
@@ -154,22 +154,13 @@ public class BasketItem
 
         BasketItem that = (BasketItem) o;
 
-        if (basket != null ? !basket.equals(that.basket) : that.basket != null) return false;
-        if (quantity != null ? !quantity.equals(that.quantity) : that.quantity != null) return false;
-        if (unitPrice != null ? !unitPrice.equals(that.unitPrice) : that.unitPrice != null) return false;
-        if (createdTime != null ? !createdTime.equals(that.createdTime) : that.createdTime != null) return false;
-        return updatedTime != null ? updatedTime.equals(that.updatedTime) : that.updatedTime == null;
+        return id != null ? id.equals(that.id) : that.id == null;
 
     }
 
     @Override
     public int hashCode()
     {
-        int result = basket != null ? basket.hashCode() : 0;
-        result = 31 * result + (quantity != null ? quantity.hashCode() : 0);
-        result = 31 * result + (unitPrice != null ? unitPrice.hashCode() : 0);
-        result = 31 * result + (createdTime != null ? createdTime.hashCode() : 0);
-        result = 31 * result + (updatedTime != null ? updatedTime.hashCode() : 0);
-        return result;
+        return id != null ? id.hashCode() : 0;
     }
 }

@@ -92,4 +92,12 @@ public class Basket
         basketItems.add(item);
         item.basket = this;
     }
+
+    /**
+     * @param item to be removed from the basket
+     */
+    public void removeItem(BasketItem item)
+    {
+        basketItems.remove(item);
+    }
 }

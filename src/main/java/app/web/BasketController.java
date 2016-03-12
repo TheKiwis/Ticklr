@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
+import javax.validation.Valid;
+
 /**
  * Created by DucNguyenMinh on 08.03.16.
  */
@@ -59,11 +61,13 @@ public class BasketController
 
 
     // todo validation
-    // todo do not create new item if there's already an item with the same ticket_set_id in basket
-    // todo use saveOrUpdate to save/update basket (persist is only for new entity) more info read: https://dzone.com/articles/saving_detatched_entities
     @RequestMapping(value = "/items", method = RequestMethod.POST)
-    public ResponseEntity addItem(@PathVariable Long userId, BasketItemForm basketItemForm, BindingResult bindingResult)
+    public ResponseEntity addItem(@PathVariable Long userId, @Valid BasketItemForm basketItemForm, BindingResult bindingResult)
     {
+        if(bindingResult.hasFieldErrors()){
+            return new ResponseEntity(bindingResult.getFieldErrors(), HttpStatus.BAD_REQUEST );
+        }
+
         User user = userRepository.findById(userId);
         if (user == null) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
@@ -79,16 +83,41 @@ public class BasketController
 
         Basket basket = basketRepository.findByUserId(userId);
 
-        BasketItem item = new BasketItem(basket, ticketSet, basketItemForm.getQuantity(), ticketSet.getPrice());
-
         if (basket == null) { // if basket doesn't existed yet, then create new one
             basket = new Basket(user);
         }
 
-        basket.addItem(item);
+        BasketItem item = basketRepository.findItemByBasketIdAndTicketSetId(basket.getId(), basketItemForm.getTicketSetId());
 
-        basketRepository.saveOrUpdate(basket);
+        if (item != null) {
 
-        return new ResponseEntity(null, status);
+            item.setQuantity(item.getQuantity() + basketItemForm.getQuantity());
+
+            basketRepository.updateItem(item);
+        } else {
+
+            item = new BasketItem(basket, ticketSet, basketItemForm.getQuantity(), ticketSet.getPrice());
+
+            basket.addItem(item);
+
+            basketRepository.saveOrUpdate(basket);
+        }
+
+        return new ResponseEntity(status);
+    }
+
+    @RequestMapping(value = "/items/{itemId}", method = RequestMethod.DELETE)
+    public ResponseEntity deleteItem(@PathVariable Long userId, @PathVariable long itemId)
+    {
+        Basket basket = basketRepository.findByUserId(userId);
+
+        BasketItem item = basketRepository.findItemById(itemId);
+
+        if (item == null || basket == null || !basket.getBasketItems().contains(item))
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+
+        basketRepository.deleteItem(item);
+
+        return new ResponseEntity(HttpStatus.OK);
     }
 }

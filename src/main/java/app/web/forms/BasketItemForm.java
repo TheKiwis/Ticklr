@@ -3,6 +3,9 @@ package app.web.forms;
 import app.data.Basket;
 import app.data.BasketItem;
 
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+
 /**
  * Created by DucNguyenMinh on 09.03.16.
  */
@@ -10,8 +13,11 @@ public class BasketItemForm
 {
     // todo validation
 
+    @NotNull
+    @Min(1)
     private Integer quantity;
 
+    @NotNull
     private Long ticketSetId;
 
     public BasketItemForm(Integer quantity, Long ticketSetId)

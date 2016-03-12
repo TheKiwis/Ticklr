@@ -1,9 +1,11 @@
 package app.data;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.security.access.method.P;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
@@ -22,6 +24,14 @@ public class BasketRepositoryTest
     @Mock
     EntityManager em;
 
+    BasketRepository basketRepository;
+
+    @Before
+    public void setUp() throws Exception
+    {
+        basketRepository = new BasketRepository(em);
+    }
+
     @Test
     public void findByUserId_shouldReturnBasket() throws Exception
     {
@@ -31,7 +41,6 @@ public class BasketRepositoryTest
         when(query.setParameter(anyString(), any())).thenReturn(query);
         when(query.getSingleResult()).thenReturn(mockBasket);
 
-        BasketRepository basketRepository = new BasketRepository(em);
 
         assertEquals(mockBasket, basketRepository.findByUserId(123l));
     }
@@ -45,7 +54,6 @@ public class BasketRepositoryTest
         when(query.setParameter(anyString(), any())).thenReturn(query);
         when(query.getSingleResult()).thenThrow(NoResultException.class);
 
-        BasketRepository basketRepository = new BasketRepository(em);
 
         assertNull(basketRepository.findByUserId(123l));
     }
@@ -54,7 +62,6 @@ public class BasketRepositoryTest
     public void save_shouldReturnTheSameBasket()
     {
 
-        BasketRepository basketRepository = new BasketRepository(em);
         Basket mockBasket = mock(Basket.class);
 
         basketRepository.save(mockBasket);
@@ -66,7 +73,6 @@ public class BasketRepositoryTest
     public void saveOrUpdate_shouldReturnTheSameBasket()
     {
 
-        BasketRepository basketRepository = new BasketRepository(em);
         Basket mockBasket = mock(Basket.class);
 
         basketRepository.saveOrUpdate(mockBasket);
@@ -81,6 +87,30 @@ public class BasketRepositoryTest
 
         verify(em, atLeastOnce()).persist(mockBasket);
 
+    }
+
+    @Test
+    public void updateItem_shouldUpdateItemIfExist() throws Exception
+    {
+        BasketItem item = mock(BasketItem.class);
+        when(item.getId()).thenReturn(123l);
+
+        basketRepository.updateItem(item);
+
+        verify(em, times(1)).merge(item);
+    }
+
+    @Test
+    public void deleteItem_shouldRemoveItem()
+    {
+        BasketItem mockBasketItem = mock(BasketItem.class);
+
+        when(em.merge(mockBasketItem)).thenReturn(mockBasketItem);
+        when(mockBasketItem.getBasket()).thenReturn(mock(Basket.class));
+
+        basketRepository.deleteItem(mockBasketItem);
+
+        verify(em, times(1)).remove(mockBasketItem);
     }
 
 }

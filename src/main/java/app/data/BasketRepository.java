@@ -55,8 +55,13 @@ public class BasketRepository
         return basket;
     }
 
-    public Basket saveOrUpdate(Basket basket){
-
+    /**
+     * todo
+     * @param basket
+     * @return
+     */
+    public Basket saveOrUpdate(Basket basket)
+    {
         if (basket.getId() == null) {
             em.persist(basket);
         } else {
@@ -66,5 +71,61 @@ public class BasketRepository
         em.flush();
 
         return basket;
+    }
+
+    /**
+     * Find item associated with the given ticket-set in the given basket
+     * @param basketId
+     * @param ticketSetId
+     * @return null if nothing found
+     */
+    public BasketItem findItemByBasketIdAndTicketSetId(Long basketId, Long ticketSetId)
+    {
+        Query query = em.createQuery("select i from BasketItem i where i.basket.id = :basketId and i.ticketSet.id = :ticketSetId")
+                .setParameter("ticketSetId", ticketSetId)
+                .setParameter("basketId", basketId);
+
+        try {
+            return (BasketItem) query.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
+    }
+
+    /**
+     * @param item != null
+     */
+    public BasketItem updateItem(BasketItem item)
+    {
+        return em.merge(item);
+    }
+
+    /**
+     * @param item the basket item to be deleted
+     */
+    public void deleteItem(BasketItem item)
+    {
+        // make this entity managed if needed
+        item = em.contains(item) ? item : em.merge(item);
+
+        item.getBasket().removeItem(item);
+
+        em.remove(item);
+    }
+
+    /**
+     * @param itemId
+     * @return the basket item with the given itemId
+     */
+    public BasketItem findItemById(long itemId)
+    {
+        Query query = em.createQuery("SELECT i FROM BasketItem i WHERE i.id = :itemId")
+                .setParameter("itemId", itemId);
+
+        try {
+            return (BasketItem) query.getSingleResult();
+        } catch (NoResultException e) {
+            return null;
+        }
     }
 }
