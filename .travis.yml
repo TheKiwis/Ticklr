@@ -1,8 +1,20 @@
+# main build script
+script: mvn -Dtravis_ci=true verify
+
 language: java
 jdk:
     - oraclejdk8
+
+# build notification list
 notifications:
   email:
     recipients:
       - m.duc.nguyen.93@gmail.com
       - ngnmhieu@gmail.com 
+
+services:
+  - mysql
+
+# create database before running build script
+before_script:
+    - mysql -e 'create database ticklr_test;' -u root

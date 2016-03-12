@@ -5,10 +5,15 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.ticklr</groupId>
-    <artifactId>backend</artifactId>
+    <artifactId>web-application</artifactId>
+    <packaging>war</packaging>
+    <name>Ticklr Web Application</name>
     <version>1.0-SNAPSHOT</version>
+
+
     <build>
         <plugins>
+            <!-- compiling -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-compiler-plugin</artifactId>
@@ -16,12 +21,38 @@
                     <source>1.8</source>
                     <target>1.8</target>
                 </configuration>
+                <version>3.5.1</version>
             </plugin>
+
+            <!-- packaging web app-->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <configuration>
+                    <webXml>web/WEB-INF/web.xml</webXml>
+                </configuration>
+                <version>2.6</version>
+            </plugin>
+
+            <!-- integration test -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-failsafe-plugin</artifactId>
+                <version>2.19.1</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>integration-test</goal>
+                            <goal>verify</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+
         </plugins>
     </build>
 
     <dependencies>
-
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
@@ -86,6 +117,11 @@
             <groupId>javax.servlet</groupId>
             <artifactId>javax.servlet-api</artifactId>
             <version>3.1.0</version>
+        </dependency>
+        <dependency>
+            <groupId>javax.el</groupId>
+            <artifactId>javax.el-api</artifactId>
+            <version>3.0.0</version>
         </dependency>
         <dependency>
             <groupId>io.jsonwebtoken</groupId>
@@ -170,19 +206,6 @@
             <version>3.2.1.1</version>
             <scope>test</scope>
         </dependency>
-        <!-- end Database -->
-
-        <dependency>
-            <groupId>javax.el</groupId>
-            <artifactId>javax.el-api</artifactId>
-            <version>3.0.0</version>
-        </dependency>
-        <dependency>
-            <groupId>org.flywaydb</groupId>
-            <artifactId>flyway-core</artifactId>
-            <version>3.2.1</version>
-            <scope>test</scope>
-        </dependency>
         <dependency>
             <groupId>commons-dbcp</groupId>
             <artifactId>commons-dbcp</artifactId>
@@ -193,6 +216,12 @@
             <artifactId>flyway-core</artifactId>
             <version>3.2.1</version>
         </dependency>
+        <!-- end Database -->
+
     </dependencies>
 
+    <properties>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+    </properties>
 </project>
