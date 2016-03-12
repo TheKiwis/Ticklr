@@ -175,7 +175,10 @@ public class EventControllerTest
     {
         TicketSet ticketSet = new TicketSet("Updated Title", new BigDecimal(30.00));
 
-        when(ticketSetRepository.findByIdAndUserIdAndEventId(ticketSetId, userId, eventId)).thenReturn(mock(TicketSet.class));
+        TicketSet foundTicketSet = mock(TicketSet.class, RETURNS_DEEP_STUBS);
+        when(ticketSetRepository.findById(ticketSetId)).thenReturn(foundTicketSet);
+        when(foundTicketSet.getEvent().getId()).thenReturn(eventId);
+        when(foundTicketSet.getEvent().getUser().getId()).thenReturn(userId);
 
         ResponseEntity response = controller.updateTicketSet(userId, eventId, ticketSetId, ticketSet, bindingResult);
 
@@ -185,13 +188,14 @@ public class EventControllerTest
     @Test
     public void deleteTicketSet_shouldReturnHttpStatusOk() throws Exception
     {
-        TicketSet mockTicketSet = mock(TicketSet.class);
-
-        when(ticketSetRepository.findByIdAndUserIdAndEventId(ticketSetId, userId, eventId)).thenReturn(mockTicketSet);
+        TicketSet foundTicketSet = mock(TicketSet.class, RETURNS_DEEP_STUBS);
+        when(ticketSetRepository.findById(ticketSetId)).thenReturn(foundTicketSet);
+        when(foundTicketSet.getEvent().getId()).thenReturn(eventId);
+        when(foundTicketSet.getEvent().getUser().getId()).thenReturn(userId);
 
         ResponseEntity response = controller.deleteTicketSet(userId, eventId, ticketSetId);
 
-        verify(ticketSetRepository, atLeastOnce()).delete(mockTicketSet);
+        verify(ticketSetRepository, atLeastOnce()).delete(foundTicketSet);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
     }
@@ -199,7 +203,7 @@ public class EventControllerTest
     @Test
     public void deleteTicketSet_shouldReturnHttpStatusNotFound() throws Exception
     {
-        when(ticketSetRepository.findByIdAndUserIdAndEventId(ticketSetId, userId, eventId)).thenReturn(null);
+        when(ticketSetRepository.findById(ticketSetId)).thenReturn(null);
 
         ResponseEntity response = controller.deleteTicketSet(userId, eventId, ticketSetId);
 

@@ -30,7 +30,7 @@ public class TestEnvironment
      */
     @Bean
     @Autowired
-    public DataSource dataSource(PlaceholderConfigurerSupport propertyPlaceholderConfigurer)
+    public DataSource dataSource()
     {
         return System.getProperty("travis_ci") == null ? localDataSource() : travisCIDataSource();
     }

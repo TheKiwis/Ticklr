@@ -37,25 +37,6 @@ public class TicketSetRepository
     }
 
     /**
-     * @param ticketSetId
-     * @param userId
-     * @param eventId
-     * @return
-     */
-    public TicketSet findByIdAndUserIdAndEventId(long ticketSetId, long userId, long eventId)
-    {
-        try {
-            return (TicketSet) em.createQuery("SELECT ts FROM TicketSet ts WHERE ts.id = :ticketSetId AND ts.event.id = :eventId AND ts.event.user.id = :userId")
-                    .setParameter("ticketSetId", ticketSetId)
-                    .setParameter("eventId", eventId)
-                    .setParameter("userId", userId)
-                    .getSingleResult();
-        } catch (NoResultException e) {
-            return null;
-        }
-    }
-
-    /**
      * @param ticketSet to be saved
      * @return
      */

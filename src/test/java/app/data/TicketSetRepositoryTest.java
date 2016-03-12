@@ -46,21 +46,6 @@ public class TicketSetRepositoryTest
     }
 
     @Test
-    public void findByIdAndUserIdAndEventId_shouldReturnTicketSetOrNull()
-    {
-        TicketSet mockTicketSet = mock(TicketSet.class);
-        Query mockQuery = mock(Query.class);
-        when(em.createQuery(anyString())).thenReturn(mockQuery);
-        when(mockQuery.setParameter(anyString(), any())).thenReturn(mockQuery);
-
-        when(mockQuery.getSingleResult()).thenReturn(mockTicketSet);
-        assertEquals(mockTicketSet, ticketSetRepository.findByIdAndUserIdAndEventId(1l, 123l, 10l));
-
-        when(mockQuery.getSingleResult()).thenThrow(NoResultException.class);
-        assertNull(ticketSetRepository.findByIdAndUserIdAndEventId(1l, 123l, 10l));
-    }
-
-    @Test
     public void saveOrUpdate_ShouldCreateNewTicketSet() throws Exception
     {
         TicketSet mockTicketSet = mock(TicketSet.class);

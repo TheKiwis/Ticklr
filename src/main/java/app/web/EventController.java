@@ -166,9 +166,9 @@ public class EventController
     public ResponseEntity updateTicketSet(@PathVariable long userId, @PathVariable long eventId,
                                           @PathVariable long ticketSetId, @Valid TicketSet updatedTicketSet, BindingResult bindingResult)
     {
-        TicketSet ticketSet = ticketSetRepository.findByIdAndUserIdAndEventId(ticketSetId, userId, eventId);
+        TicketSet ticketSet = ticketSetRepository.findById(ticketSetId);
 
-        if (ticketSet == null)
+        if (ticketSet == null || !ticketSet.getEvent().getId().equals(eventId) || !ticketSet.getEvent().getUser().getId().equals(userId))
             return new ResponseEntity(HttpStatus.NOT_FOUND);
 
         if (bindingResult.hasFieldErrors())
@@ -183,7 +183,10 @@ public class EventController
     @RequestMapping(value = "/{eventId}/ticket-sets/{ticketSetId}", method = RequestMethod.DELETE)
     public ResponseEntity deleteTicketSet(@PathVariable long userId, @PathVariable long eventId, @PathVariable long ticketSetId)
     {
-        TicketSet ticketSet = ticketSetRepository.findByIdAndUserIdAndEventId(ticketSetId, userId, eventId);
+        TicketSet ticketSet = ticketSetRepository.findById(ticketSetId);
+
+        if (ticketSet == null || !ticketSet.getEvent().getId().equals(eventId) || !ticketSet.getEvent().getUser().getId().equals(userId))
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
 
         if (ticketSet == null)
             return new ResponseEntity(HttpStatus.NOT_FOUND);
