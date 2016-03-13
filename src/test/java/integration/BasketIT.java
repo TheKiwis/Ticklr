@@ -23,10 +23,21 @@ public class BasketIT extends CommonIntegrationTest
     // authentication token
     private String loginString;
 
+    private String basketUrl(Long userId)
+    {
+        return "/users/" + userId + "/basket/";
+    }
+
+    private String basketItemUrl(Long userId, Long basketItemId)
+    {
+        return "/users/" + userId + "/basket/items/" +( basketItemId == null? "" : basketItemId);
+
+    }
+
     @Before
     public void login() throws Exception
     {
-        loginString = "Bearer " + new JwtAuthenticator(authSecret).generateToken("user@example.com").getKey();
+        loginString = "Bearer " + new JwtAuthenticator(authSecret).generateToken("user_with_basket@example.com").getKey();
     }
 
     @Test
@@ -41,6 +52,8 @@ public class BasketIT extends CommonIntegrationTest
     @Test
     public void shouldAddItemToBasket() throws Exception
     {
+        String loginString = "Bearer " + new JwtAuthenticator(authSecret).generateToken("user_without_basket@example.com").getKey();
+
         mockMvc.perform(post("/users/124/basket/items")
                 .header("Authorization", loginString)
                 .param("quantity", "10")
@@ -121,6 +134,29 @@ public class BasketIT extends CommonIntegrationTest
                 .header("Authorization", loginString)
                 .param("ticketSetId", "13"))
                 .andExpect(status().isBadRequest());
+    }
+
+    @Test
+    public void shouldReturnForbiddenAccessWhileAccessingBasketOfOtherUser() throws Exception
+    {
+        Long anotherUserId = 124l;
+        Long anotherBasketItemId = 456l;
+
+        mockMvc.perform(get(basketUrl(anotherUserId))
+                .header("Authorization", loginString))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(post(basketItemUrl(anotherUserId, null))
+                .header("Authorization", loginString))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(put(basketItemUrl(anotherUserId, anotherBasketItemId))
+                .header("Authorization", loginString))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(delete(basketItemUrl(anotherUserId, anotherBasketItemId))
+                .header("Authorization", loginString))
+                .andExpect(status().isForbidden());
     }
 
     /*******************

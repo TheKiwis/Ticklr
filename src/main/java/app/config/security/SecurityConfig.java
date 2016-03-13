@@ -70,6 +70,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
         http.authorizeRequests()
                 .antMatchers(HttpMethod.GET, "/users/**").authenticated()
                 .antMatchers("/users/*/events/**", "/users/*/basket/**").authenticated();
+
     }
 
     @Bean

@@ -1,6 +1,7 @@
 package app.web;
 
 import app.data.*;
+import app.web.authorization.UserAuthorizer;
 import app.web.forms.BasketItemForm;
 import app.web.forms.BasketItemUpdateForm;
 import org.junit.Before;
@@ -35,6 +36,9 @@ public class BasketControllerTest
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private TicketSetRepository ticketSetRepository;
 
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private UserAuthorizer userAuthorizer;
+
     BasketController basketController;
 
     @Mock
@@ -55,9 +59,11 @@ public class BasketControllerTest
     @Before
     public void setUp() throws Exception
     {
-        basketController = new BasketController(basketRepository, userRepository, ticketSetRepository);
+        basketController = new BasketController(basketRepository, userRepository, ticketSetRepository, userAuthorizer);
 
         when(mockBasket.getId()).thenReturn(basketId);
+
+        when(userAuthorizer.authorize(any())).thenReturn(true);
     }
 
     @Test
