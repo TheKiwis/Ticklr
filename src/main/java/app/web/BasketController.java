@@ -143,6 +143,9 @@ public class BasketController
     {
 
         User user = userRepository.findById(userId);
+        if(user == null)
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+
         if( !userAuthorizer.authorize(user)) return new ResponseEntity(HttpStatus.FORBIDDEN);
 
         if(bindingResult.hasFieldErrors()){
