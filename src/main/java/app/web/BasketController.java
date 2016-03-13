@@ -2,6 +2,7 @@ package app.web;
 
 import app.data.*;
 import app.web.forms.BasketItemForm;
+import app.web.forms.BasketItemUpdateForm;
 import javafx.geometry.Pos;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -60,7 +61,6 @@ public class BasketController
     }
 
 
-    // todo validation
     @RequestMapping(value = "/items", method = RequestMethod.POST)
     public ResponseEntity addItem(@PathVariable Long userId, @Valid BasketItemForm basketItemForm, BindingResult bindingResult)
     {
@@ -117,6 +117,31 @@ public class BasketController
             return new ResponseEntity(HttpStatus.NOT_FOUND);
 
         basketRepository.deleteItem(item);
+
+        return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @RequestMapping(value = "/items/{itemId}", method = RequestMethod.PUT)
+    public ResponseEntity updateItem(@ PathVariable Long userId, @PathVariable Long itemId, BasketItemUpdateForm basketItemUpdateForm, BindingResult bindingResult)
+    {
+
+        if(bindingResult.hasFieldErrors()){
+            return new ResponseEntity(bindingResult.getFieldErrors(), HttpStatus.BAD_REQUEST);
+        }
+
+        User user = userRepository.findById(userId);
+
+        Basket basket = basketRepository.findByUserId(userId);
+
+        BasketItem basketItem = basketRepository.findItemById(itemId);
+
+        if (user == null ||basket == null || basketItem == null ) {
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
+        }
+
+        basketItem.setQuantity(basketItemUpdateForm.getQuantity());
+
+        basketRepository.updateItem(basketItem);
 
         return new ResponseEntity(HttpStatus.OK);
     }

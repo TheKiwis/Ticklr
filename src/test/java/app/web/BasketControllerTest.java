@@ -2,11 +2,13 @@ package app.web;
 
 import app.data.*;
 import app.web.forms.BasketItemForm;
+import app.web.forms.BasketItemUpdateForm;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
+import org.mockito.internal.matchers.Null;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -46,6 +48,7 @@ public class BasketControllerTest
 
     BasketItemForm basketItemForm = new BasketItemForm(10, ticketSetId);
 
+    BasketItemUpdateForm basketItemUpdateForm = new BasketItemUpdateForm(30);
     @Mock
     BindingResult bindingResult;
 
@@ -221,5 +224,48 @@ public class BasketControllerTest
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
+
+    @Test
+    public void updateItem_shouldUpdateItem() throws Exception
+    {
+
+        BasketItem mockItem = mock(BasketItem.class);
+
+        when(userRepository.findById(userId)).thenReturn(mock(User.class));
+        when(basketRepository.findItemById(itemId)).thenReturn(mockItem);
+
+        ResponseEntity response = basketController.updateItem(userId, itemId, basketItemUpdateForm, bindingResult);
+
+        verify(basketRepository, times(1)).updateItem(any());
+
+        assertEquals(HttpStatus.OK, response.getStatusCode());
+    }
+
+    @Test
+    public void updateItem_shouldReturnNotFoundIfUserNotExist()
+    {
+
+        when(userRepository.findById(userId)).thenReturn(null);
+
+        ResponseEntity response = basketController.updateItem(userId, itemId, basketItemUpdateForm, bindingResult);
+
+        verify(basketRepository, never()).updateItem(any());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+
+    @Test
+    public void updateItem_shouldReturnNotFoundIfBasketItemNotFound()
+    {
+
+        when(userRepository.findById(userId)).thenReturn(mock(User.class));
+        when(basketRepository.findItemById(anyLong())).thenReturn(null);
+
+        ResponseEntity response = basketController.updateItem(userId, itemId, basketItemUpdateForm, bindingResult);
+
+        verify(basketRepository, never()).updateItem(any());
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
 }
 

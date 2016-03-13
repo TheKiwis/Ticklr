@@ -3,11 +3,13 @@ package app.data;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.*;
+import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -21,17 +23,13 @@ import java.util.Date;
 @Table(name = "events")
 public class Event
 {
-    /* todo: validation
-     *     - title should not be empty
-     *     - start_time should not be in the past
-     */
-
     @Id
     @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     protected Long id;
 
     @Column(name = "title")
+    @NotNull @NotEmpty
     protected String title;
 
     @Column(name = "description")

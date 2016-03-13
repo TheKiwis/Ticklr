@@ -5,6 +5,7 @@ import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.internal.exceptions.ExceptionIncludingMockitoWarnings;
 import org.springframework.beans.factory.annotation.Value;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -92,6 +93,34 @@ public class BasketIT extends CommonIntegrationTest
                 .andExpect(status().isOk());
 
         assertEquals(0, (long) em.createQuery("select count(i) from BasketItem i where i.id = :id").setParameter("id", 1l).getSingleResult());
+    }
+
+    @Test
+    public void shouldUpdateItem() throws Exception
+    {
+        assertEquals(1,  (long) em.createQuery("SELECT COUNT(i) FROM BasketItem i WHERE i.id = :id").setParameter("id", 1l).getSingleResult());
+
+
+        mockMvc.perform(put("/users/123/basket/items/1")
+                .header("Authorization", loginString)
+                .param("quantity", "15"))
+                .andExpect(status().isOk());
+
+        assertEquals(1, (long) em.createQuery("select count(i) from BasketItem i where i.id = :id").setParameter("id", 1l).getSingleResult());
+        assertEquals(15 ,(int) em.createQuery("select i.quantity from BasketItem i where i.id = :id").setParameter("id", 1l).getSingleResult());
+    }
+
+    @Test
+    public void shouldValidateBasketItUpdateForm() throws Exception
+    {
+
+        mockMvc.perform(post("/users/123/basket/items")
+                .header("Authorization", loginString))
+                .andExpect(status().isBadRequest());
+        mockMvc.perform(post("/users/123/basket/items")
+                .header("Authorization", loginString)
+                .param("ticketSetId", "13"))
+                .andExpect(status().isBadRequest());
     }
 
     /*******************
