@@ -69,27 +69,4 @@ public class EventRepositoryTest
 
         assertNull(eventRepository.findById(123l));
     }
-
-    @Test
-    public void findByIdAndUserId_shouldReturnTheCorrectEvent() throws Exception
-    {
-        Event event = mock(Event.class);
-        Query mockQuery = mock(Query.class);
-        when(em.createQuery(anyString())).thenReturn(mockQuery);
-        when(mockQuery.setParameter(anyString(), any())).thenReturn(mockQuery);
-        when(mockQuery.getSingleResult()).thenReturn(event);
-
-        assertEquals(event, eventRepository.findByIdAndUserId(1l, 123l));
-    }
-
-    @Test
-    public void findByIdAndUserId_shouldReturnNullIfNoEventFound() throws Exception
-    {
-        Query mockQuery = mock(Query.class);
-        when(em.createQuery(anyString())).thenReturn(mockQuery);
-        when(mockQuery.setParameter(anyString(), any())).thenReturn(mockQuery);
-        when(mockQuery.getSingleResult()).thenThrow(NoResultException.class);
-
-        assertNull(eventRepository.findByIdAndUserId(1l, 123l));
-    }
 }

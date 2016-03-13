@@ -13,7 +13,8 @@ import java.util.Collections;
 import java.util.Date;
 
 /**
- * Created by DucNguyenMinh on 05.03.16.
+ * @author DucNguyenMinh
+ * @since 05.03.16.
  */
 @Entity
 @Table(name = "baskets")
@@ -77,7 +78,7 @@ public class Basket
     }
 
     /**
-     * @return Items contained in this Basket
+     * @return Items an immutable collection of BasketItem's contained in this Basket
      */
     public Collection<BasketItem> getBasketItems()
     {
@@ -85,7 +86,7 @@ public class Basket
     }
 
     /**
-     * @param item to be added to the basket
+     * @param item BasketItem to be added to this Basket
      */
     public void addItem(BasketItem item)
     {
@@ -94,7 +95,8 @@ public class Basket
     }
 
     /**
-     * @param item to be removed from the basket
+     * @param item BasketItem to be removed from the Basket
+     *             the first
      */
     public void removeItem(BasketItem item)
     {

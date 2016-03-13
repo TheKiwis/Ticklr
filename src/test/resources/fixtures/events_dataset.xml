@@ -1,8 +1,10 @@
 <dataset>
     <!-- Owner of events -->
     <users id="1" email="user@example.com" password="$2a$10$7DiTrG0atup/drERomar.eg4N0yVhRDvd7VHmAGKpxZP.XTzwCq16"/>
+        <events id="123" title="Sample Event" description="Pool Party" visibility="PUBLIC" start_time="2015-09-15 00:00:00" end_time="2015-09-15 00:00:00" canceled="1"  user_id="1"/>
+            <ticket_sets id="10" title="Sample Ticket Set" price="25.00" event_id="123" />
 
-    <events id="123" title="Sample Event" description="Pool Party" visibility="PUBLIC" start_time="2015-09-15 00:00:00" end_time="2015-09-15 00:00:00" canceled="1"  user_id="1"/>
-        <ticket_sets id="10" title="Sample Ticket Set" price="25.00" event_id="123" />
-
+    <users id="2" email="another_user@example.com" password="$2a$10$7DiTrG0atup/drERomar.eg4N0yVhRDvd7VHmAGKpxZP.XTzwCq16"/>
+        <events id="456" title="Sample Event" description="Pool Party" visibility="PUBLIC" start_time="2015-09-15 00:00:00" end_time="2015-09-15 00:00:00" canceled="0"  user_id="2"/>
+            <ticket_sets id="9" title="Sample Ticket Set" price="25.00" event_id="456" />
 </dataset>

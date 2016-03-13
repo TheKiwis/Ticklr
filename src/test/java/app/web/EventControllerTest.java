@@ -2,9 +2,11 @@ package app.web;
 
 import app.data.*;
 import app.data.validation.EventValidator;
+import app.web.authorization.UserAuthorizer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
@@ -41,8 +43,14 @@ public class EventControllerTest
     @Mock
     EventValidator validator;
 
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     Event mockEvent;
+
+    @Mock
+    User mockUser;
+
+    @Mock
+    UserAuthorizer userAuthorizer;
 
     private long ticketSetId = 10l;
     private long userId = 1l;
@@ -51,93 +59,97 @@ public class EventControllerTest
     @Before
     public void setUp()
     {
-        controller = new EventController(eventRepository, userRepository, ticketSetRepository, validator);
+        // always authorized
+        when(userAuthorizer.authorize(any())).thenReturn(true);
+        controller = new EventController(eventRepository, userRepository, ticketSetRepository, validator, userAuthorizer);
+
+        // mockEvent belongs to User with userId
+        when(mockEvent.getUser().getId()).thenReturn(userId);
+
+        when(mockUser.getId()).thenReturn(userId);
     }
 
     @Test
-    public void create_shouldReturnHttpStatusCreated() throws Exception
+    public void createEvent_shouldReturnHttpStatusCreated() throws Exception
     {
         // mocks
-        List fieldErrors = mock(ArrayList.class);
+        when(userRepository.findById(userId)).thenReturn(mockUser);
         when(eventRepository.saveOrUpdate(any())).thenReturn(mockEvent);
+
+        List fieldErrors = mock(ArrayList.class);
         when(bindingResult.getFieldErrors()).thenReturn(fieldErrors);
-        when(userRepository.findById(userId)).thenReturn(mock(User.class));
 
         // test object
-        ResponseEntity response = controller.create(userId, mockEvent, bindingResult);
+        ResponseEntity response = controller.createEvent(userId, mockEvent, bindingResult);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertEquals(fieldErrors, response.getBody());
     }
 
     @Test
-    public void create_shouldCreateEventViaEventRepository() throws Exception
+    public void createEvent_shouldCreateEventViaEventRepository() throws Exception
     {
         // mocks
+        when(userRepository.findById(userId)).thenReturn(mockUser);
         when(eventRepository.saveOrUpdate(any())).thenReturn(mockEvent);
-        when(userRepository.findById(userId)).thenReturn(mock(User.class));
 
         // test object
-        controller.create(userId, mockEvent, bindingResult);
+        controller.createEvent(userId, mockEvent, bindingResult);
         verify(eventRepository, times(1)).saveOrUpdate(mockEvent);
     }
 
     @Test
-    public void create_shouldReturnHttpStatusBadRequest() throws Exception
+    public void createEvent_shouldReturnHttpStatusBadRequest() throws Exception
     {
         // mocks
         when(bindingResult.hasErrors()).thenReturn(true);
         when(bindingResult.hasFieldErrors()).thenReturn(true);
-        when(userRepository.findById(userId)).thenReturn(mock(User.class));
+        when(userRepository.findById(userId)).thenReturn(mockUser);
 
         // test object
-        ResponseEntity response = controller.create(userId, mockEvent, bindingResult);
+        ResponseEntity response = controller.createEvent(userId, mockEvent, bindingResult);
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
     }
 
     @Test
-    public void create_shouldReturnHttpStatusNotFound() throws Exception
+    public void createEvent_shouldReturnHttpStatusNotFoundIfUserNotFound() throws Exception
     {
-        // mocks
         when(userRepository.findById(userId)).thenReturn(null);
 
-        // test object
-        ResponseEntity response = controller.create(userId, mockEvent, bindingResult);
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-    }
-
-    // todo create return not found if user not found
-
-    @Test
-    public void show_shouldReturnHttpStatusNotFoundIfUserNotFound() throws Exception
-    {
-        when(eventRepository.findByIdAndUserId(userId, eventId)).thenReturn(null);
-
-        // test object
-        ResponseEntity response = controller.show(userId, eventId);
+        ResponseEntity response = controller.createEvent(userId, mockEvent, bindingResult);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
 
     @Test
-    public void show_shouldReturnHttpStatusOKwithEventInfo() throws Exception
+    public void showEvent_shouldReturnHttpStatusNotFoundIfUserNotFound() throws Exception
     {
-        when(eventRepository.findByIdAndUserId(userId, eventId)).thenReturn(mockEvent);
+        when(userRepository.findById(userId)).thenReturn(null);
 
-        // test object
-        ResponseEntity response = controller.show(userId, eventId);
+        ResponseEntity response = controller.showEvent(userId, eventId);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+    }
+
+    @Test
+    public void showEvent_shouldReturnHttpStatusOkWithEventInfo() throws Exception
+    {
+        when(userRepository.findById(userId)).thenReturn(mockUser);
+        when(eventRepository.findById(eventId)).thenReturn(mockEvent);
+
+        ResponseEntity response = controller.showEvent(userId, eventId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(mockEvent, response.getBody());
     }
 
     @Test
-    public void show_shouldReturnHttpStatusNotFound() throws Exception
+    public void showEvent_shouldReturnHttpStatusNotFound() throws Exception
     {
-        when(eventRepository.findByIdAndUserId(userId, eventId)).thenReturn(null);
+        when(userRepository.findById(userId)).thenReturn(mockUser);
+        when(eventRepository.findById(eventId)).thenReturn(null);
 
-        // test object
-        ResponseEntity response = controller.show(userId, eventId);
+        ResponseEntity response = controller.showEvent(userId, eventId);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }
@@ -147,14 +159,13 @@ public class EventControllerTest
     {
         TicketSet ticketSet = new TicketSet("Sample Ticket-set", new BigDecimal(25.00));
 
-        when(eventRepository.findByIdAndUserId(userId, eventId)).thenReturn(mockEvent);
+        when(userRepository.findById(userId)).thenReturn(mockUser);
+        when(eventRepository.findById(eventId)).thenReturn(mockEvent);
 
         ResponseEntity response = controller.addTicketSet(userId, eventId, ticketSet, bindingResult);
 
         verify(mockEvent, times(1)).addTicketSet(ticketSet);
-
         verify(eventRepository, times(1)).saveOrUpdate(mockEvent);
-
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
     }
 
@@ -163,7 +174,8 @@ public class EventControllerTest
     {
         TicketSet ticketSet = new TicketSet("Sample Ticket-set", new BigDecimal(25.00));
 
-        when(eventRepository.findByIdAndUserId(userId, eventId)).thenReturn(null);
+        when(userRepository.findById(userId)).thenReturn(mockUser);
+        when(eventRepository.findById(eventId)).thenReturn(null);
 
         ResponseEntity response = controller.addTicketSet(userId, eventId, ticketSet, bindingResult);
 
