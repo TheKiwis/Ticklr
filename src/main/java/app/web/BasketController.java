@@ -52,7 +52,7 @@ public class BasketController
 
         User user = userRepository.findById(userId);
 
-        if( !userAuthorizer.authorize(user)) return new ResponseEntity(HttpStatus.FORBIDDEN);
+        if (!userAuthorizer.authorize(user)) return new ResponseEntity(HttpStatus.FORBIDDEN);
 
         if (user != null) {
             basket = basketRepository.findByUserId(userId);
@@ -78,10 +78,10 @@ public class BasketController
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
 
-        if( !userAuthorizer.authorize(user)) return new ResponseEntity(HttpStatus.FORBIDDEN);
+        if (!userAuthorizer.authorize(user)) return new ResponseEntity(HttpStatus.FORBIDDEN);
 
-        if(bindingResult.hasFieldErrors()){
-            return new ResponseEntity(bindingResult.getFieldErrors(), HttpStatus.BAD_REQUEST );
+        if (bindingResult.hasFieldErrors()) {
+            return new ResponseEntity(bindingResult.getFieldErrors(), HttpStatus.BAD_REQUEST);
         }
 
         TicketSet ticketSet = ticketSetRepository.findById(basketItemForm.getTicketSetId());
@@ -123,7 +123,7 @@ public class BasketController
     {
 
         User user = userRepository.findById(userId);
-        if( !userAuthorizer.authorize(user)) return new ResponseEntity(HttpStatus.FORBIDDEN);
+        if (!userAuthorizer.authorize(user)) return new ResponseEntity(HttpStatus.FORBIDDEN);
 
 
         Basket basket = basketRepository.findByUserId(userId);
@@ -139,16 +139,17 @@ public class BasketController
     }
 
     @RequestMapping(value = "/items/{itemId}", method = RequestMethod.PUT)
-    public ResponseEntity updateItem(@ PathVariable Long userId, @PathVariable Long itemId, BasketItemUpdateForm basketItemUpdateForm, BindingResult bindingResult)
+    public ResponseEntity updateItem(@PathVariable Long userId, @PathVariable Long itemId, BasketItemUpdateForm basketItemUpdateForm, BindingResult bindingResult)
     {
 
         User user = userRepository.findById(userId);
-        if(user == null)
+
+        if (user == null)
             return new ResponseEntity(HttpStatus.NOT_FOUND);
 
-        if( !userAuthorizer.authorize(user)) return new ResponseEntity(HttpStatus.FORBIDDEN);
+        if (!userAuthorizer.authorize(user)) return new ResponseEntity(HttpStatus.FORBIDDEN);
 
-        if(bindingResult.hasFieldErrors()){
+        if (bindingResult.hasFieldErrors()) {
             return new ResponseEntity(bindingResult.getFieldErrors(), HttpStatus.BAD_REQUEST);
         }
 
@@ -156,7 +157,7 @@ public class BasketController
 
         BasketItem basketItem = basketRepository.findItemById(itemId);
 
-        if (user == null ||basket == null || basketItem == null ) {
+        if (basket == null || basketItem == null) {
             return new ResponseEntity(HttpStatus.NOT_FOUND);
         }
 
