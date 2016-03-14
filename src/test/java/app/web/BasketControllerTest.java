@@ -83,11 +83,11 @@ public class BasketControllerTest
     {
         when(userRepository.findById(userId)).thenReturn(mock(User.class));
         when(basketRepository.findByUserId(userId)).thenReturn(null);
-        when(basketRepository.save(any())).thenReturn(mockBasket);
+        when(basketRepository.saveOrUpdate(any())).thenReturn(mockBasket);
 
         ResponseEntity responseEntity = basketController.show(userId);
 
-        verify(basketRepository, atLeastOnce()).save(any());
+        verify(basketRepository, atLeastOnce()).saveOrUpdate(any());
 
         assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
         assertEquals(mockBasket, responseEntity.getBody());

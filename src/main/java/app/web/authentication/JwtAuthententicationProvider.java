@@ -4,6 +4,7 @@ import app.data.User;
 import app.data.UserRepository;
 import io.jsonwebtoken.Claims;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
@@ -14,7 +15,6 @@ import java.util.ArrayList;
  */
 public class JwtAuthententicationProvider implements AuthenticationProvider
 {
-    // UserRepository is used to fetch user
     private UserRepository userRepository;
 
     private JwtAuthenticator authenticator;
@@ -37,8 +37,10 @@ public class JwtAuthententicationProvider implements AuthenticationProvider
 
         String userEmail = authDetails.getSubject();
 
-        // todo if user null then BadCredentialException
         User user = userRepository.findByEmail(userEmail);
+
+        if (user == null)
+            throw new BadCredentialsException("User with email '" + userEmail + "' doesn't exist.");
 
         JwtAuthenticationToken authResult = new JwtAuthenticationToken(user, credentials, new ArrayList());
 
