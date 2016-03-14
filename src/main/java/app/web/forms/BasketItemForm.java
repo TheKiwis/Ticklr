@@ -11,8 +11,6 @@ import javax.validation.constraints.NotNull;
  */
 public class BasketItemForm
 {
-    // todo validation
-
     @NotNull
     @Min(1)
     private Integer quantity;

@@ -58,7 +58,7 @@ public class BasketController
             basket = basketRepository.findByUserId(userId);
 
             if (basket == null) {
-                basket = basketRepository.save(new Basket(user));
+                basket = basketRepository.saveOrUpdate(new Basket(user));
             }
         } else {
             status = HttpStatus.NOT_FOUND;
@@ -71,8 +71,6 @@ public class BasketController
     @RequestMapping(value = "/items", method = RequestMethod.POST)
     public ResponseEntity addItem(@PathVariable Long userId, @Valid BasketItemForm basketItemForm, BindingResult bindingResult)
     {
-
-
         User user = userRepository.findById(userId);
         if (user == null) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);

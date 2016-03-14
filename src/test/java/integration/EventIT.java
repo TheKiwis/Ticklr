@@ -387,8 +387,6 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldNotCreateOrUpdateTicketSetAndReturnBadRequestIfInputIsInvalid() throws Exception
     {
-        // todo consider moving validation test to another test
-
         mockMvc.perform(post(ticketSetUrl(sampleUserId, sampleEventId, null))
                 .header("Authorization", loginString)
                 .param("title", "Sample title")

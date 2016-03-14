@@ -48,18 +48,6 @@ public class BasketRepository
      * @param basket
      * @return
      */
-    public Basket save(Basket basket)
-    {
-        em.persist(basket);
-        em.flush();
-        return basket;
-    }
-
-    /**
-     * todo
-     * @param basket
-     * @return
-     */
     public Basket saveOrUpdate(Basket basket)
     {
         if (basket.getId() == null) {

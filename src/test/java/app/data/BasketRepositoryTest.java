@@ -59,17 +59,6 @@ public class BasketRepositoryTest
     }
 
     @Test
-    public void save_shouldReturnTheSameBasket()
-    {
-
-        Basket mockBasket = mock(Basket.class);
-
-        basketRepository.save(mockBasket);
-
-        verify(em, atLeastOnce()).persist(mockBasket);
-    }
-
-    @Test
     public void saveOrUpdate_shouldReturnTheSameBasket()
     {
 

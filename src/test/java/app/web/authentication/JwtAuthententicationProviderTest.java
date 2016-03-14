@@ -76,7 +76,26 @@ public class JwtAuthententicationProviderTest
         // create test object
         AuthenticationProvider authenticationProvider = new JwtAuthententicationProvider(userRepository, authenticator);
         authenticationProvider.authenticate(mockAuth);
+    }
 
+    @Test(expected = AuthenticationException.class)
+    public void shouldThrowBadCredentialsExceptionIfUserDoesNotExist() throws Exception
+    {
+        String email = "user@example.com";
+        String credential = "credential";
+
+        // mocks
+        Authentication mockAuth = mock(JwtAuthenticationToken.class);
+        when(mockAuth.getCredentials()).thenReturn(credential);
+
+        Claims mockClaim = mock(Claims.class);
+        when(authenticator.authenticate(any())).thenReturn(mockClaim);
+        when(mockClaim.getSubject()).thenReturn(email);
+        when(userRepository.findByEmail(email)).thenReturn(null); // user not found
+
+        // create test object
+        AuthenticationProvider authenticationProvider = new JwtAuthententicationProvider(userRepository, authenticator);
+        Authentication authResult = authenticationProvider.authenticate(mockAuth);
     }
 
     @Test
@@ -92,6 +111,7 @@ public class JwtAuthententicationProviderTest
         assertNull(authenticationProvider.authenticate(mockAuth));
 
     }
+
 
     // todo assign authorities for authorization
 }
