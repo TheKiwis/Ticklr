@@ -14,7 +14,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Date;
 
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -27,6 +26,8 @@ public class AuthenticationIT extends CommonIntegrationTest
 {
     @Value("${auth.secret}")
     private String authSecret;
+
+    private String AUTH_URI = "/api/users/request-auth-token";
 
     @Test
     public void shouldLoadTestFixture() throws Exception
@@ -49,7 +50,7 @@ public class AuthenticationIT extends CommonIntegrationTest
                 .signWith(SignatureAlgorithm.HS256,authSecret.getBytes(StandardCharsets.UTF_8)).compact();
 
         mockMvc.perform(
-                post("/users/request-auth-token")
+                post(AUTH_URI)
                         .param("email", email)
                         .param("password", "123456789"))
                 .andExpect(status().isOk())
@@ -60,7 +61,7 @@ public class AuthenticationIT extends CommonIntegrationTest
     public void shouldRespondWithJWTTokenWhenProvidedWithInvalidCredential() throws Exception
     {
         mockMvc.perform(
-                post("/users/request-auth-token")
+                post(AUTH_URI)
                         .param("email", "user@example.com")
                         .param("password", "wrong_pasword"))
                 .andExpect(status().isUnauthorized());
@@ -74,7 +75,7 @@ public class AuthenticationIT extends CommonIntegrationTest
         assertEquals(0, userCount);
 
         mockMvc.perform(
-                post("/users/request-auth-token")
+                post(AUTH_URI)
                         .param("email", email)
                         .param("password", "123456789"))
                 .andExpect(status().isUnauthorized());
@@ -86,7 +87,7 @@ public class AuthenticationIT extends CommonIntegrationTest
         JwtAuthenticator jwt = new JwtAuthenticator(authSecret);
         Token jwtToken = jwt.generateToken("user@example.com");
 
-        mockMvc.perform(get("/admin")
+        mockMvc.perform(get("/api/users/1")
                 .header("Authorization", "Bearer " + jwtToken.getKey()))
                 .andExpect(status().isOk());
     }

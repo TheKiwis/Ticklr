@@ -23,7 +23,7 @@ import javax.validation.Valid;
  * @since 08.03.16
  */
 @RestController
-@RequestMapping("/users/{userId}/basket")
+@RequestMapping("/api/users/{userId}/basket")
 public class BasketController
 {
     protected BasketRepository basketRepository;

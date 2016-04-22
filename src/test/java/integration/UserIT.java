@@ -13,7 +13,6 @@ import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.test.web.servlet.MvcResult;
 
 import javax.persistence.Query;
 
@@ -34,10 +33,15 @@ public class UserIT extends CommonIntegrationTest
         loginString = "Bearer " + new JwtAuthenticator(authSecret).generateToken("user@example.com").getKey();
     }
 
+    private String userUri(Long id)
+    {
+        return "/api/users" + (id == null ? "" : "/" + id);
+    }
+
     @Test
     public void shouldReturnUserInformation() throws Exception
     {
-        mockMvc.perform(get("/users/1")
+        mockMvc.perform(get(userUri(1l))
                 .header("Authorization", loginString))
                 .andExpect(jsonPath("$.id").value(1))
                 .andExpect(jsonPath("$.email").value("user@example.com"))
@@ -50,7 +54,7 @@ public class UserIT extends CommonIntegrationTest
     {
         assertNull(em.find(User.class, 123l));
 
-        mockMvc.perform(get("/users/123")
+        mockMvc.perform(get(userUri(123l))
                 .header("Authorization", loginString))
                 .andExpect(status().isNotFound());
     }
@@ -63,11 +67,11 @@ public class UserIT extends CommonIntegrationTest
         query = em.createQuery("SELECT COUNT(u) FROM User u");
         long count = (long) query.getSingleResult();
 
-        mockMvc.perform(post("/users/")
+        mockMvc.perform(post(userUri(null))
                 .accept("application/json")
                 .param("email", "unique_email@gmail.com")
                 .param("password", "123456789"))
-                .andExpect(header().string("Location", startsWith("/users/")));
+                .andExpect(header().string("Location", startsWith(userUri(null))));
 
         query = em.createQuery("SELECT COUNT(u) FROM User u");
         assertEquals((count + 1), query.getSingleResult());
@@ -77,7 +81,7 @@ public class UserIT extends CommonIntegrationTest
     public void shouldReturnEmptyValidationErrorsAndCreatedStatus() throws Exception
     {
         mockMvc.perform(
-                post("/users/")
+                post(userUri(null))
                         .accept("application/json")
                         .param("email", "email@gmail.com")
                         .param("password", "123456789"))
@@ -89,7 +93,7 @@ public class UserIT extends CommonIntegrationTest
     public void shouldReturnValidationErrorWithBadRequestHTTPStatus() throws Exception
     {
         mockMvc.perform(
-                post("/users/")
+                post(userUri(null))
                         .accept("application/json")
                         .param("email", "")
                         .param("password", "123456789"))
@@ -101,7 +105,7 @@ public class UserIT extends CommonIntegrationTest
     public void shouldRejectRequestWithDuplicatedEmail() throws Exception
     {
         mockMvc.perform(
-                post("/users/")
+                post(userUri(null))
                         .accept("application/json")
                         .param("email", "user@example.com")
                         .param("password", "123456789"))

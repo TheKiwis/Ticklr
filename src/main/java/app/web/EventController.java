@@ -18,7 +18,7 @@ import javax.validation.Valid;
 import java.net.URI;
 
 @RestController
-@RequestMapping("/users/{userId}/events")
+@RequestMapping("/api/users/{userId}/events")
 public class EventController
 {
     private static final ResponseEntity NOT_FOUND = new ResponseEntity(HttpStatus.NOT_FOUND);
@@ -82,7 +82,7 @@ public class EventController
 
             Event event = eventRepository.saveOrUpdate(requestEvent);
 
-            headers.setLocation(URI.create("/users/" + userId + "/events/" + event.getId()));
+            headers.setLocation(URI.create(eventUri(userId, event.getId())));
         } else {
             status = HttpStatus.BAD_REQUEST;
         }
@@ -119,7 +119,7 @@ public class EventController
 
             Event updatedEvent = eventRepository.saveOrUpdate(event.merge(requestEvent));
 
-            headers.setLocation(URI.create("/users/" + userId + "/events/" + updatedEvent.getId()));
+            headers.setLocation(URI.create(eventUri(userId, updatedEvent.getId())));
         } else {
             status = HttpStatus.BAD_REQUEST;
         }
@@ -195,7 +195,7 @@ public class EventController
         eventRepository.saveOrUpdate(event);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(URI.create("/users/" + userId + "/events/" + event.getId() + "/ticket-sets/" + ticketSet.getId()));
+        headers.setLocation(URI.create(ticketSetUri(userId, event.getId(), ticketSet.getId())));
 
         return new ResponseEntity(headers, HttpStatus.CREATED);
     }
@@ -252,4 +252,28 @@ public class EventController
 
         return new ResponseEntity(HttpStatus.OK);
     }
-}
+
+    /**
+     * @param userId != null
+     * @param eventId if null, it's not included in the result
+     * @return Event URI
+     */
+    private String eventUri(Long userId, Long eventId)
+    {
+        assert userId != null;
+        return "/api/users/" + userId + "/events" + (eventId != null ? "/" + eventId : "");
+    }
+
+    /**
+     * @param userId
+     * @param eventId
+     * @param ticketSetId
+     * @return Ticket Set URI
+     */
+    private String ticketSetUri(Long userId, Long eventId, Long ticketSetId)
+    {
+        assert userId != null;
+        assert eventId != null;
+        return eventUri(userId, eventId) + "/ticket-sets" + (ticketSetId == null ? "" : "/" + ticketSetId);
+    }
+ }

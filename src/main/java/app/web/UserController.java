@@ -25,12 +25,21 @@ import java.net.URI;
  * @author ngnmhieu
  */
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/api/users")
 public class UserController
 {
     private UserRepository repo;
 
     private JwtAuthenticator jwtAuthenticator;
+
+    /**
+     * @param userId user's id; if userId == null, it's not appended
+     * @return /{USER_BASE_URI}[/userId]
+     */
+    private String getUserUri(Long userId)
+    {
+        return "/api/users" + (userId == null ? "" : "/" + userId);
+    }
 
     /**
      * @param repo fetches and saves User object
@@ -73,7 +82,7 @@ public class UserController
 
             try {
                 User user = repo.save(userForm.getUser());
-                headers.setLocation(URI.create("/users/" + user.getId()));
+                headers.setLocation(URI.create(getUserUri(user.getId())));
             } catch (PersistenceException e) {
                 status = HttpStatus.CONFLICT; // duplicated email found
             }
@@ -108,5 +117,4 @@ public class UserController
 
         return new ResponseEntity(token, status);
     }
-
 }

@@ -49,14 +49,14 @@ public class EventIT extends CommonIntegrationTest
     private String authSecret;
 
 
-    private String ticketSetUrl(Long userId, Long eventId, Long ticketSetId)
+    private String ticketSetUri(Long userId, Long eventId, Long ticketSetId)
     {
-        return eventUrl(userId, eventId) + "/ticket-sets/" + (ticketSetId == null ? "" : ticketSetId);
+        return eventUri(userId, eventId) + "/ticket-sets" + (ticketSetId == null ? "" : "/" + ticketSetId);
     }
 
-    private String eventUrl(Long userId, Long eventId)
+    private String eventUri(Long userId, Long eventId)
     {
-        return "/users/" + userId + "/events/" + (eventId != null ? eventId : "");
+        return "/api/users/" + userId + "/events" + (eventId != null ? "/" + eventId : "");
     }
 
     @Before
@@ -89,7 +89,7 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldReturnAnEvent() throws Exception
     {
-        mockMvc.perform(get(eventUrl(sampleUser.getId(), sampleEventId))
+        mockMvc.perform(get(eventUri(sampleUser.getId(), sampleEventId))
                 .header("Authorization", loginString))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(sampleEvent.getId().intValue()))
@@ -104,9 +104,9 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldReturnWithHttpStatusCreatedAndALocationHeader() throws Exception
     {
-        mockMvc.perform(post(eventUrl(sampleUserId, null))
+        mockMvc.perform(post(eventUri(sampleUserId, null))
                 .header("Authorization", loginString))
-                .andExpect(header().string("Location", startsWith(eventUrl(sampleUserId, null))))
+                .andExpect(header().string("Location", startsWith(eventUri(sampleUserId, null))))
                 .andExpect(status().isCreated());
     }
 
@@ -114,7 +114,7 @@ public class EventIT extends CommonIntegrationTest
     public void shouldCreateEmptyEventWithDefaultValues() throws Exception
     {
         MvcResult response = mockMvc.perform(
-                post(eventUrl(sampleUserId, null))
+                post(eventUri(sampleUserId, null))
                         .header("Authorization", loginString)
         ).andExpect(status().isCreated()).andReturn();
 
@@ -138,7 +138,7 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldCreateAnEventWithProvidedValue() throws Exception
     {
-        MvcResult response = mockMvc.perform(post(eventUrl(sampleUserId, null))
+        MvcResult response = mockMvc.perform(post(eventUri(sampleUserId, null))
                 .header("Authorization", loginString)
                 .param("title", sampleTitle)
                 .param("description", sampleDesc)
@@ -163,7 +163,7 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldUpdateAnExistingEvent() throws Exception
     {
-        MvcResult response = mockMvc.perform(put(eventUrl(sampleUserId, sampleEventId))
+        MvcResult response = mockMvc.perform(put(eventUri(sampleUserId, sampleEventId))
                 .header("Authorization", loginString)
                 .param("title", sampleTitle)
                 .param("description", sampleDesc)
@@ -188,7 +188,7 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldCancelEvent() throws Exception
     {
-        mockMvc.perform(delete(eventUrl(sampleUserId, sampleEventId)).header("Authorization", loginString))
+        mockMvc.perform(delete(eventUri(sampleUserId, sampleEventId)).header("Authorization", loginString))
                 .andExpect(status().isNoContent());
 
         boolean canceled = (Boolean) em.createQuery("SELECT e.canceled FROM Event e WHERE e.id = :event_id").setParameter("event_id", sampleEventId).getSingleResult();
@@ -199,7 +199,7 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldNotCancelEventAndReturnNotFound() throws Exception
     {
-        mockMvc.perform(delete(eventUrl(sampleUserId, 234l)).header("Authorization", loginString))
+        mockMvc.perform(delete(eventUri(sampleUserId, 234l)).header("Authorization", loginString))
                 .andExpect(status().isNotFound());
     }
 
@@ -210,12 +210,12 @@ public class EventIT extends CommonIntegrationTest
 
         long count = (long) em.createQuery(query).setParameter("event_id", sampleEventId).getSingleResult();
 
-        mockMvc.perform(post(ticketSetUrl(sampleUserId, sampleEventId, null))
+        mockMvc.perform(post(ticketSetUri(sampleUserId, sampleEventId, null))
                 .header("Authorization", loginString)
                 .param("title", "Early Bird")
                 .param("price", "25.00"))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", startsWith(ticketSetUrl(sampleUserId, sampleEventId, null))));
+                .andExpect(header().string("Location", startsWith(ticketSetUri(sampleUserId, sampleEventId, null))));
 
         assertEquals(count + 1, (long) em.createQuery(query).setParameter("event_id", sampleEventId).getSingleResult());
     }
@@ -223,7 +223,7 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldUpdateTicketSet() throws Exception
     {
-        mockMvc.perform(put(ticketSetUrl(sampleUserId, sampleEventId, sampleTicketSetId))
+        mockMvc.perform(put(ticketSetUri(sampleUserId, sampleEventId, sampleTicketSetId))
                 .header("Authorization", loginString)
                 .param("title", "Updated title")
                 .param("price", "30.00"))
@@ -238,7 +238,7 @@ public class EventIT extends CommonIntegrationTest
     {
         long count = (long) em.createQuery("SELECT count(ts) FROM TicketSet ts").getSingleResult();
 
-        mockMvc.perform(delete(ticketSetUrl(sampleUserId, sampleEventId, sampleTicketSetId))
+        mockMvc.perform(delete(ticketSetUri(sampleUserId, sampleEventId, sampleTicketSetId))
                 .header("Authorization", loginString))
                 .andExpect(status().isOk());
 
@@ -256,7 +256,7 @@ public class EventIT extends CommonIntegrationTest
         assertNull(em.find(Event.class, 345l));
 
         // put operation should create a new one (with a different ID)
-        mockMvc.perform(put(eventUrl(sampleUserId, 345l))
+        mockMvc.perform(put(eventUri(sampleUserId, 345l))
                 .header("Authorization", loginString)
                 .param("title", sampleTitle)
                 .param("description", sampleDesc)
@@ -273,10 +273,10 @@ public class EventIT extends CommonIntegrationTest
         // User with ID 234 doesn't exist
         assertNull(em.find(User.class, 234l));
 
-        mockMvc.perform(put(eventUrl(234l, sampleEventId)).header("Authorization", loginString))
+        mockMvc.perform(put(eventUri(234l, sampleEventId)).header("Authorization", loginString))
                 .andExpect(status().isNotFound());
 
-        mockMvc.perform(get(eventUrl(234l, sampleEventId)).header("Authorization", loginString))
+        mockMvc.perform(get(eventUri(234l, sampleEventId)).header("Authorization", loginString))
                 .andExpect(status().isNotFound());
     }
 
@@ -285,7 +285,7 @@ public class EventIT extends CommonIntegrationTest
     {
         Event beforePut = em.find(Event.class, sampleEventId);
 
-        mockMvc.perform(put(eventUrl(sampleUserId, sampleEventId))
+        mockMvc.perform(put(eventUri(sampleUserId, sampleEventId))
                 .header("Authorization", loginString)
                 .param("title", "Title")
                 .param("description", "Desc")
@@ -301,21 +301,21 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldReturnHttpStatusNotFoundForNonExistentEvent() throws Exception
     {
-        mockMvc.perform(get(eventUrl(sampleUserId, 555l)).header("Authorization", loginString))
+        mockMvc.perform(get(eventUri(sampleUserId, 555l)).header("Authorization", loginString))
                 .andExpect(status().isNotFound());
     }
 
     @Test
     public void shouldReturnHttpStatusBadRequestForNonNumericEventId() throws Exception
     {
-        mockMvc.perform(get("/users/1/events/non_numeric").header("Authorization", loginString))
+        mockMvc.perform(get(eventUri(1l, null) + "/nonnumeric").header("Authorization", loginString))
                 .andExpect(status().isBadRequest());
     }
 
     @Test
     public void shouldReturnBadRequestForInvalidStatusAndVisibility() throws Exception
     {
-        mockMvc.perform(post(eventUrl(sampleUserId, null))
+        mockMvc.perform(post(eventUri(sampleUserId, null))
                 .header("Authorization", loginString)
                 .param("title", "Title")
                 .param("description", "Desc")
@@ -327,7 +327,7 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldReturnBadRequestForMalformedTime() throws Exception
     {
-        mockMvc.perform(post(eventUrl(sampleUserId, null))
+        mockMvc.perform(post(eventUri(sampleUserId, null))
                 .header("Authorization", loginString)
                 .param("title", "Title")
                 .param("description", "Desc")
@@ -335,7 +335,7 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").isNotEmpty());
 
-        mockMvc.perform(post(eventUrl(sampleUserId, null))
+        mockMvc.perform(post(eventUri(sampleUserId, null))
                 .header("Authorization", loginString)
                 .param("title", "Title")
                 .param("description", "Desc")
@@ -347,7 +347,7 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldReturnBadRequestWhenEndTimeBeforeStartTime() throws Exception
     {
-        mockMvc.perform(post(eventUrl(sampleUserId, null))
+        mockMvc.perform(post(eventUri(sampleUserId, null))
                 .header("Authorization", loginString)
                 .param("title", "Title")
                 .param("description", "Desc")
@@ -365,7 +365,7 @@ public class EventIT extends CommonIntegrationTest
 
         long count = (long) em.createQuery("SELECT count(ts) FROM TicketSet ts").getSingleResult();
 
-        mockMvc.perform(post(ticketSetUrl(sampleUserId, 234l, null))
+        mockMvc.perform(post(ticketSetUri(sampleUserId, 234l, null))
                 .header("Authorization", loginString))
                 .andExpect(status().isNotFound());
 
@@ -374,12 +374,12 @@ public class EventIT extends CommonIntegrationTest
         // update
         assertNull(em.find(TicketSet.class, 30l));
 
-        mockMvc.perform(put(ticketSetUrl(sampleUserId, sampleEventId, 30l))
+        mockMvc.perform(put(ticketSetUri(sampleUserId, sampleEventId, 30l))
                 .header("Authorization", loginString))
                 .andExpect(status().isNotFound());
 
         // delete
-        mockMvc.perform(delete(ticketSetUrl(sampleUserId, sampleEventId, 30l))
+        mockMvc.perform(delete(ticketSetUri(sampleUserId, sampleEventId, 30l))
                 .header("Authorization", loginString))
                 .andExpect(status().isNotFound());
     }
@@ -389,33 +389,33 @@ public class EventIT extends CommonIntegrationTest
     {
         // todo consider moving validation test to another test
 
-        mockMvc.perform(post(ticketSetUrl(sampleUserId, sampleEventId, null))
+        mockMvc.perform(post(ticketSetUri(sampleUserId, sampleEventId, null))
                 .header("Authorization", loginString)
                 .param("title", "Sample title")
                 .param("price", "-25.00"))
                 .andExpect(status().isBadRequest());
 
-        mockMvc.perform(post(ticketSetUrl(sampleUserId, sampleEventId, null))
+        mockMvc.perform(post(ticketSetUri(sampleUserId, sampleEventId, null))
                 .header("Authorization", loginString)
                 .param("title", "")
                 .param("price", "25.00"))
                 .andExpect(status().isBadRequest());
 
         // negative price
-        mockMvc.perform(put(ticketSetUrl(sampleUserId, sampleEventId, sampleTicketSetId))
+        mockMvc.perform(put(ticketSetUri(sampleUserId, sampleEventId, sampleTicketSetId))
                 .header("Authorization", loginString)
                 .param("title", "Sample title")
                 .param("price", "-25.00"))
                 .andExpect(status().isBadRequest());
 
         // no title
-        mockMvc.perform(put(ticketSetUrl(sampleUserId, sampleEventId, sampleTicketSetId))
+        mockMvc.perform(put(ticketSetUri(sampleUserId, sampleEventId, sampleTicketSetId))
                 .header("Authorization", loginString)
                 .param("price", "25.00"))
                 .andExpect(status().isBadRequest());
 
         // no price
-        mockMvc.perform(put(ticketSetUrl(sampleUserId, sampleEventId, sampleTicketSetId))
+        mockMvc.perform(put(ticketSetUri(sampleUserId, sampleEventId, sampleTicketSetId))
                 .header("Authorization", loginString)
                 .param("title", "A Title"))
                 .andExpect(status().isBadRequest());
@@ -430,31 +430,31 @@ public class EventIT extends CommonIntegrationTest
         Long anotherEventId = 456l;
         Long anotherTicketSetId = 9l;
 
-        mockMvc.perform(get(eventUrl(anotherUserId, anotherEventId))
+        mockMvc.perform(get(eventUri(anotherUserId, anotherEventId))
                 .header("Authorization", loginString))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(post(eventUrl(anotherUserId, null))
+        mockMvc.perform(post(eventUri(anotherUserId, null))
                 .header("Authorization", loginString))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(put(eventUrl(anotherUserId, anotherEventId))
+        mockMvc.perform(put(eventUri(anotherUserId, anotherEventId))
                 .header("Authorization", loginString))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(delete(eventUrl(anotherUserId, anotherEventId))
+        mockMvc.perform(delete(eventUri(anotherUserId, anotherEventId))
                 .header("Authorization", loginString))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(post(ticketSetUrl(anotherUserId, anotherEventId, null))
+        mockMvc.perform(post(ticketSetUri(anotherUserId, anotherEventId, null))
                 .header("Authorization", loginString))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(put(ticketSetUrl(anotherUserId, anotherEventId, anotherTicketSetId))
+        mockMvc.perform(put(ticketSetUri(anotherUserId, anotherEventId, anotherTicketSetId))
                 .header("Authorization", loginString))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(delete(ticketSetUrl(anotherUserId, anotherEventId, anotherTicketSetId))
+        mockMvc.perform(delete(ticketSetUri(anotherUserId, anotherEventId, anotherTicketSetId))
                 .header("Authorization", loginString))
                 .andExpect(status().isForbidden());
     }
