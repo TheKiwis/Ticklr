@@ -61,7 +61,7 @@ public class EventController
      * @return
      */
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity createEvent(@PathVariable Long userId, Event requestEvent, BindingResult bindingResult)
+    public ResponseEntity createEvent(@PathVariable Long userId, @RequestBody(required = false) Event requestEvent, BindingResult bindingResult)
     {
         User user = userRepository.findById(userId);
 
@@ -73,6 +73,9 @@ public class EventController
 
         HttpHeaders headers = new HttpHeaders();
         HttpStatus status = HttpStatus.CREATED;
+
+        if (requestEvent == null)
+            requestEvent = new Event();
 
         validator.validate(requestEvent, bindingResult);
 
@@ -254,7 +257,7 @@ public class EventController
     }
 
     /**
-     * @param userId != null
+     * @param userId  != null
      * @param eventId if null, it's not included in the result
      * @return Event URI
      */
@@ -276,4 +279,4 @@ public class EventController
         assert eventId != null;
         return eventUri(userId, eventId) + "/ticket-sets" + (ticketSetId == null ? "" : "/" + ticketSetId);
     }
- }
+}

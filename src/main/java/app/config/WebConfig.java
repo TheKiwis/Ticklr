@@ -6,12 +6,14 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.MediaType;
+import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.*;
 import org.springframework.web.servlet.resource.VersionResourceResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import java.time.format.DateTimeFormatter;
+import java.util.List;
 
 /**
  * @author ngnmhieu
@@ -30,11 +32,11 @@ public class WebConfig extends WebMvcConfigurerAdapter
         return resolver;
     }
 
-    //@Override
-    //public void configureDefaultServletHandling(DefaultServletHandlerConfigurer configurer)
-    //{
-    //    configurer.enable();
-    //}
+    @Override
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters)
+    {
+        super.extendMessageConverters(converters);
+    }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry)

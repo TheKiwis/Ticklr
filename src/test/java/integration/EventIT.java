@@ -6,6 +6,7 @@ import app.data.Event;
 import app.data.TicketSet;
 import app.data.User;
 import app.web.authentication.JwtAuthenticator;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.junit.Before;
@@ -106,17 +107,15 @@ public class EventIT extends CommonIntegrationTest
     {
         mockMvc.perform(post(eventUri(sampleUserId, null))
                 .header("Authorization", loginString))
-                .andExpect(header().string("Location", startsWith(eventUri(sampleUserId, null))))
-                .andExpect(status().isCreated());
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", startsWith(eventUri(sampleUserId, null))));
     }
 
     @Test
     public void shouldCreateEmptyEventWithDefaultValues() throws Exception
     {
-        MvcResult response = mockMvc.perform(
-                post(eventUri(sampleUserId, null))
-                        .header("Authorization", loginString)
-        ).andExpect(status().isCreated()).andReturn();
+        MvcResult response = mockMvc.perform(post(eventUri(sampleUserId, null))
+                .header("Authorization", loginString)).andExpect(status().isCreated()).andReturn();
 
         String expectedStartTime = LocalDateTime.now().plusDays(7).withHour(0).withMinute(0).withSecond(0).withNano(0).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         String expectedEndTime = LocalDateTime.now().plusDays(7).withHour(0).withMinute(0).withSecond(0).withNano(0).plusHours(sampleUserId).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
@@ -138,14 +137,37 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldCreateAnEventWithProvidedValue() throws Exception
     {
+        class EventForm
+        {
+            public String title;
+            public String description;
+            public String startTime;
+            public String endTime;
+            public String visibility;
+            public boolean canceled;
+
+            public EventForm(String title, String description, String startTime, String endTime, String visibility, boolean canceled)
+            {
+                this.title = title;
+                this.description = description;
+                this.startTime = startTime;
+                this.endTime = endTime;
+                this.visibility = visibility;
+                this.canceled = canceled;
+            }
+        }
+        String body = new ObjectMapper().writeValueAsString(new EventForm(sampleTitle, sampleDesc, sampleStartTime, sampleEndTime, sampleVisibility, true));
+
         MvcResult response = mockMvc.perform(post(eventUri(sampleUserId, null))
-                .header("Authorization", loginString)
-                .param("title", sampleTitle)
-                .param("description", sampleDesc)
-                .param("startTime", sampleStartTime)
-                .param("endTime", sampleEndTime)
-                .param("canceled", "true")
-                .param("visibility", sampleVisibility)
+                        .header("Authorization", loginString)
+                        .contentType("application/json")
+                        .content(body)
+                //.param("title", sampleTitle)
+                //.param("description", sampleDesc)
+                //.param("startTime", sampleStartTime)
+                //.param("endTime", sampleEndTime)
+                //.param("canceled", "true")
+                //.param("visibility", sampleVisibility)
         ).andExpect(status().isCreated()).andReturn();
 
         String location = response.getResponse().getHeader("Location");

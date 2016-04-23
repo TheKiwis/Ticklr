@@ -8,6 +8,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import app.data.User;
 import app.web.authentication.JwtAuthenticator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.junit.Before;
@@ -69,8 +71,9 @@ public class UserIT extends CommonIntegrationTest
 
         mockMvc.perform(post(userUri(null))
                 .accept("application/json")
-                .param("email", "unique_email@gmail.com")
-                .param("password", "123456789"))
+                .contentType("application/json")
+                .content(registrationForm("unique_email@example.com", "123456789")))
+                .andExpect(status().isCreated())
                 .andExpect(header().string("Location", startsWith(userUri(null))));
 
         query = em.createQuery("SELECT COUNT(u) FROM User u");
@@ -83,8 +86,8 @@ public class UserIT extends CommonIntegrationTest
         mockMvc.perform(
                 post(userUri(null))
                         .accept("application/json")
-                        .param("email", "email@gmail.com")
-                        .param("password", "123456789"))
+                        .contentType("application/json")
+                        .content(registrationForm("email@gmail.com", "123456789")))
                 .andExpect(status().isCreated())
                 .andExpect(jsonPath("$").isEmpty());
     }
@@ -95,8 +98,8 @@ public class UserIT extends CommonIntegrationTest
         mockMvc.perform(
                 post(userUri(null))
                         .accept("application/json")
-                        .param("email", "")
-                        .param("password", "123456789"))
+                        .contentType("application/json")
+                        .content(registrationForm("", "123456789")))
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").isNotEmpty());
     }
@@ -107,8 +110,8 @@ public class UserIT extends CommonIntegrationTest
         mockMvc.perform(
                 post(userUri(null))
                         .accept("application/json")
-                        .param("email", "user@example.com")
-                        .param("password", "123456789"))
+                        .contentType("application/json")
+                        .content(registrationForm("user@example.com", "123456789")))
                 .andExpect(status().isConflict());
     }
 
@@ -117,6 +120,24 @@ public class UserIT extends CommonIntegrationTest
     {
         User u = (User) em.createQuery("SELECT u FROM User u WHERE u.email = 'user@example.com'").getSingleResult();
         assertEquals("user@example.com", u.getEmail());
+    }
+
+    private String registrationForm(String email, String password) throws JsonProcessingException
+    {
+        class RegistrationForm
+        {
+            public String email;
+            public String password;
+
+            public RegistrationForm(String email, String password)
+            {
+                this.email = email;
+                this.password = password;
+            }
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        return mapper.writeValueAsString(new RegistrationForm(email, password));
     }
 
     @Override

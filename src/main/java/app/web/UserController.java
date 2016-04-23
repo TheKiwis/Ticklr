@@ -6,6 +6,7 @@ import app.web.forms.UserForm;
 import app.web.authentication.JwtAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.token.Token;
@@ -71,7 +72,7 @@ public class UserController
      * @return
      */
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity processRegistration(@Valid UserForm userForm, BindingResult bindingResult)
+    public ResponseEntity processRegistration(@RequestBody @Valid UserForm userForm, BindingResult bindingResult)
     {
         HttpHeaders headers = new HttpHeaders();
         HttpStatus status;

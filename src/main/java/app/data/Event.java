@@ -11,6 +11,7 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -323,6 +324,5 @@ public class Event
         if (endTime != null ? !endTime.equals(event.endTime) : event.endTime != null) return false;
         if (canceled != event.canceled) return false;
         return visibility == event.visibility;
-
     }
 }
