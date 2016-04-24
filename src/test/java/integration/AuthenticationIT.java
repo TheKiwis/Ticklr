@@ -2,6 +2,8 @@ package integration;
 
 import app.data.User;
 import app.web.authentication.JwtAuthenticator;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.dbunit.dataset.IDataSet;
@@ -9,6 +11,8 @@ import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.token.Token;
+import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.MvcResult;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
@@ -36,6 +40,38 @@ public class AuthenticationIT extends CommonIntegrationTest
         assertEquals("user@example.com", u.getEmail());
     }
 
+    // For the purpose of mapping json response to object - see login()
+    private static class AuthToken {
+        public String key;
+        public Integer keyCreationTime;
+        public String extendedInformation;
+    }
+
+    public static String getAuthTokenFor(String email, String password, MockMvc mockMvc) throws Exception
+    {
+        class LoginForm
+        {
+            public String email;
+            public String password;
+
+            public LoginForm(String email, String password)
+            {
+                this.email = email;
+                this.password = password;
+            }
+        }
+
+        // perform the login
+        MvcResult result = mockMvc.perform(post("/api/users/request-auth-token")
+                .contentType("application/json")
+                .content(new ObjectMapper().writeValueAsString(new LoginForm(email, password)))
+        ).andExpect(status().isOk()).andReturn();
+
+        AuthToken token = new ObjectMapper().readValue(result.getResponse().getContentAsString(), AuthToken.class);
+
+        return "Bearer " + token.key;
+    }
+
     @Test
     public void shouldRespondWithJWTTokenWhenProvidedWithValidCredential() throws Exception
     {
@@ -47,12 +83,11 @@ public class AuthenticationIT extends CommonIntegrationTest
                 .setHeaderParam("typ", "JWT")
                 .setSubject(email)
                 .setExpiration(expiredDate)
-                .signWith(SignatureAlgorithm.HS256,authSecret.getBytes(StandardCharsets.UTF_8)).compact();
+                .signWith(SignatureAlgorithm.HS256, authSecret.getBytes(StandardCharsets.UTF_8)).compact();
 
-        mockMvc.perform(
-                post(AUTH_URI)
-                        .param("email", email)
-                        .param("password", "123456789"))
+        mockMvc.perform(post(AUTH_URI)
+                .contentType("application/json")
+                .content(getAuthBody(email, "123456789")))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.key").value(jwtToken));
     }
@@ -60,11 +95,16 @@ public class AuthenticationIT extends CommonIntegrationTest
     @Test
     public void shouldRespondWithJWTTokenWhenProvidedWithInvalidCredential() throws Exception
     {
-        mockMvc.perform(
-                post(AUTH_URI)
-                        .param("email", "user@example.com")
-                        .param("password", "wrong_pasword"))
+        // invalid password
+        mockMvc.perform(post(AUTH_URI)
+                .contentType("application/json")
+                .content(getAuthBody("user@example.com", "wrong_password")))
                 .andExpect(status().isUnauthorized());
+
+        // without request body
+        mockMvc.perform(post(AUTH_URI)
+                .contentType("application/json"))
+                .andExpect(status().isBadRequest());
     }
 
     @Test
@@ -74,10 +114,9 @@ public class AuthenticationIT extends CommonIntegrationTest
         long userCount = (long) em.createQuery("SELECT COUNT(u) FROM User u WHERE u.email = :email").setParameter("email", email).getSingleResult();
         assertEquals(0, userCount);
 
-        mockMvc.perform(
-                post(AUTH_URI)
-                        .param("email", email)
-                        .param("password", "123456789"))
+        mockMvc.perform(post(AUTH_URI)
+                .contentType("application/json")
+                .content(getAuthBody(email, "123456789")))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -112,7 +151,7 @@ public class AuthenticationIT extends CommonIntegrationTest
                 .setHeaderParam("typ", "JWT")
                 .setSubject(email)
                 .setExpiration(expiredDate)
-                .signWith(SignatureAlgorithm.HS256,anotherSecret.getBytes(StandardCharsets.UTF_8)).compact();
+                .signWith(SignatureAlgorithm.HS256, anotherSecret.getBytes(StandardCharsets.UTF_8)).compact();
 
 
         mockMvc.perform(get("/admin")
@@ -131,11 +170,11 @@ public class AuthenticationIT extends CommonIntegrationTest
                 .setHeaderParam("typ", "JWT")
                 .setSubject(email)
                 .setExpiration(expiredDate)
-                .signWith(SignatureAlgorithm.HS256,authSecret.getBytes(StandardCharsets.UTF_8)).compact();
+                .signWith(SignatureAlgorithm.HS256, authSecret.getBytes(StandardCharsets.UTF_8)).compact();
 
 
         mockMvc.perform(get("/admin")
-                .header("Authorization", "Bearer " + jwtToken ))
+                .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isUnauthorized());
     }
 
@@ -153,7 +192,25 @@ public class AuthenticationIT extends CommonIntegrationTest
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
-        cal.add(Calendar.DATE,expiredInDays);
+        cal.add(Calendar.DATE, expiredInDays);
         return cal.getTime();
     }
+
+    private String getAuthBody(String email, String password) throws JsonProcessingException
+    {
+        class LoginForm
+        {
+            public String email;
+            public String password;
+
+            public LoginForm(String email, String password)
+            {
+                this.email = email;
+                this.password = password;
+            }
+        }
+
+        return new ObjectMapper().writeValueAsString(new LoginForm(email, password));
+    }
+
 }

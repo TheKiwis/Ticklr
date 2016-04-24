@@ -9,6 +9,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.core.token.Token;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -103,7 +104,7 @@ public class UserController
      * @return
      */
     @RequestMapping(value= "/request-auth-token", method = RequestMethod.POST)
-    public ResponseEntity requestAuthToken(UserForm form)
+    public ResponseEntity requestAuthToken(@RequestBody UserForm form)
     {
         User user = repo.findByEmail(form.getEmail());
 
@@ -117,5 +118,12 @@ public class UserController
         }
 
         return new ResponseEntity(token, status);
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity handleHttpMessageNotReadableException(HttpMessageNotReadableException ex)
+    {
+        // todo use logger to log ex.getMessage()
+        return new ResponseEntity("{\"message\": \"The request sent by the client was syntactically incorrect.\"}", HttpStatus.BAD_REQUEST);
     }
 }

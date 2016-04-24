@@ -16,11 +16,8 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 public class BasketIT extends CommonIntegrationTest
 {
-    @Value("${auth.secret}")
-    private String authSecret;
-
     // authentication token
-    private String loginString;
+    private String authString;
 
     private String basketUri(Long userId)
     {
@@ -36,13 +33,13 @@ public class BasketIT extends CommonIntegrationTest
     @Before
     public void login() throws Exception
     {
-        loginString = "Bearer " + new JwtAuthenticator(authSecret).generateToken("user_with_basket@example.com").getKey();
+        authString = AuthenticationIT.getAuthTokenFor("user_with_basket@example.com", "123456789", mockMvc);
     }
 
     @Test
     public void shouldReturnBasket() throws Exception
     {
-        mockMvc.perform(get(basketUri(123l)).header("Authorization", loginString))
+        mockMvc.perform(get(basketUri(123l)).header("Authorization", authString))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.basketItems").isArray());
@@ -51,10 +48,8 @@ public class BasketIT extends CommonIntegrationTest
     @Test
     public void shouldAddItemToBasket() throws Exception
     {
-        String loginString = "Bearer " + new JwtAuthenticator(authSecret).generateToken("user_without_basket@example.com").getKey();
-
-        mockMvc.perform(post(basketItemUri(124l, null))
-                .header("Authorization", loginString)
+        mockMvc.perform(post(basketItemUri(123l, null))
+                .header("Authorization", authString)
                 .param("quantity", "10")
                 .param("ticketSetId", "1"))
                 .andExpect(status().isCreated());
@@ -66,7 +61,7 @@ public class BasketIT extends CommonIntegrationTest
         int quantity = (Integer) em.createQuery("SELECT i.quantity FROM BasketItem i WHERE i.id= :id").setParameter("id", 1l).getSingleResult();
         long count = (Long) em.createQuery("SELECT count(i) FROM BasketItem i").getSingleResult();
         mockMvc.perform(post(basketItemUri(123l, null))
-                .header("Authorization", loginString)
+                .header("Authorization", authString)
                 .param("quantity", "2")
                 .param("ticketSetId", "2"))
                 .andExpect(status().isCreated());
@@ -80,16 +75,16 @@ public class BasketIT extends CommonIntegrationTest
     {
 
         mockMvc.perform(post(basketItemUri(123l, null))
-                .header("Authorization", loginString)
+                .header("Authorization", authString)
                 .param("quantity", "-2"))
                 .andExpect(status().isBadRequest());
         mockMvc.perform(post(basketItemUri(123l, null))
-                .header("Authorization", loginString)
+                .header("Authorization", authString)
                 .param("quantity", "-2")
                 .param("ticketSetId", "13"))
                 .andExpect(status().isBadRequest());
         mockMvc.perform(post(basketItemUri(123l, null))
-                .header("Authorization", loginString)
+                .header("Authorization", authString)
                 .param("ticketSetId", "12"))
                 .andExpect(status().isBadRequest());
 
@@ -101,7 +96,7 @@ public class BasketIT extends CommonIntegrationTest
         assertEquals(1, (long) em.createQuery("SELECT COUNT(i) FROM BasketItem i WHERE i.id = :id").setParameter("id", 1l).getSingleResult());
 
         mockMvc.perform(delete(basketItemUri(123l, 1l))
-                .header("Authorization", loginString))
+                .header("Authorization", authString))
                 .andExpect(status().isOk());
 
         assertEquals(0, (long) em.createQuery("select count(i) from BasketItem i where i.id = :id").setParameter("id", 1l).getSingleResult());
@@ -114,7 +109,7 @@ public class BasketIT extends CommonIntegrationTest
 
 
         mockMvc.perform(put(basketItemUri(123l, 1l))
-                .header("Authorization", loginString)
+                .header("Authorization", authString)
                 .param("quantity", "15"))
                 .andExpect(status().isOk());
 
@@ -127,10 +122,10 @@ public class BasketIT extends CommonIntegrationTest
     {
 
         mockMvc.perform(post(basketItemUri(123l, null))
-                .header("Authorization", loginString))
+                .header("Authorization", authString))
                 .andExpect(status().isBadRequest());
         mockMvc.perform(post(basketItemUri(123l, null))
-                .header("Authorization", loginString)
+                .header("Authorization", authString)
                 .param("ticketSetId", "13"))
                 .andExpect(status().isBadRequest());
     }
@@ -142,19 +137,19 @@ public class BasketIT extends CommonIntegrationTest
         Long anotherBasketItemId = 456l;
 
         mockMvc.perform(get(basketUri(anotherUserId))
-                .header("Authorization", loginString))
+                .header("Authorization", authString))
                 .andExpect(status().isForbidden());
 
         mockMvc.perform(post(basketItemUri(anotherUserId, null))
-                .header("Authorization", loginString))
+                .header("Authorization", authString))
                 .andExpect(status().isForbidden());
 
         mockMvc.perform(put(basketItemUri(anotherUserId, anotherBasketItemId))
-                .header("Authorization", loginString))
+                .header("Authorization", authString))
                 .andExpect(status().isForbidden());
 
         mockMvc.perform(delete(basketItemUri(anotherUserId, anotherBasketItemId))
-                .header("Authorization", loginString))
+                .header("Authorization", authString))
                 .andExpect(status().isForbidden());
     }
 
