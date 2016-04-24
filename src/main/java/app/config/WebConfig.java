@@ -1,15 +1,15 @@
 package app.config;
 
-import app.supports.converter.LocalDateTimeConverter;
+import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.format.FormatterRegistry;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
+import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.*;
-import org.springframework.web.servlet.resource.VersionResourceResolver;
 import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import java.time.format.DateTimeFormatter;
@@ -35,7 +35,12 @@ public class WebConfig extends WebMvcConfigurerAdapter
     @Override
     public void extendMessageConverters(List<HttpMessageConverter<?>> converters)
     {
-        super.extendMessageConverters(converters);
+        converters.stream()
+                .filter(converter -> converter instanceof MappingJackson2HttpMessageConverter)
+                .forEach(converter -> {
+                    MappingJackson2HttpMessageConverter jacksonMapper = ((MappingJackson2HttpMessageConverter) converter);
+                    jacksonMapper.getObjectMapper().disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+                });
     }
 
     @Override
@@ -52,11 +57,5 @@ public class WebConfig extends WebMvcConfigurerAdapter
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer)
     {
         configurer.defaultContentType(MediaType.APPLICATION_JSON);
-    }
-
-    @Override
-    public void addFormatters(FormatterRegistry registry)
-    {
-        registry.addConverter(new LocalDateTimeConverter(DateTimeFormatter.ISO_LOCAL_DATE_TIME));
     }
 }

@@ -2,7 +2,7 @@ package app.data;
 
 import org.junit.Test;
 
-import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.atLeastOnce;
@@ -25,10 +25,10 @@ public class EventTest
         assertEquals(false, event.isCanceled());
         assertNull(event.getUser());
 
-        LocalDateTime expectedStart = LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0).plusDays(7);
-        LocalDateTime expectedEnd = expectedStart.plusHours(1);
-        LocalDateTime startTime = event.getStartTime();
-        LocalDateTime endTime = event.getEndTime();
+        ZonedDateTime expectedStart = ZonedDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0).plusDays(7);
+        ZonedDateTime expectedEnd = expectedStart.plusHours(1);
+        ZonedDateTime startTime = event.getStartTime();
+        ZonedDateTime endTime = event.getEndTime();
 
         assertEquals(expectedStart.getYear(), startTime.getYear());
         assertEquals(expectedStart.getMonth(), startTime.getMonth());
@@ -44,17 +44,17 @@ public class EventTest
         Event event = new Event();
 
         // before event
-        event.setStartTime(LocalDateTime.now().plusDays(1));
+        event.setStartTime(ZonedDateTime.now().plusDays(1));
         event.setEndTime(event.getStartTime().plusHours(1));
         assertFalse(event.isExpired());
 
         // after event
-        event.setStartTime(LocalDateTime.now().minusDays(1));
+        event.setStartTime(ZonedDateTime.now().minusDays(1));
         event.setEndTime(event.getStartTime().plusHours(1));
         assertTrue(event.isExpired());
 
         // while event is happening
-        event.setStartTime(LocalDateTime.now().minusHours(1));
+        event.setStartTime(ZonedDateTime.now().minusHours(1));
         event.setEndTime(event.getStartTime().plusHours(2));
         assertFalse(event.isExpired());
     }
@@ -65,17 +65,17 @@ public class EventTest
         Event event = new Event();
 
         // before event
-        event.setStartTime(LocalDateTime.now().plusDays(1));
+        event.setStartTime(ZonedDateTime.now().plusDays(1));
         event.setEndTime(event.getStartTime().plusHours(1));
         assertFalse(event.isHappening());
 
         // after event
-        event.setStartTime(LocalDateTime.now().minusDays(1));
+        event.setStartTime(ZonedDateTime.now().minusDays(1));
         event.setEndTime(event.getStartTime().plusHours(1));
         assertFalse(event.isHappening());
 
         // while event is happening
-        event.setStartTime(LocalDateTime.now().minusHours(1));
+        event.setStartTime(ZonedDateTime.now().minusHours(1));
         event.setEndTime(event.getStartTime().plusHours(2));
         assertTrue(event.isHappening());
     }

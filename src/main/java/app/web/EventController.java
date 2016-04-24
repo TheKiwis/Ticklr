@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.validation.BindException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +25,7 @@ public class EventController
 {
     private static final ResponseEntity NOT_FOUND = new ResponseEntity(HttpStatus.NOT_FOUND);
     private static final ResponseEntity FORBIDDEN = new ResponseEntity(HttpStatus.FORBIDDEN);
+    private static final ResponseEntity BAD_REQUEST = new ResponseEntity(HttpStatus.BAD_REQUEST);
 
     private EventRepository eventRepository;
 
@@ -47,12 +50,6 @@ public class EventController
         this.ticketSetRepository = ticketSetRepository;
         this.validator = validator;
         this.userAuthorizer = userAuthorizer;
-    }
-
-    @InitBinder
-    public void initBinder(WebDataBinder binder)
-    {
-        binder.registerCustomEditor(Visibility.class, new EnumConverter(Visibility.class));
     }
 
     /**
@@ -93,13 +90,21 @@ public class EventController
         return new ResponseEntity(bindingResult.getFieldErrors(), headers, status);
     }
 
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity handleHttpMessageNotReadableException(HttpMessageNotReadableException ex)
+    {
+        // todo more descriptive response
+        return new ResponseEntity(ex.getMessage(), HttpStatus.BAD_REQUEST);
+    }
+
+
     /**
      * @param requestEvent
      * @param bindingResult
      * @return
      */
     @RequestMapping(value = "/{eventId}", method = RequestMethod.PUT)
-    public ResponseEntity updateEvent(@PathVariable Long userId, @PathVariable Long eventId, Event requestEvent, BindingResult bindingResult)
+    public ResponseEntity updateEvent(@PathVariable Long userId, @PathVariable Long eventId, @RequestBody(required = false) Event requestEvent, BindingResult bindingResult)
     {
         Event event = eventRepository.findById(eventId);
 
@@ -115,6 +120,10 @@ public class EventController
 
         HttpHeaders headers = new HttpHeaders();
         HttpStatus status = HttpStatus.NO_CONTENT;
+
+        // todo consider let handleHttpMessageNotReadableException return Bad Request response with appropriate message
+        if (requestEvent == null)
+            return BAD_REQUEST;
 
         validator.validate(requestEvent, bindingResult);
 

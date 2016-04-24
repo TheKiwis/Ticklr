@@ -7,6 +7,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
@@ -28,8 +30,10 @@ public class EventValidatorTest
     public void testValidate() throws Exception
     {
         Event mockEvent = mock(Event.class);
-        when(mockEvent.getStartTime()).thenReturn(LocalDateTime.of(2015, 10, 10, 12, 00));
-        when(mockEvent.getEndTime()).thenReturn(LocalDateTime.of(2015, 10, 10, 10, 00));
+        ZonedDateTime sdt = ZonedDateTime.of(2015, 10, 10, 12, 00, 00, 00, ZoneId.of("Z"));
+        ZonedDateTime edt = ZonedDateTime.of(2015, 10, 10, 10, 00, 00, 00, ZoneId.of("Z"));
+        when(mockEvent.getStartTime()).thenReturn(sdt);
+        when(mockEvent.getEndTime()).thenReturn(edt);
         Errors result = mock(BindingResult.class);
 
         new EventValidator().validate(mockEvent, result);

@@ -1,7 +1,9 @@
 package app.data;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonValue;
 import org.hibernate.annotations.*;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -10,12 +12,10 @@ import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
-import java.time.LocalDateTime;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
+import java.time.ZonedDateTime;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 
 /**
  * @author ngnmhieu
@@ -30,19 +30,20 @@ public class Event
     protected Long id;
 
     @Column(name = "title")
-    @NotNull @NotEmpty
+    @NotNull
+    @NotEmpty
     protected String title;
 
     @Column(name = "description")
     protected String description;
 
     @Column(name = "start_time")
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS")
-    protected LocalDateTime startTime;
+    //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    protected ZonedDateTime startTime;
 
     @Column(name = "end_time")
-    @JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSS")
-    protected LocalDateTime endTime;
+    //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSSZ")
+    protected ZonedDateTime endTime;
 
     @Column(name = "visibility")
     @Enumerated(EnumType.STRING)
@@ -61,43 +62,41 @@ public class Event
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_time", updatable = false)
     @CreationTimestamp
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     protected Date createdTime;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_time", insertable = false, updatable = false)
     @Generated(GenerationTime.ALWAYS)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
     protected Date updatedTime;
 
     /**
      * Default Constructor assigns default values to fields
-     *  - title = New Event
-     *  - description is empty
-     *  - startTime = now + 7 days
-     *  - endTime = startTime + 1 hours
-     *  - status = DRAFT
-     *  - visibility = PRIVATE
-     *  - canceled = false
+     * - title = New Event
+     * - description is empty
+     * - startTime = now + 7 days
+     * - endTime = startTime + 1 hours
+     * - status = DRAFT
+     * - visibility = PRIVATE
+     * - canceled = false
      */
     public Event()
     {
         this("New Event", "", null, null, Visibility.PRIVATE, false, null);
 
-        setStartTime(LocalDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0).plusDays(7));
+        setStartTime(ZonedDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0).plusDays(7));
         setEndTime(startTime.plusHours(1));
     }
 
     /**
-     * @param title event's title
+     * @param title       event's title
      * @param description event's description
-     * @param startTime time when the event starts
-     * @param endTime time when the event ends
-     * @param visibility visibility of the event @see Visibility
-     * @param canceled has this event been canceled
-     * @param user the user who owns this event
+     * @param startTime   time when the event starts
+     * @param endTime     time when the event ends
+     * @param visibility  visibility of the event @see Visibility
+     * @param canceled    has this event been canceled
+     * @param user        the user who owns this event
      */
-    public Event(String title, String description, LocalDateTime startTime, LocalDateTime endTime, Visibility visibility, boolean canceled, User user)
+    public Event(String title, String description, ZonedDateTime startTime, ZonedDateTime endTime, Visibility visibility, boolean canceled, User user)
     {
         this.title = title;
         this.description = description;
@@ -128,16 +127,16 @@ public class Event
     /**
      * @return the time when this event ends
      */
-    public LocalDateTime getEndTime()
+    public ZonedDateTime getEndTime()
     {
         return endTime;
     }
 
     /**
      * @param endTime the time when this event ends
-     *        must be later than startTime
+     *                must be later than startTime
      */
-    public void setEndTime(LocalDateTime endTime)
+    public void setEndTime(ZonedDateTime endTime)
     {
         this.endTime = endTime;
     }
@@ -145,16 +144,16 @@ public class Event
     /**
      * @return the time when this event starts
      */
-    public LocalDateTime getStartTime()
+    public ZonedDateTime getStartTime()
     {
         return startTime;
     }
 
     /**
      * @param startTime the time when this event starts
-     *        must be earlier than endTime
+     *                  must be earlier than endTime
      */
-    public void setStartTime(LocalDateTime startTime)
+    public void setStartTime(ZonedDateTime startTime)
     {
         this.startTime = startTime;
     }
@@ -252,6 +251,7 @@ public class Event
 
     /**
      * Set canceled state of event
+     *
      * @param canceled
      */
     public void setCanceled(boolean canceled)
@@ -261,6 +261,7 @@ public class Event
 
     /**
      * Takes over attributes of other event (except ID and Owner)
+     *
      * @param other
      * @return a new event with ID and Owner of this instance and other attributes of other event
      */
@@ -280,7 +281,7 @@ public class Event
      */
     public boolean isExpired()
     {
-        return LocalDateTime.now().isAfter(endTime);
+        return ZonedDateTime.now().isAfter(endTime);
     }
 
     /**
@@ -288,26 +289,21 @@ public class Event
      */
     public boolean isHappening()
     {
-        LocalDateTime now = LocalDateTime.now();
+        ZonedDateTime now = ZonedDateTime.now();
         return now.isAfter(startTime) && now.isBefore(endTime);
-    }
-
-    public Date getCreatedTime()
-    {
-        return createdTime;
-    }
-
-    public Date getUpdatedTime()
-    {
-        return updatedTime;
     }
 
     /**
      * Possible visibilities of an event
      */
-    public static enum Visibility
+    public enum Visibility
     {
-        PUBLIC, PRIVATE
+        PUBLIC, PRIVATE;
+        //@JsonCreator
+        //public static Visibility forValue(String value)
+        //{
+        //    return Enum.valueOf(Visibility.class, value);
+        //}
     }
 
     @Override
