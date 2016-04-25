@@ -35,15 +35,6 @@ public class UserController
     private JwtAuthenticator jwtAuthenticator;
 
     /**
-     * @param userId user's id; if userId == null, it's not appended
-     * @return /{USER_BASE_URI}[/userId]
-     */
-    private String getUserUri(Long userId)
-    {
-        return "/api/users" + (userId == null ? "" : "/" + userId);
-    }
-
-    /**
      * @param repo fetches and saves User object
      * @param jwtAuthenticator Jwt Authentication helper object
      */
@@ -125,5 +116,14 @@ public class UserController
     {
         // todo use logger to log ex.getMessage()
         return new ResponseEntity("{\"message\": \"The request sent by the client was syntactically incorrect.\"}", HttpStatus.BAD_REQUEST);
+    }
+
+    /**
+     * @param userId user's id; if userId == null, it's not appended
+     * @return /{USER_BASE_URI}[/userId]
+     */
+    private String getUserUri(Long userId)
+    {
+        return "/api/users" + (userId == null ? "" : "/" + userId);
     }
 }

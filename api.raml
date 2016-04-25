@@ -1,0 +1,66 @@
+#%RAML 0.8
+title: Ticklr API 
+version: v1
+baseUri: http://localhost:8080/api/
+protocols: [HTTP, HTTPS]
+mediaType: application/json
+description: |
+Notes about design decisions are temporarily written here.
+DateTime inputs and outputs are formatted in ISO-8601.
+
+/users:
+  post:
+    description: creates new user
+    body:
+      application/json:
+        example: |
+          {
+            "email"    : "unique_email@gmail.com",
+            "password" : "123456789"
+          }
+    responses:
+      201:
+        description: User successfully registered.
+        headers:
+          Location:
+            description: Location of the newly created user
+            example: "Location: /users/27a4563a45ab4a7aacd15af9"
+      400:
+        description: 400 Bad Request due to validation errors
+        body:
+          application/json:
+            example: |
+              # TODO: consider if it should be an array or object with one attribute errors
+              {
+              }
+      409:
+        description: Conflict due to duplicated email.
+  /request-auth-token:
+    post:
+      body:
+        application/json:
+          example: |
+            {
+              "email"    : "unique_email@gmail.com",
+              "password" : "123456789"
+            }
+      responses:
+        200:
+          description: Authentication succeeds, return auth token to user.
+          body:
+            application/json:
+              example: |
+                {
+                  "key": "eyJ0eXQiLCJhbGcAiO1IUzI1iJKViOiJNiJ9.eyJlldUBnbWFpbC5zdWIiOiJuZ25taGjb20iLCJleHAiOjE0NjE4ODA4MDB9.ZmddFiD4vB9p0cWL6ahbaqLbLLGTXTjbJwH5QmbS2YL",
+                  "keyCreationTime": 1461311670,
+                  "extendedInformation": ""
+                }
+        401:
+          description: User can not be authenticated, try again.
+  /{userId}:
+    get:
+      responses:
+        200:
+        401:
+    /basket:
+    /events:
