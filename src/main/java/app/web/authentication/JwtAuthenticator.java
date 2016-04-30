@@ -16,11 +16,12 @@ import java.util.Date;
  */
 public class JwtAuthenticator
 {
+    // default expiration days
     public static final int DEFAULT_EXPIRED_DAYS = 7;
+
     private byte[] authSecretBytes;
 
     /**
-     *
      * @param authSecret
      */
     public JwtAuthenticator(String authSecret)
@@ -34,14 +35,14 @@ public class JwtAuthenticator
      * @param token the JWT token
      * @return a set of claims contained in the JWT token
      * @throws org.springframework.security.authentication.BadCredentialsException if the followings happen:
-     *             - malformed token
-     *             - signature doesn't match
-     *             - missing required claims (subject, expiration)
-     *             - expired token
+     *                                                                             - malformed token
+     *                                                                             - signature doesn't match
+     *                                                                             - missing required claims (subject, expiration)
+     *                                                                             - expired token
      */
     public Claims authenticate(String token)
     {
-        Claims claims  = null;
+        Claims claims = null;
         try {
             claims = Jwts.parser()
                     .setSigningKey(authSecretBytes)
@@ -49,46 +50,50 @@ public class JwtAuthenticator
                     .getBody();
 
             // check expiration claim
-            if (claims.getExpiration() == null){
+            if (claims.getExpiration() == null) {
                 throw new BadCredentialsException("Missing expiration claim");
             }
 
-            if(claims.getSubject() == null){
+            if (claims.getSubject() == null) {
                 throw new BadCredentialsException("Missing subject claim");
             }
 
-        }catch (UnsupportedJwtException|MalformedJwtException|SignatureException|ExpiredJwtException|MissingClaimException e){
+        } catch (UnsupportedJwtException | MalformedJwtException | SignatureException | ExpiredJwtException | MissingClaimException e) {
             throw new BadCredentialsException("JWT token is not valid");
         }
 
-
-        return  claims;
+        return claims;
     }
 
     /**
      * Generates a JWT Token with provided information and signs it with authSecret
      *
-     * @param email subject claim
+     * @param sub           subject claim
      * @param expiredInDays
      * @return JWT Token
      */
-    public Token generateToken(String email , int expiredInDays)
+    public Token generateToken(String sub, int expiredInDays)
     {
-
         Date expiredDate = getExpiredDate(expiredInDays);
 
         String jwtToken = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
-                .setSubject(email)
+                .setSubject(sub)
                 .setExpiration(expiredDate)
                 .signWith(SignatureAlgorithm.HS256, authSecretBytes).compact();
         DefaultToken token = new DefaultToken(jwtToken, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC), "");
         return token;
     }
 
-    public Token generateToken(String email)
+    /**
+     * Generates JWT Token with the default expired day @see {@link JwtAuthenticator::DEFAULT_EXPIRED_DAYS}
+     *
+     * @param sub subject of the generated token (User's ID or Email)
+     * @return
+     */
+    public Token generateToken(String sub)
     {
-       return this.generateToken(email, DEFAULT_EXPIRED_DAYS);
+        return this.generateToken(sub, DEFAULT_EXPIRED_DAYS);
     }
 
     private Date getExpiredDate(int expiredInDays)
@@ -99,7 +104,7 @@ public class JwtAuthenticator
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
-        cal.add(Calendar.DATE,expiredInDays);
+        cal.add(Calendar.DATE, expiredInDays);
         return cal.getTime();
     }
 }
