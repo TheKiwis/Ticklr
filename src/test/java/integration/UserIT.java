@@ -17,6 +17,7 @@ import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 
 import javax.persistence.Query;
+import java.util.UUID;
 
 /**
  * @author ngnmhieu
@@ -29,13 +30,15 @@ public class UserIT extends CommonIntegrationTest
     // authentication token
     private String loginString;
 
+    UUID userId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
+
     @Before
     public void login() throws Exception
     {
         loginString = "Bearer " + new JwtAuthenticator(authSecret).generateToken("user@example.com").getKey();
     }
 
-    private String userUri(Long id)
+    private String getUserURL(UUID id)
     {
         return "/api/users" + (id == null ? "" : "/" + id);
     }
@@ -43,9 +46,9 @@ public class UserIT extends CommonIntegrationTest
     @Test
     public void shouldReturnUserInformation() throws Exception
     {
-        mockMvc.perform(get(userUri(1l))
+        mockMvc.perform(get(getUserURL(userId))
                 .header("Authorization", loginString))
-                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.id").value(userId.toString()))
                 .andExpect(jsonPath("$.email").value("user@example.com"))
                 .andExpect(jsonPath("$.password").doesNotExist());
     }
@@ -54,9 +57,10 @@ public class UserIT extends CommonIntegrationTest
 
     public void shouldReturnHttpNotFoundIfNoUserFound() throws Exception
     {
-        assertNull(em.find(User.class, 123l));
+        UUID unknownUserId = UUID.fromString("f7fa0180-0f17-11e6-b94e-0002a5d5c51b");
+        assertNull(em.find(User.class, unknownUserId));
 
-        mockMvc.perform(get(userUri(123l))
+        mockMvc.perform(get(getUserURL(unknownUserId))
                 .header("Authorization", loginString))
                 .andExpect(status().isNotFound());
     }
@@ -69,12 +73,12 @@ public class UserIT extends CommonIntegrationTest
         query = em.createQuery("SELECT COUNT(u) FROM User u");
         long count = (long) query.getSingleResult();
 
-        mockMvc.perform(post(userUri(null))
+        mockMvc.perform(post(getUserURL(null))
                 .accept("application/json")
                 .contentType("application/json")
                 .content(registrationForm("unique_email@example.com", "123456789")))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", startsWith(userUri(null))));
+                .andExpect(header().string("Location", startsWith(getUserURL(null))));
 
         query = em.createQuery("SELECT COUNT(u) FROM User u");
         assertEquals((count + 1), query.getSingleResult());
@@ -84,7 +88,7 @@ public class UserIT extends CommonIntegrationTest
     public void shouldReturnEmptyValidationErrorsAndCreatedStatus() throws Exception
     {
         mockMvc.perform(
-                post(userUri(null))
+                post(getUserURL(null))
                         .accept("application/json")
                         .contentType("application/json")
                         .content(registrationForm("email@gmail.com", "123456789")))
@@ -96,7 +100,7 @@ public class UserIT extends CommonIntegrationTest
     public void shouldReturnValidationErrorWithBadRequestHTTPStatus() throws Exception
     {
         mockMvc.perform(
-                post(userUri(null))
+                post(getUserURL(null))
                         .accept("application/json")
                         .contentType("application/json")
                         .content(registrationForm("", "123456789")))
@@ -108,7 +112,7 @@ public class UserIT extends CommonIntegrationTest
     public void shouldRejectRequestWithDuplicatedEmail() throws Exception
     {
         mockMvc.perform(
-                post(userUri(null))
+                post(getUserURL(null))
                         .accept("application/json")
                         .contentType("application/json")
                         .content(registrationForm("user@example.com", "123456789")))

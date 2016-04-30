@@ -1,9 +1,11 @@
 package app.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import org.hibernate.annotations.GenericGenerator;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.persistence.*;
+import java.util.UUID;
 
 /**
  * @author ngnmhieu
@@ -14,8 +16,9 @@ public class User
 {
     @Id
     @Column(name = "id")
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    @GeneratedValue(generator = "uuid")
+    @GenericGenerator(name = "uuid", strategy = "uuid2")
+    private UUID id;
 
     @Column(name = "email", unique = true)
     private String email;
@@ -33,15 +36,18 @@ public class User
         setPassword(password);
     }
 
-    public User(Long id, String email, String password)
+    public User(UUID id, String email, String password)
     {
         this(email, password);
         setId(id);
     }
 
-    public Long getId() { return id; }
+    public UUID getId()
+    {
+        return id;
+    }
 
-    public void setId(Long id)
+    public void setId(UUID id)
     {
         this.id = id;
     }

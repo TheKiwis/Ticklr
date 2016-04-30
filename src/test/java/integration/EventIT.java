@@ -18,6 +18,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import java.math.BigDecimal;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -29,7 +30,7 @@ public class EventIT extends CommonIntegrationTest
 {
     // loaded fixtures from database
     private User sampleUser;
-    private Long sampleUserId;
+    private UUID sampleUserId;
 
     private Event sampleEvent;
     private Long sampleEventId;
@@ -46,13 +47,15 @@ public class EventIT extends CommonIntegrationTest
     // Authentication token is put in Authorization header in each request
     private String authString;
 
+    private UUID invalidUserId;
+
     /**
      * @param userId
      * @param eventId
      * @param ticketSetId
      * @return TicketSet URL
      */
-    private String ticketSetURL(Long userId, Long eventId, Long ticketSetId)
+    private String ticketSetURL(UUID userId, Long eventId, Long ticketSetId)
     {
         return eventURL(userId, eventId) + "/ticket-sets" + (ticketSetId == null ? "" : "/" + ticketSetId);
     }
@@ -62,7 +65,7 @@ public class EventIT extends CommonIntegrationTest
      * @param eventId
      * @return Event URL
      */
-    private String eventURL(Long userId, Long eventId)
+    private String eventURL(UUID userId, Long eventId)
     {
         return "/api/users/" + userId + "/events" + (eventId != null ? "/" + eventId : "");
     }
@@ -77,7 +80,7 @@ public class EventIT extends CommonIntegrationTest
     public void sampleInput() throws Exception
     {
         sampleEventId = 123l;
-        sampleUserId = 1l;
+        sampleUserId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
         sampleTicketSetId = 10l;
         sampleEvent = em.find(Event.class, sampleEventId);
         sampleUser = sampleEvent.getUser();
@@ -88,6 +91,8 @@ public class EventIT extends CommonIntegrationTest
         sampleStartTime = sampleEvent.getStartTime().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         sampleEndTime = sampleEvent.getEndTime().format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         sampleCanceled = sampleEvent.isCanceled();
+
+        invalidUserId = UUID.fromString("f3958500-0f0e-11e6-b1d4-0002a5d5c51b");
     }
 
     private MockHttpServletRequestBuilder addAuthHeader(MockHttpServletRequestBuilder requestBuilder)
@@ -128,7 +133,7 @@ public class EventIT extends CommonIntegrationTest
                 .header("Authorization", authString)).andExpect(status().isCreated()).andReturn();
 
         String expectedStartTime = ZonedDateTime.now().plusDays(7).withHour(0).withMinute(0).withSecond(0).withNano(0).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
-        String expectedEndTime = ZonedDateTime.now().plusDays(7).withHour(0).withMinute(0).withSecond(0).withNano(0).plusHours(sampleUserId).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
+        String expectedEndTime = ZonedDateTime.now().plusDays(7).withHour(0).withMinute(0).withSecond(0).withNano(0).plusHours(1).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
         String location = response.getResponse().getHeader("Location");
         mockMvc.perform(addAuthHeader(get(location)))
@@ -315,15 +320,15 @@ public class EventIT extends CommonIntegrationTest
     public void shouldReturnHttpNotFoundIfNoUserFound() throws Exception
     {
         // User with ID 234 doesn't exist
-        assertNull(em.find(User.class, 234l));
+        assertNull(em.find(User.class, invalidUserId));
 
-        mockMvc.perform(put(eventURL(234l, sampleEventId))
+        mockMvc.perform(put(eventURL(invalidUserId, sampleEventId))
                 .header("Authorization", authString)
                 .contentType("application/json")
                 .content(getEventForm()))
                 .andExpect(status().isNotFound());
 
-        mockMvc.perform(get(eventURL(234l, sampleEventId)).header("Authorization", authString))
+        mockMvc.perform(get(eventURL(invalidUserId, sampleEventId)).header("Authorization", authString))
                 .andExpect(status().isNotFound());
     }
 
@@ -364,7 +369,7 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldReturnHttpStatusBadRequestForNonNumericEventId() throws Exception
     {
-        mockMvc.perform(get(eventURL(1l, null) + "/nonnumeric")
+        mockMvc.perform(get(eventURL(sampleUserId, null) + "/nonnumeric")
                 .header("Authorization", authString))
                 .andExpect(status().isBadRequest());
     }
@@ -472,7 +477,7 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldReturnForbiddenAccessWhileAccessingEventsOfOtherUser() throws Exception
     {
-        Long anotherUserId = 2l;
+        UUID anotherUserId = UUID.fromString("63b8e800-0f0e-11e6-bec3-0002a5d5c51b");
         Long anotherEventId = 456l;
         Long anotherTicketSetId = 9l;
 

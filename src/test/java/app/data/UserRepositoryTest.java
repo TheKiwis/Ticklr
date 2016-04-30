@@ -13,6 +13,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
+import java.util.UUID;
 
 /**
  * @author ngnmhieu
@@ -26,6 +27,8 @@ public class UserRepositoryTest
     @Mock
     User user;
 
+    UUID userId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
+
     protected UserRepository userRepository;
 
     @Before
@@ -37,18 +40,18 @@ public class UserRepositoryTest
     @Test
     public void findById_shouldReturnTheCorrectUser() throws Exception
     {
-        when(em.find(User.class, 123l)).thenReturn(user);
+        when(em.find(User.class, userId)).thenReturn(user);
 
-        assertEquals(user, userRepository.findById(123l));
+        assertEquals(user, userRepository.findById(userId));
     }
 
     @Test
     public void findById_shouldReturnNullIfNoUserFound() throws Exception
     {
-        when(em.find(User.class, 123l)
+        when(em.find(User.class, userId)
         ).thenThrow(NoResultException.class);
 
-        assertNull(userRepository.findById(123l));
+        assertNull(userRepository.findById(userId));
     }
 
     @Test

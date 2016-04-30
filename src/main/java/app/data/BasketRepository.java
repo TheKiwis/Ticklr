@@ -4,6 +4,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
+import java.util.UUID;
 
 /**
  * Created by DucNguyenMinh on 08.03.16.
@@ -28,7 +29,7 @@ public class BasketRepository
      * @param userId ID of the user who owns the basket
      * @return null if nothing found
      */
-    public Basket findByUserId(Long userId)
+    public Basket findByUserId(UUID userId)
     {
         Query query = em.createQuery("SELECT b FROM Basket b WHERE b.user.id = :user_id");
 

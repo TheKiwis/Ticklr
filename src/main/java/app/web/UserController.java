@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.persistence.PersistenceException;
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.UUID;
 
 /**
  * Contains REST API Endpoints for following services:
@@ -47,7 +48,7 @@ public class UserController
 
     // todo only user authorization
     @RequestMapping(value = "/{userId}", method = RequestMethod.GET)
-    public ResponseEntity show(@PathVariable long userId)
+    public ResponseEntity show(@PathVariable UUID userId)
     {
         User user = repo.findById(userId);
 
@@ -122,7 +123,7 @@ public class UserController
      * @param userId user's id; if userId == null, it's not appended
      * @return /{USER_BASE_URI}[/userId]
      */
-    private String getUserUri(Long userId)
+    private String getUserUri(UUID userId)
     {
         return "/api/users" + (userId == null ? "" : "/" + userId);
     }

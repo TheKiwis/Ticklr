@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
+import java.util.UUID;
 
 /**
  * @author DucNguyenMinh
@@ -44,7 +45,7 @@ public class BasketController
     }
 
     @RequestMapping(method = RequestMethod.GET)
-    public ResponseEntity show(@PathVariable Long userId)
+    public ResponseEntity show(@PathVariable UUID userId)
     {
         Basket basket = null;
 
@@ -69,10 +70,8 @@ public class BasketController
 
 
     @RequestMapping(value = "/items", method = RequestMethod.POST)
-    public ResponseEntity addItem(@PathVariable Long userId, @Valid BasketItemForm basketItemForm, BindingResult bindingResult)
+    public ResponseEntity addItem(@PathVariable UUID userId, @Valid BasketItemForm basketItemForm, BindingResult bindingResult)
     {
-
-
         User user = userRepository.findById(userId);
         if (user == null) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
@@ -119,7 +118,7 @@ public class BasketController
     }
 
     @RequestMapping(value = "/items/{itemId}", method = RequestMethod.DELETE)
-    public ResponseEntity deleteItem(@PathVariable Long userId, @PathVariable long itemId)
+    public ResponseEntity deleteItem(@PathVariable UUID userId, @PathVariable long itemId)
     {
 
         User user = userRepository.findById(userId);
@@ -139,7 +138,7 @@ public class BasketController
     }
 
     @RequestMapping(value = "/items/{itemId}", method = RequestMethod.PUT)
-    public ResponseEntity updateItem(@PathVariable Long userId, @PathVariable Long itemId, BasketItemUpdateForm basketItemUpdateForm, BindingResult bindingResult)
+    public ResponseEntity updateItem(@PathVariable UUID userId, @PathVariable Long itemId, BasketItemUpdateForm basketItemUpdateForm, BindingResult bindingResult)
     {
 
         User user = userRepository.findById(userId);

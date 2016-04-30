@@ -17,6 +17,7 @@ import org.springframework.test.web.servlet.MvcResult;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.UUID;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -31,7 +32,8 @@ public class AuthenticationIT extends CommonIntegrationTest
     @Value("${auth.secret}")
     private String authSecret;
 
-    private String AUTH_URI = "/api/users/request-auth-token";
+    private static final String AUTH_URI = "/api/users/request-auth-token";
+    private UUID userId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
 
     @Test
     public void shouldLoadTestFixture() throws Exception
@@ -62,7 +64,7 @@ public class AuthenticationIT extends CommonIntegrationTest
         }
 
         // perform the login
-        MvcResult result = mockMvc.perform(post("/api/users/request-auth-token")
+        MvcResult result = mockMvc.perform(post(AUTH_URI)
                 .contentType("application/json")
                 .content(new ObjectMapper().writeValueAsString(new LoginForm(email, password)))
         ).andExpect(status().isOk()).andReturn();
@@ -126,7 +128,7 @@ public class AuthenticationIT extends CommonIntegrationTest
         JwtAuthenticator jwt = new JwtAuthenticator(authSecret);
         Token jwtToken = jwt.generateToken("user@example.com");
 
-        mockMvc.perform(get("/api/users/1")
+        mockMvc.perform(get("/api/users/" + userId)
                 .header("Authorization", "Bearer " + jwtToken.getKey()))
                 .andExpect(status().isOk());
     }

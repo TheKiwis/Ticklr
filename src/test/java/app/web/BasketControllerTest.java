@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 
 import java.math.BigDecimal;
+import java.util.UUID;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
@@ -47,7 +48,7 @@ public class BasketControllerTest
 
     Long ticketSetId = 456l;
     Long basketId = 1l;
-    Long userId = 123l;
+    UUID userId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
     long itemId = 5l;
 
     BasketItemForm basketItemForm = new BasketItemForm(10, ticketSetId);

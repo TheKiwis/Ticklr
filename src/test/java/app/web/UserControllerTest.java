@@ -35,6 +35,8 @@ public class UserControllerTest
 
     UserController controller;
 
+    UUID userId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
+
     // Signature Secret for JWT
     private static final String authSecret = "test_secret";
 
@@ -49,9 +51,9 @@ public class UserControllerTest
     {
         User mockUser = mock(User.class);
 
-        when(userRepository.findById(123l)).thenReturn(mockUser);
+        when(userRepository.findById(userId)).thenReturn(mockUser);
 
-        ResponseEntity response = controller.show(123l);
+        ResponseEntity response = controller.show(userId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(mockUser, response.getBody());
@@ -60,9 +62,9 @@ public class UserControllerTest
     @Test
     public void show_shouldReturnHttpNotFound() throws Exception
     {
-        when(userRepository.findById(123l)).thenReturn(null);
+        when(userRepository.findById(userId)).thenReturn(null);
 
-        ResponseEntity response = controller.show(123l);
+        ResponseEntity response = controller.show(userId);
 
         assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
     }

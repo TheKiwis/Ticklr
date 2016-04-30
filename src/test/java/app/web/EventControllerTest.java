@@ -16,6 +16,7 @@ import org.springframework.validation.BindingResult;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
@@ -52,9 +53,9 @@ public class EventControllerTest
     @Mock
     UserAuthorizer userAuthorizer;
 
-    private long ticketSetId = 10l;
-    private long userId = 1l;
-    private long eventId = 123l;
+    private Long ticketSetId = 10l;
+    private UUID userId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
+    private Long eventId = 123l;
 
     @Before
     public void setUp()

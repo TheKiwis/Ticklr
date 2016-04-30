@@ -38,11 +38,9 @@ public class Event
     protected String description;
 
     @Column(name = "start_time")
-    //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     protected ZonedDateTime startTime;
 
     @Column(name = "end_time")
-    //@JsonFormat(shape=JsonFormat.Shape.STRING, pattern="yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     protected ZonedDateTime endTime;
 
     @Column(name = "visibility")
@@ -220,7 +218,6 @@ public class Event
      */
     public Collection<TicketSet> getTicketSets()
     {
-        //return Collections.unmodifiableCollection(ticketSets);
         return ticketSets;
     }
 
@@ -299,11 +296,6 @@ public class Event
     public enum Visibility
     {
         PUBLIC, PRIVATE;
-        //@JsonCreator
-        //public static Visibility forValue(String value)
-        //{
-        //    return Enum.valueOf(Visibility.class, value);
-        //}
     }
 
     @Override

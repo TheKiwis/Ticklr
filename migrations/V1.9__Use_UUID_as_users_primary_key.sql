@@ -1,0 +1,2 @@
+ALTER TABLE `users` 
+CHANGE COLUMN `id` `id` BINARY(16) NOT NULL;

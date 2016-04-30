@@ -5,3 +5,8 @@
 out/
 .floo*
 target
+node_modules
+bower_components
+*.log
+src/main/webapp/public/app/**/*.js
+src/main/webapp/public/app/**/*.map

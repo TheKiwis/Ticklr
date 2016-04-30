@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users/{userId}/events")
@@ -52,7 +53,7 @@ public class EventController
      * @return
      */
     @RequestMapping(method = RequestMethod.POST)
-    public ResponseEntity createEvent(@PathVariable Long userId, @RequestBody(required = false) Event requestEvent, BindingResult bindingResult)
+    public ResponseEntity createEvent(@PathVariable UUID userId, @RequestBody(required = false) Event requestEvent, BindingResult bindingResult)
     {
         User user = userRepository.findById(userId);
 
@@ -97,7 +98,7 @@ public class EventController
      * @return
      */
     @RequestMapping(value = "/{eventId}", method = RequestMethod.PUT)
-    public ResponseEntity updateEvent(@PathVariable Long userId, @PathVariable Long eventId, @RequestBody(required = false) Event requestEvent, BindingResult bindingResult)
+    public ResponseEntity updateEvent(@PathVariable UUID userId, @PathVariable Long eventId, @RequestBody(required = false) Event requestEvent, BindingResult bindingResult)
     {
         Event event = eventRepository.findById(eventId);
 
@@ -131,7 +132,7 @@ public class EventController
     }
 
     @RequestMapping(value = "/{eventId}", method = RequestMethod.GET)
-    public ResponseEntity showEvent(@PathVariable Long userId, @PathVariable Long eventId)
+    public ResponseEntity showEvent(@PathVariable UUID userId, @PathVariable Long eventId)
     {
         User user = userRepository.findById(userId);
 
@@ -150,7 +151,7 @@ public class EventController
     }
 
     @RequestMapping(value = "/{eventId}", method = RequestMethod.DELETE)
-    public ResponseEntity cancelEvent(@PathVariable Long userId, @PathVariable Long eventId)
+    public ResponseEntity cancelEvent(@PathVariable UUID userId, @PathVariable Long eventId)
     {
         User user = userRepository.findById(userId);
 
@@ -174,7 +175,7 @@ public class EventController
     }
 
     @RequestMapping(value = "/{eventId}/ticket-sets", method = RequestMethod.POST)
-    public ResponseEntity addTicketSet(@PathVariable Long userId, @PathVariable Long eventId, @RequestBody(required = false) @Valid TicketSet ticketSet, BindingResult bindingResult)
+    public ResponseEntity addTicketSet(@PathVariable UUID userId, @PathVariable Long eventId, @RequestBody(required = false) @Valid TicketSet ticketSet, BindingResult bindingResult)
     {
         User user = userRepository.findById(userId);
 
@@ -207,7 +208,7 @@ public class EventController
     }
 
     @RequestMapping(value = "/{eventId}/ticket-sets/{ticketSetId}", method = RequestMethod.PUT)
-    public ResponseEntity updateTicketSet(@PathVariable long userId, @PathVariable long eventId,
+    public ResponseEntity updateTicketSet(@PathVariable UUID userId, @PathVariable long eventId,
                                           @PathVariable long ticketSetId, @RequestBody(required = false) @Valid TicketSet updatedTicketSet,
                                           BindingResult bindingResult)
     {
@@ -242,7 +243,7 @@ public class EventController
 
     // todo deals with situation when basket items still reference this ticket set
     @RequestMapping(value = "/{eventId}/ticket-sets/{ticketSetId}", method = RequestMethod.DELETE)
-    public ResponseEntity deleteTicketSet(@PathVariable long userId, @PathVariable long eventId, @PathVariable long ticketSetId)
+    public ResponseEntity deleteTicketSet(@PathVariable UUID userId, @PathVariable long eventId, @PathVariable long ticketSetId)
     {
         TicketSet ticketSet = ticketSetRepository.findById(ticketSetId);
 
@@ -272,7 +273,7 @@ public class EventController
      * @param eventId is not included in the result if it's null
      * @return Event URL
      */
-    private String eventURL(Long userId, Long eventId)
+    private String eventURL(UUID userId, Long eventId)
     {
         assert userId != null;
         return "/api/users/" + userId + "/events" + (eventId != null ? "/" + eventId : "");
@@ -284,7 +285,7 @@ public class EventController
      * @param ticketSetId is not included in the result if it's null
      * @return Ticket Set URL
      */
-    private String ticketSetURL(Long userId, Long eventId, Long ticketSetId)
+    private String ticketSetURL(UUID userId, Long eventId, Long ticketSetId)
     {
         assert userId != null;
         assert eventId != null;

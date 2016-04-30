@@ -35,10 +35,10 @@ public class JwtAuthententicationProvider implements AuthenticationProvider
 
         Claims authDetails = authenticator.authenticate(credentials);
 
-        String userEmail = authDetails.getSubject();
+        String subject = authDetails.getSubject();
 
         // todo if user null then BadCredentialException
-        User user = userRepository.findByEmail(userEmail);
+        User user = userRepository.findByEmail(subject);
 
         JwtAuthenticationToken authResult = new JwtAuthenticationToken(user, credentials, new ArrayList());
 

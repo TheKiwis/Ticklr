@@ -4,6 +4,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.*;
+import java.util.UUID;
 
 /**
  * @author ngnmhieu
@@ -30,7 +31,7 @@ public class UserRepository
      * @param userId the given user's ID
      * @return null if no user found
      */
-    public User findById(long userId)
+    public User findById(UUID userId)
     {
         try {
             return em.find(User.class, userId);

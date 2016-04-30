@@ -11,6 +11,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.Query;
 
+import java.util.UUID;
+
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
@@ -25,6 +27,8 @@ public class BasketRepositoryTest
     EntityManager em;
 
     BasketRepository basketRepository;
+
+    UUID userId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
 
     @Before
     public void setUp() throws Exception
@@ -42,7 +46,7 @@ public class BasketRepositoryTest
         when(query.getSingleResult()).thenReturn(mockBasket);
 
 
-        assertEquals(mockBasket, basketRepository.findByUserId(123l));
+        assertEquals(mockBasket, basketRepository.findByUserId(userId));
     }
 
 
@@ -55,7 +59,7 @@ public class BasketRepositoryTest
         when(query.getSingleResult()).thenThrow(NoResultException.class);
 
 
-        assertNull(basketRepository.findByUserId(123l));
+        assertNull(basketRepository.findByUserId(userId));
     }
 
     @Test
