@@ -103,7 +103,7 @@ public class UserController
         Token token = null;
         HttpStatus status;
         if (user != null && user.authenticate(form.getPassword())) {
-            token = jwtAuthenticator.generateToken(form.getEmail());
+            token = jwtAuthenticator.generateToken(user.getId().toString());
             status = HttpStatus.OK;
         } else {
             status = HttpStatus.UNAUTHORIZED;

@@ -7,7 +7,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import app.data.User;
-import app.web.authentication.JwtAuthenticator;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dbunit.dataset.IDataSet;
@@ -28,14 +27,14 @@ public class UserIT extends CommonIntegrationTest
     private String authSecret;
 
     // authentication token
-    private String loginString;
+    private String authHeader;
 
     UUID userId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
 
     @Before
     public void login() throws Exception
     {
-        loginString = "Bearer " + new JwtAuthenticator(authSecret).generateToken("user@example.com").getKey();
+        authHeader = AuthenticationIT.getAuthTokenFor("user@example.com", "123456789", mockMvc);
     }
 
     private String getUserURL(UUID id)
@@ -47,7 +46,7 @@ public class UserIT extends CommonIntegrationTest
     public void shouldReturnUserInformation() throws Exception
     {
         mockMvc.perform(get(getUserURL(userId))
-                .header("Authorization", loginString))
+                .header("Authorization", authHeader))
                 .andExpect(jsonPath("$.id").value(userId.toString()))
                 .andExpect(jsonPath("$.email").value("user@example.com"))
                 .andExpect(jsonPath("$.password").doesNotExist());
@@ -61,7 +60,7 @@ public class UserIT extends CommonIntegrationTest
         assertNull(em.find(User.class, unknownUserId));
 
         mockMvc.perform(get(getUserURL(unknownUserId))
-                .header("Authorization", loginString))
+                .header("Authorization", authHeader))
                 .andExpect(status().isNotFound());
     }
 

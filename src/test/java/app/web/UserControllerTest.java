@@ -130,6 +130,10 @@ public class UserControllerTest
                 .findByEmail(anyString())
                 .authenticate(anyString())
         ).thenReturn(true);
+        when(userRepository
+                .findByEmail(anyString())
+                .getId()).thenReturn(UUID.randomUUID());
+
         Token token = mock(Token.class);
         when(jwtAuthenticator.generateToken(anyString())).thenReturn(token);
 
@@ -148,8 +152,8 @@ public class UserControllerTest
     {
         // mock objects
         when(userRepository
-            .findByEmail(anyString())
-            .authenticate(anyString())
+                .findByEmail(anyString())
+                .authenticate(anyString())
         ).thenReturn(false);
 
         UserForm form = mock(UserForm.class);

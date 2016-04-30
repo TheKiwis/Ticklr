@@ -13,6 +13,8 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
+import java.util.UUID;
+
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.mock;
@@ -40,19 +42,19 @@ public class JwtAuthententicationProviderTest
     @Test
     public void shouldReturnPopulatedAuthenticationObject() throws Exception
     {
-        String email = "user@example.com";
+        UUID userId = UUID.randomUUID();
         String credential = "credential";
 
         // mocks
         User mockUser = mock(User.class);
-        when(userRepository.findByEmail(email)).thenReturn(mockUser);
+        when(userRepository.findById(userId)).thenReturn(mockUser);
 
         Authentication mockAuth = mock(JwtAuthenticationToken.class);
         when(mockAuth.getCredentials()).thenReturn(credential);
 
         Claims mockClaim = mock(Claims.class);
         when(authenticator.authenticate(any())).thenReturn(mockClaim);
-        when(mockClaim.getSubject()).thenReturn(email);
+        when(mockClaim.getSubject()).thenReturn(userId.toString());
 
         // create test object
         AuthenticationProvider authenticationProvider = new JwtAuthententicationProvider(userRepository, authenticator);

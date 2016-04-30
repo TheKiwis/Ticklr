@@ -8,6 +8,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.token.Token;
@@ -32,8 +33,16 @@ public class AuthenticationIT extends CommonIntegrationTest
     @Value("${auth.secret}")
     private String authSecret;
 
+    private JwtAuthenticator jwt;
+
     private static final String AUTH_URI = "/api/users/request-auth-token";
     private UUID userId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
+
+    @Before
+    public void setupJwt() throws Exception
+    {
+        jwt = new JwtAuthenticator(authSecret);
+    }
 
     @Test
     public void shouldLoadTestFixture() throws Exception
@@ -79,13 +88,7 @@ public class AuthenticationIT extends CommonIntegrationTest
     {
         String email = "user@example.com";
 
-        Date expiredDate = getExpiredDate(JwtAuthenticator.DEFAULT_EXPIRED_DAYS);
-
-        String jwtToken = Jwts.builder()
-                .setHeaderParam("typ", "JWT")
-                .setSubject(email)
-                .setExpiration(expiredDate)
-                .signWith(SignatureAlgorithm.HS256, authSecret.getBytes(StandardCharsets.UTF_8)).compact();
+        String jwtToken = jwt.generateToken(userId.toString()).getKey();
 
         mockMvc.perform(post(AUTH_URI)
                 .contentType("application/json")
@@ -110,7 +113,7 @@ public class AuthenticationIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldRespondWithUnauthroziedWhenProvidedWithNonExistentUser() throws Exception
+    public void shouldRespondWithUnauthorizedWhenProvidedWithNonExistentUser() throws Exception
     {
         String email = "nonexistentuser@example.com";
         long userCount = (long) em.createQuery("SELECT COUNT(u) FROM User u WHERE u.email = :email").setParameter("email", email).getSingleResult();
@@ -125,8 +128,7 @@ public class AuthenticationIT extends CommonIntegrationTest
     @Test
     public void shouldReturnResourceWhenProvidedWithValidJwtToken() throws Exception
     {
-        JwtAuthenticator jwt = new JwtAuthenticator(authSecret);
-        Token jwtToken = jwt.generateToken("user@example.com");
+        Token jwtToken = jwt.generateToken(userId.toString());
 
         mockMvc.perform(get("/api/users/" + userId)
                 .header("Authorization", "Bearer " + jwtToken.getKey()))
@@ -134,7 +136,7 @@ public class AuthenticationIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldNotReturnResouceWhenProviedWithMalformtoken() throws Exception
+    public void shouldNotReturnResourceWhenProvidedWithMalformedToken() throws Exception
     {
         mockMvc.perform(get("/admin")
                 .header("Authorization", "Bearer erggdfsyserysdghsrty.sdfghsdyyydfhys"))
@@ -142,17 +144,14 @@ public class AuthenticationIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldNotReturnResouceWhenProvidedWithTokenSignedWithInvalidSecrete() throws Exception
+    public void shouldNotReturnResourceWhenProvidedWithTokenSignedWithInvalidSecret() throws Exception
     {
-
-        String email = "user@example.com";
-        String anotherSecret = "another_Secret";
-        Date expiredDate = getExpiredDate(JwtAuthenticator.DEFAULT_EXPIRED_DAYS);
+        String anotherSecret = "another_secret";
 
         String jwtToken = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
-                .setSubject(email)
-                .setExpiration(expiredDate)
+                .setSubject(userId.toString())
+                .setExpiration(new Date(System.currentTimeMillis() + (24 * 3600 * 1000)))
                 .signWith(SignatureAlgorithm.HS256, anotherSecret.getBytes(StandardCharsets.UTF_8)).compact();
 
 
@@ -162,16 +161,12 @@ public class AuthenticationIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldNotReturnResouceWhenProvidedWithExpiredToken() throws Exception
+    public void shouldNotReturnResourceWhenProvidedWithExpiredToken() throws Exception
     {
-        String email = "user@example.com";
-
-        Date expiredDate = getExpiredDate(-2);
-
         String jwtToken = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
-                .setSubject(email)
-                .setExpiration(expiredDate)
+                .setSubject(userId.toString())
+                .setExpiration(new Date(System.currentTimeMillis() - (24 * 3600 * 1000))) // expiration date in the past
                 .signWith(SignatureAlgorithm.HS256, authSecret.getBytes(StandardCharsets.UTF_8)).compact();
 
 
@@ -184,18 +179,6 @@ public class AuthenticationIT extends CommonIntegrationTest
     protected IDataSet getDataSet() throws Exception
     {
         return new FlatXmlDataSetBuilder().build(getClass().getResourceAsStream("/fixtures/user_dataset.xml"));
-    }
-
-    private Date getExpiredDate(int expiredInDays)
-    {
-        Calendar cal = Calendar.getInstance();
-        cal.setTime(new Date());
-        cal.set(Calendar.HOUR_OF_DAY, 0);
-        cal.set(Calendar.MINUTE, 0);
-        cal.set(Calendar.SECOND, 0);
-        cal.set(Calendar.MILLISECOND, 0);
-        cal.add(Calendar.DATE, expiredInDays);
-        return cal.getTime();
     }
 
     private String getAuthBody(String email, String password) throws JsonProcessingException

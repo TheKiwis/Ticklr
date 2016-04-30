@@ -8,6 +8,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
 import java.util.ArrayList;
+import java.util.UUID;
 
 /**
  * @author ngnmhieu
@@ -37,8 +38,12 @@ public class JwtAuthententicationProvider implements AuthenticationProvider
 
         String subject = authDetails.getSubject();
 
-        // todo if user null then BadCredentialException
-        User user = userRepository.findByEmail(subject);
+        // todo if IllegalArgument
+        User user = userRepository.findById(UUID.fromString(subject));
+
+        if (user == null) {
+            // todo if user null then BadCredentialException
+        }
 
         JwtAuthenticationToken authResult = new JwtAuthenticationToken(user, credentials, new ArrayList());
 
