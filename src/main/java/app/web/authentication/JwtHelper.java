@@ -1,5 +1,6 @@
 package app.web.authentication;
 
+import app.data.User;
 import io.jsonwebtoken.*;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.token.DefaultToken;
@@ -12,9 +13,12 @@ import java.util.Calendar;
 import java.util.Date;
 
 /**
+ * {@link JwtHelper} performs JWT Token verification and generation.
+ * Todo: avoid using Date Calendar, use java.time instead; consider changing args of generateToken to a class that represent time period better as int (e.g. Period)
  *
+ * @author Duc Nguyen
  */
-public class JwtAuthenticator
+public class JwtHelper
 {
     // default expiration days
     public static final int DEFAULT_EXPIRED_DAYS = 7;
@@ -24,7 +28,7 @@ public class JwtAuthenticator
     /**
      * @param authSecret
      */
-    public JwtAuthenticator(String authSecret)
+    public JwtHelper(String authSecret)
     {
         this.authSecretBytes = authSecret.getBytes(StandardCharsets.UTF_8);
     }
@@ -68,17 +72,17 @@ public class JwtAuthenticator
     /**
      * Generates a JWT Token with provided information and signs it with authSecret
      *
-     * @param sub           subject claim
+     * @param user          subject claim
      * @param expiredInDays
      * @return JWT Token
      */
-    public Token generateToken(String sub, int expiredInDays)
+    public Token generateToken(User user, int expiredInDays)
     {
         Date expiredDate = getExpiredDate(expiredInDays);
 
         String jwtToken = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
-                .setSubject(sub)
+                .setSubject(user.getId().toString())
                 .setExpiration(expiredDate)
                 .signWith(SignatureAlgorithm.HS256, authSecretBytes).compact();
         DefaultToken token = new DefaultToken(jwtToken, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC), "");
@@ -86,14 +90,14 @@ public class JwtAuthenticator
     }
 
     /**
-     * Generates JWT Token with the default expired day @see {@link JwtAuthenticator::DEFAULT_EXPIRED_DAYS}
+     * Generates JWT Token with the default expired day @see {@link JwtHelper ::DEFAULT_EXPIRED_DAYS}
      *
-     * @param sub subject of the generated token (User's ID or Email)
+     * @param user user, for which of the token is generated (using user's ID or email)
      * @return
      */
-    public Token generateToken(String sub)
+    public Token generateToken(User user)
     {
-        return this.generateToken(sub, DEFAULT_EXPIRED_DAYS);
+        return this.generateToken(user, DEFAULT_EXPIRED_DAYS);
     }
 
     private Date getExpiredDate(int expiredInDays)

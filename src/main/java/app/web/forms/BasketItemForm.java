@@ -7,12 +7,11 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 
 /**
- * Created by DucNguyenMinh on 09.03.16.
+ * @author DucNguyenMinh
+ * @since 09.03.16
  */
 public class BasketItemForm
 {
-    // todo validation
-
     @NotNull
     @Min(1)
     private Integer quantity;

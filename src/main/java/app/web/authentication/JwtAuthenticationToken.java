@@ -7,6 +7,8 @@ import org.springframework.security.core.GrantedAuthority;
 import java.util.Collection;
 
 /**
+ * JwtAuthenticationToken serves as a wrapper for a JWT Token, which will be used by JwtAuthenticationProvider
+ *
  * @author ngnmhieu
  */
 public class JwtAuthenticationToken extends AbstractAuthenticationToken

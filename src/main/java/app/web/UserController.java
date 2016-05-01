@@ -3,10 +3,9 @@ package app.web;
 import app.data.User;
 import app.data.UserRepository;
 import app.web.forms.UserForm;
-import app.web.authentication.JwtAuthenticator;
+import app.web.authentication.JwtHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -33,17 +32,17 @@ public class UserController
 {
     private UserRepository repo;
 
-    private JwtAuthenticator jwtAuthenticator;
+    private JwtHelper jwtHelper;
 
     /**
      * @param repo fetches and saves User object
-     * @param jwtAuthenticator Jwt Authentication helper object
+     * @param jwtHelper Jwt Authentication helper object
      */
     @Autowired
-    public UserController(UserRepository repo, JwtAuthenticator jwtAuthenticator)
+    public UserController(UserRepository repo, JwtHelper jwtHelper)
     {
         this.repo = repo;
-        this.jwtAuthenticator = jwtAuthenticator;
+        this.jwtHelper = jwtHelper;
     }
 
     // todo only user authorization
@@ -103,7 +102,7 @@ public class UserController
         Token token = null;
         HttpStatus status;
         if (user != null && user.authenticate(form.getPassword())) {
-            token = jwtAuthenticator.generateToken(user.getId().toString());
+            token = jwtHelper.generateToken(user);
             status = HttpStatus.OK;
         } else {
             status = HttpStatus.UNAUTHORIZED;

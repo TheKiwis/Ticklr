@@ -3,7 +3,7 @@ package app.config.security;
 import app.data.UserRepository;
 import app.web.authentication.JwtAuthenticationProvider;
 import app.web.authentication.JwtAuthenticationFilter;
-import app.web.authentication.JwtAuthenticator;
+import app.web.authentication.JwtHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -30,7 +30,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     UserRepository userRepository;
 
     @Autowired
-    JwtAuthenticator jwtAuthenticator;
+    JwtHelper jwtHelper;
 
     @Override
     protected void configure(AuthenticationManagerBuilder auth) throws Exception
@@ -41,7 +41,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     @Bean
     public AuthenticationProvider jwtAuthenticationProvider()
     {
-        return new JwtAuthenticationProvider(userRepository, jwtAuthenticator);
+        return new JwtAuthenticationProvider(userRepository, jwtHelper);
     }
 
     @Override

@@ -1,6 +1,6 @@
 package app.config;
 
-import app.web.authentication.JwtAuthenticator;
+import app.web.authentication.JwtHelper;
 import app.web.authorization.UserAuthorizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -20,9 +20,9 @@ import org.springframework.web.context.WebApplicationContext;
 public class ApplicationBeans
 {
     @Bean
-    public JwtAuthenticator jwtAuthenticator(@Value("${auth.secret}") String authSecret)
+    public JwtHelper jwtAuthenticator(@Value("${auth.secret}") String authSecret)
     {
-        return new JwtAuthenticator(authSecret);
+        return new JwtHelper(authSecret);
     }
 
     /**

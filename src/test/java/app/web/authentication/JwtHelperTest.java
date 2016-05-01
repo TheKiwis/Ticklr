@@ -1,5 +1,6 @@
 package app.web.authentication;
 
+import app.data.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
@@ -11,35 +12,42 @@ import org.springframework.security.core.token.Token;
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
 
 /**
- * Created by DucNguyenMinh on 29.02.16.
+ * @author DucNguyenMinh
+ * @since 29.02.16
  */
-public class JwtAuthenticatorTest
+public class JwtHelperTest
 {
 
-    private final String AUTHSECRET = "auth_secret";
+    private final String AUTH_SECRET = "auth_secret";
 
-    private JwtAuthenticator jwtAuthenticator;
+    private JwtHelper jwtHelper;
 
     private String validToken;
 
     private String subject;
 
+    private User user;
+
     @Before
-    public void setUp(){
-        this.subject = "user@example.com";
+    public void setUp()
+    {
+        user = new User(UUID.randomUUID(), "user@example.com", "123456789");
+        subject = user.getId().toString();
 
-        Date expiredDate = getExpiredDate(JwtAuthenticator.DEFAULT_EXPIRED_DAYS);
+        Date expiredDate = getExpiredDate(JwtHelper.DEFAULT_EXPIRED_DAYS);
 
-        this.jwtAuthenticator = new JwtAuthenticator(AUTHSECRET);
+        this.jwtHelper = new JwtHelper(AUTH_SECRET);
+
         this.validToken = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .setSubject(subject)
                 .setExpiration(expiredDate)
-                .signWith(SignatureAlgorithm.HS256,AUTHSECRET.getBytes(StandardCharsets.UTF_8)).compact();
+                .signWith(SignatureAlgorithm.HS256, AUTH_SECRET.getBytes(StandardCharsets.UTF_8)).compact();
     }
 
 
@@ -52,16 +60,16 @@ public class JwtAuthenticatorTest
                 .setHeaderParam("typ", "JWT")
                 .setSubject(subject)
                 .setExpiration(expiredDate)
-                .signWith(SignatureAlgorithm.HS256,AUTHSECRET.getBytes(StandardCharsets.UTF_8)).compact();
+                .signWith(SignatureAlgorithm.HS256, AUTH_SECRET.getBytes(StandardCharsets.UTF_8)).compact();
 
-        Token jwtToken = jwtAuthenticator.generateToken(subject,10);
+        Token jwtToken = jwtHelper.generateToken(user, 10);
         assertEquals(jwtTokenExpiredIn10Days, jwtToken.getKey());
     }
 
     @Test
-    public void generate_shouldReturnjwtTokenWithDefaultExpiration(){
-
-        Token jwtToken = jwtAuthenticator.generateToken(subject);
+    public void generate_shouldReturnJwtTokenWithDefaultExpiration()
+    {
+        Token jwtToken = jwtHelper.generateToken(user);
         assertEquals(validToken, jwtToken.getKey());
     }
 
@@ -69,31 +77,31 @@ public class JwtAuthenticatorTest
     @Test
     public void authenticate_shouldReturnValidClaims()
     {
-        String email = "user@example.com";
+        Claims claims = jwtHelper.authenticate(validToken);
 
-        Claims claims = jwtAuthenticator.authenticate(validToken);
-
-        assertEquals(email,claims.getSubject());
+        assertEquals(subject, claims.getSubject());
     }
 
 
     @Test(expected = BadCredentialsException.class)
     public void authenticate_shouldThrowBadCredentialsException()
     {
-        JwtAuthenticator authenticator = new JwtAuthenticator("another_Secret");
+        JwtHelper authenticator = new JwtHelper("another_Secret");
         String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIn0.Wx5VgMKG0VZaj7c-bi5ditbQOEQqb9YQyJHFLLvFMFs";
         authenticator.authenticate(token);
     }
 
     @Test(expected = BadCredentialsException.class)
-    public void authenticate_shouldThrowBadCredentialsExceptionWhenMissingExpiration(){
+    public void authenticate_shouldThrowBadCredentialsExceptionWhenMissingExpiration()
+    {
         String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIn0.Wx5VgMKG0VZaj7c-bi5ditbQOEQqb9YQyJHFLLvFMFs";
 
-        jwtAuthenticator.authenticate(token);
+        jwtHelper.authenticate(token);
     }
 
     @Test(expected = BadCredentialsException.class)
-    public void authenticate_shouldThrowBadCredentialsExceptionWhenExpired(){
+    public void authenticate_shouldThrowBadCredentialsExceptionWhenExpired()
+    {
 
         String email = "user@example.com";
 
@@ -101,9 +109,9 @@ public class JwtAuthenticatorTest
                 .setHeaderParam("typ", "JWT")
                 .setSubject(email)
                 .setExpiration(new Date((new Date()).getTime() - 10000))
-                .signWith(SignatureAlgorithm.HS256, AUTHSECRET.getBytes(StandardCharsets.UTF_8)).compact();
+                .signWith(SignatureAlgorithm.HS256, AUTH_SECRET.getBytes(StandardCharsets.UTF_8)).compact();
 
-        jwtAuthenticator.authenticate(jwtToken);
+        jwtHelper.authenticate(jwtToken);
     }
 
 
@@ -115,7 +123,7 @@ public class JwtAuthenticatorTest
         cal.set(Calendar.MINUTE, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MILLISECOND, 0);
-        cal.add(Calendar.DATE,expiredInDays);
+        cal.add(Calendar.DATE, expiredInDays);
         return cal.getTime();
     }
 }

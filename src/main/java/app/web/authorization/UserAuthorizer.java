@@ -14,7 +14,7 @@ public class UserAuthorizer
     private Authentication authentication;
 
     /**
-     * @param authentication Authentication Information
+     * @param authentication User's authentication information
      */
     public UserAuthorizer(Authentication authentication)
     {
@@ -22,9 +22,9 @@ public class UserAuthorizer
     }
 
     /**
-     * @param user User, whose resources are being access
+     * @param user the user, whose resources are being access
      *             (not to be confused with the user being authorized).
-     * @return true if the authenticated is authorized to the given user's resources
+     * @return true if the authenticated user is authorized to resources of the user provided in argument
      */
     public boolean authorize(User user)
     {

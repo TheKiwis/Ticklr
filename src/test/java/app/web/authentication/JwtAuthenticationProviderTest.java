@@ -30,7 +30,7 @@ public class JwtAuthenticationProviderTest
     UserRepository userRepository;
 
     @Mock
-    JwtAuthenticator authenticator;
+    JwtHelper authenticator;
     @Test
     public void supports_shouldSupportOnlyJwtAuthenticationToken() throws Exception
     {

@@ -3,7 +3,7 @@ package app.web;
 import app.data.User;
 import app.data.UserRepository;
 import app.web.forms.UserForm;
-import app.web.authentication.JwtAuthenticator;
+import app.web.authentication.JwtHelper;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -31,7 +31,7 @@ public class UserControllerTest
     UserRepository userRepository;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    JwtAuthenticator jwtAuthenticator;
+    JwtHelper jwtHelper;
 
     UserController controller;
 
@@ -43,7 +43,7 @@ public class UserControllerTest
     @Before
     public void setup()
     {
-        controller = new UserController(userRepository, jwtAuthenticator);
+        controller = new UserController(userRepository, jwtHelper);
     }
 
     @Test
@@ -135,7 +135,7 @@ public class UserControllerTest
                 .getId()).thenReturn(UUID.randomUUID());
 
         Token token = mock(Token.class);
-        when(jwtAuthenticator.generateToken(anyString())).thenReturn(token);
+        when(jwtHelper.generateToken(any())).thenReturn(token);
 
         UserForm form = mock(UserForm.class);
         when(form.getEmail()).thenReturn("user@example.com");

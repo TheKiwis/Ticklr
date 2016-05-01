@@ -1,7 +1,7 @@
 package integration;
 
 import app.data.User;
-import app.web.authentication.JwtAuthenticator;
+import app.web.authentication.JwtHelper;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
@@ -16,7 +16,6 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 import java.nio.charset.StandardCharsets;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.UUID;
 
@@ -33,22 +32,27 @@ public class AuthenticationIT extends CommonIntegrationTest
     @Value("${auth.secret}")
     private String authSecret;
 
-    private JwtAuthenticator jwt;
+    private JwtHelper jwt;
 
     private static final String AUTH_URI = "/api/users/request-auth-token";
+
     private UUID userId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
 
+    private User user;
+
     @Before
-    public void setupJwt() throws Exception
+    @Override
+    public void setUp() throws Exception
     {
-        jwt = new JwtAuthenticator(authSecret);
+        super.setUp();
+        jwt = new JwtHelper(authSecret);
+        user = (User) em.createQuery("SELECT u FROM User u WHERE u.email = 'user@example.com'").getSingleResult();
     }
 
     @Test
     public void shouldLoadTestFixture() throws Exception
     {
-        User u = (User) em.createQuery("SELECT u FROM User u WHERE u.email = 'user@example.com'").getSingleResult();
-        assertEquals("user@example.com", u.getEmail());
+        assertEquals("user@example.com", user.getEmail());
     }
 
     // For the purpose of mapping json response to object - see login()
@@ -88,7 +92,7 @@ public class AuthenticationIT extends CommonIntegrationTest
     {
         String email = "user@example.com";
 
-        String jwtToken = jwt.generateToken(userId.toString()).getKey();
+        String jwtToken = jwt.generateToken(user).getKey();
 
         mockMvc.perform(post(AUTH_URI)
                 .contentType("application/json")
@@ -128,7 +132,7 @@ public class AuthenticationIT extends CommonIntegrationTest
     @Test
     public void shouldReturnResourceWhenProvidedWithValidJwtToken() throws Exception
     {
-        Token jwtToken = jwt.generateToken(userId.toString());
+        Token jwtToken = jwt.generateToken(user);
 
         mockMvc.perform(get("/api/users/" + userId)
                 .header("Authorization", "Bearer " + jwtToken.getKey()))

@@ -1,11 +1,9 @@
 package integration;
 
-import app.web.authentication.JwtAuthenticator;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.junit.Before;
 import org.junit.Test;
-import org.springframework.beans.factory.annotation.Value;
 
 import java.util.UUID;
 

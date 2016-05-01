@@ -19,9 +19,10 @@ public class JwtAuthenticationProvider implements AuthenticationProvider
     // UserRepository is used to fetch user
     private UserRepository userRepository;
 
-    private JwtAuthenticator authenticator;
+    // performs JWT Token verification
+    private JwtHelper authenticator;
 
-    public JwtAuthenticationProvider(UserRepository userRepository, JwtAuthenticator authenticator)
+    public JwtAuthenticationProvider(UserRepository userRepository, JwtHelper authenticator)
     {
         this.userRepository = userRepository;
         this.authenticator = authenticator;
