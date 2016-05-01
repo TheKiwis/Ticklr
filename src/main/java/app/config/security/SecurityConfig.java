@@ -1,7 +1,7 @@
 package app.config.security;
 
 import app.data.UserRepository;
-import app.web.authentication.JwtAuthententicationProvider;
+import app.web.authentication.JwtAuthenticationProvider;
 import app.web.authentication.JwtAuthenticationFilter;
 import app.web.authentication.JwtAuthenticator;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,23 +10,13 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.AccessDecisionManager;
-import org.springframework.security.access.AccessDecisionVoter;
-import org.springframework.security.access.vote.AuthenticatedVoter;
-import org.springframework.security.access.vote.RoleVoter;
-import org.springframework.security.access.vote.UnanimousBased;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.web.access.expression.WebExpressionVoter;
-import org.springframework.security.web.authentication.Http403ForbiddenEntryPoint;
 import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.www.BasicAuthenticationFilter;
-
-import java.util.*;
 
 /**
  * @author ngnmhieu
@@ -51,7 +41,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     @Bean
     public AuthenticationProvider jwtAuthenticationProvider()
     {
-        return new JwtAuthententicationProvider(userRepository, jwtAuthenticator);
+        return new JwtAuthenticationProvider(userRepository, jwtAuthenticator);
     }
 
     @Override

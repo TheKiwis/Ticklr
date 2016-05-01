@@ -26,18 +26,18 @@ public class JwtAuthenticatorTest
 
     private String validToken;
 
-    private String email;
+    private String subject;
 
     @Before
     public void setUp(){
-        this.email = "user@example.com";
+        this.subject = "user@example.com";
 
         Date expiredDate = getExpiredDate(JwtAuthenticator.DEFAULT_EXPIRED_DAYS);
 
         this.jwtAuthenticator = new JwtAuthenticator(AUTHSECRET);
         this.validToken = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
-                .setSubject(email)
+                .setSubject(subject)
                 .setExpiration(expiredDate)
                 .signWith(SignatureAlgorithm.HS256,AUTHSECRET.getBytes(StandardCharsets.UTF_8)).compact();
     }
@@ -46,23 +46,22 @@ public class JwtAuthenticatorTest
     @Test
     public void generate_shouldReturnJwtTokenExpiredIn10Days()
     {
-
         Date expiredDate = getExpiredDate(10);
 
         String jwtTokenExpiredIn10Days = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
-                .setSubject(email)
+                .setSubject(subject)
                 .setExpiration(expiredDate)
                 .signWith(SignatureAlgorithm.HS256,AUTHSECRET.getBytes(StandardCharsets.UTF_8)).compact();
 
-        Token jwtToken = jwtAuthenticator.generateToken(email,10);
+        Token jwtToken = jwtAuthenticator.generateToken(subject,10);
         assertEquals(jwtTokenExpiredIn10Days, jwtToken.getKey());
     }
 
     @Test
     public void generate_shouldReturnjwtTokenWithDefaultExpiration(){
 
-        Token jwtToken = jwtAuthenticator.generateToken(email);
+        Token jwtToken = jwtAuthenticator.generateToken(subject);
         assertEquals(validToken, jwtToken.getKey());
     }
 
@@ -70,7 +69,6 @@ public class JwtAuthenticatorTest
     @Test
     public void authenticate_shouldReturnValidClaims()
     {
-
         String email = "user@example.com";
 
         Claims claims = jwtAuthenticator.authenticate(validToken);

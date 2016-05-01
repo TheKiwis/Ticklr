@@ -4,6 +4,7 @@ import app.data.User;
 import app.data.UserRepository;
 import io.jsonwebtoken.Claims;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
@@ -13,14 +14,14 @@ import java.util.UUID;
 /**
  * @author ngnmhieu
  */
-public class JwtAuthententicationProvider implements AuthenticationProvider
+public class JwtAuthenticationProvider implements AuthenticationProvider
 {
     // UserRepository is used to fetch user
     private UserRepository userRepository;
 
     private JwtAuthenticator authenticator;
 
-    public JwtAuthententicationProvider(UserRepository userRepository, JwtAuthenticator authenticator)
+    public JwtAuthenticationProvider(UserRepository userRepository, JwtAuthenticator authenticator)
     {
         this.userRepository = userRepository;
         this.authenticator = authenticator;
@@ -38,12 +39,15 @@ public class JwtAuthententicationProvider implements AuthenticationProvider
 
         String subject = authDetails.getSubject();
 
-        // todo if IllegalArgument
-        User user = userRepository.findById(UUID.fromString(subject));
-
-        if (user == null) {
-            // todo if user null then BadCredentialException
+        User user = null;
+        try {
+            user = userRepository.findById(UUID.fromString(subject));
+        } catch (IllegalArgumentException e) {
+            throw new BadCredentialsException("Invalid UUID", e);
         }
+
+        if (user == null)
+            throw new BadCredentialsException("User not found");
 
         JwtAuthenticationToken authResult = new JwtAuthenticationToken(user, credentials, new ArrayList());
 
