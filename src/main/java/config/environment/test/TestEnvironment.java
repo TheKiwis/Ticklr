@@ -1,26 +1,22 @@
-package app.config.environment;
+package config.environment.test;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+import config.environment.Environment;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.config.PlaceholderConfigurerSupport;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.*;
-import org.springframework.core.env.Environment;
-import org.springframework.core.type.AnnotatedTypeMetadata;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
 import javax.sql.DataSource;
-import java.util.Map;
 import java.util.Properties;
 
 /**
  * @author ngnmhieu
  */
-@Configuration
-@Profile("integration")
+@Profile(Environment.TEST)
 public class TestEnvironment
 {
     /**
@@ -29,7 +25,6 @@ public class TestEnvironment
      *         is set or not.
      */
     @Bean
-    @Autowired
     public DataSource dataSource()
     {
         return System.getProperty("travis_ci") == null ? localDataSource() : travisCIDataSource();

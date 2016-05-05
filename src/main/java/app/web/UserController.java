@@ -1,7 +1,7 @@
 package app.web;
 
 import app.data.User;
-import app.data.UserRepository;
+import app.services.UserRepository;
 import app.web.forms.UserForm;
 import app.web.authentication.JwtHelper;
 import org.springframework.beans.factory.annotation.Autowired;

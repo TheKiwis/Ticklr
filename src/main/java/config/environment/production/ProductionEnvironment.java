@@ -1,9 +1,9 @@
-package app.config.environment;
+package config.environment.production;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
+import config.environment.Environment;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.Database;
@@ -15,9 +15,8 @@ import java.util.Properties;
 /**
  * @author ngnmhieu
  */
-@Configuration
-@Profile("dev")
-public class DevelopmentEnvironment
+@Profile(Environment.PRODUCTION)
+public class ProductionEnvironment
 {
     @Bean
     public DataSource dataSource()
@@ -50,5 +49,4 @@ public class DevelopmentEnvironment
 
         return placeholderConfigurer;
     }
-
 }

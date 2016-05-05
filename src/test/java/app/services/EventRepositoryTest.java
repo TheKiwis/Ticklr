@@ -1,5 +1,7 @@
-package app.data;
+package app.services;
 
+import app.data.Event;
+import app.services.EventRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -9,7 +11,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
-import javax.persistence.Query;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;

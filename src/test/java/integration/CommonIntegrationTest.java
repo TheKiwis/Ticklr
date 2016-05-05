@@ -1,7 +1,8 @@
 package integration;
 
-import app.config.RootConfig;
-import app.config.WebConfig;
+import config.RootConfig;
+import config.environment.Environment;
+import config.web.WebConfig;
 import org.dbunit.DataSourceBasedDBTestCase;
 import org.dbunit.dataset.DefaultDataSet;
 import org.dbunit.dataset.IDataSet;
@@ -11,7 +12,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -38,7 +38,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
         DependencyInjectionTestExecutionListener.class,
         FlywayTestExecutionListener.class
 })
-@ActiveProfiles("integration")
+@ActiveProfiles(Environment.TEST)
 @FlywayTest
 abstract public class CommonIntegrationTest extends DataSourceBasedDBTestCase
 {

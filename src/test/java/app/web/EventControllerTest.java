@@ -2,6 +2,9 @@ package app.web;
 
 import app.data.*;
 import app.data.validation.EventValidator;
+import app.services.EventRepository;
+import app.services.TicketSetRepository;
+import app.services.UserRepository;
 import app.web.authorization.UserAuthorizer;
 import org.junit.Before;
 import org.junit.Test;

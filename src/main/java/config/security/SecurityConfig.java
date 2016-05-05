@@ -1,12 +1,11 @@
-package app.config.security;
+package config.security;
 
-import app.data.UserRepository;
+import app.services.UserRepository;
 import app.web.authentication.JwtAuthenticationProvider;
 import app.web.authentication.JwtAuthenticationFilter;
 import app.web.authentication.JwtHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
@@ -23,7 +22,6 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
  */
 @Configuration
 @EnableWebSecurity
-@ComponentScan
 public class SecurityConfig extends WebSecurityConfigurerAdapter
 {
     @Autowired

@@ -1,8 +1,7 @@
-package app.config.persistence;
+package config.persistence;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 
@@ -11,7 +10,7 @@ import javax.sql.DataSource;
 /**
  * @author ngnmhieu
  */
-@Configuration
+//@Configuration
 public class HibernateConfig
 {
     @Bean

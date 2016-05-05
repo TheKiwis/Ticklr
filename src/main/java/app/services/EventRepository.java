@@ -1,5 +1,6 @@
-package app.data;
+package app.services;
 
+import app.data.Event;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 

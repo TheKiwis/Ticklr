@@ -1,7 +1,7 @@
 package app.web.authentication;
 
 import app.data.User;
-import app.data.UserRepository;
+import app.services.UserRepository;
 import io.jsonwebtoken.Claims;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;

@@ -1,4 +1,4 @@
-package app.config;
+package config;
 
 import app.web.authentication.JwtHelper;
 import app.web.authorization.UserAuthorizer;

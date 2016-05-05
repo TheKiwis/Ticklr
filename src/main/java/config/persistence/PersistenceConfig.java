@@ -1,4 +1,4 @@
-package app.config.environment;
+package config.persistence;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -7,7 +7,8 @@ import org.springframework.context.annotation.Import;
  * @author ngnmhieu
  */
 @Configuration
-@Import({DevelopmentEnvironment.class, TestEnvironment.class})
-public class EnvironmentConfig
+@Import({HibernateConfig.class, TransactionConfig.class})
+public class PersistenceConfig
 {
 }
+

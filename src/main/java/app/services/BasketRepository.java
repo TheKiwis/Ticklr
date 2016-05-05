@@ -1,5 +1,7 @@
-package app.data;
+package app.services;
 
+import app.data.Basket;
+import app.data.BasketItem;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 

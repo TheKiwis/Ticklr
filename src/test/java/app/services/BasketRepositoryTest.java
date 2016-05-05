@@ -1,11 +1,13 @@
-package app.data;
+package app.services;
 
+import app.data.Basket;
+import app.data.BasketItem;
+import app.services.BasketRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.security.access.method.P;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
