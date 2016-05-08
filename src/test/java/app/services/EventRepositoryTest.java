@@ -12,6 +12,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
+
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
@@ -69,5 +73,16 @@ public class EventRepositoryTest
         ).thenThrow(NoResultException.class);
 
         assertNull(eventRepository.findById(123l));
+    }
+
+    @Test
+    public void findByUserId_shouldReturnEventList() throws Exception
+    {
+        UUID userId = UUID.randomUUID();
+        List<Event> expectedList = new ArrayList();
+        expectedList.add(new Event());
+        expectedList.add(new Event());
+        when(em.createQuery(anyString()).getResultList()).thenReturn(expectedList);
+        assertFalse(eventRepository.findByUserId(UUID.randomUUID()).isEmpty());
     }
 }

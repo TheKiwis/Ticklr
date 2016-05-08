@@ -1,22 +1,22 @@
 package config.web;
 
 import com.fasterxml.jackson.databind.SerializationFeature;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.*;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
-import org.springframework.web.servlet.ViewResolver;
 import org.springframework.web.servlet.config.annotation.*;
-import org.springframework.web.servlet.view.InternalResourceViewResolver;
 
 import java.util.List;
+import java.util.Properties;
 
 /**
  * @author ngnmhieu
  */
 @EnableWebMvc
 @ComponentScan(basePackages = "app.web")
-public class WebConfig extends WebMvcConfigurerAdapter
+public abstract class BaseWebConfig extends WebMvcConfigurerAdapter
 {
     @Override
     public void addViewControllers(ViewControllerRegistry registry)

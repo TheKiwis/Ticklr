@@ -6,7 +6,9 @@ import app.services.EventRepository;
 import app.services.TicketSetRepository;
 import app.services.UserRepository;
 import app.web.authorization.UserAuthorizer;
+import net.minidev.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -16,13 +18,18 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users/{userId}/events")
 public class EventController
 {
     private static final ResponseEntity NOT_FOUND = new ResponseEntity(HttpStatus.NOT_FOUND);
+
     private static final ResponseEntity FORBIDDEN = new ResponseEntity(HttpStatus.FORBIDDEN);
 
     private EventRepository eventRepository;
@@ -35,19 +42,56 @@ public class EventController
 
     private UserAuthorizer userAuthorizer;
 
+    private String hostname;
+
     /**
-     * @param eventRepository Manage Event entities
-     * @param validator       performs validation on Event entity
+     * @param eventRepository
+     * @param userRepository
+     * @param ticketSetRepository
+     * @param validator
+     * @param userAuthorizer
+     * @param hostname            hostname of the server on which the app is running
      */
     @Autowired
     public EventController(EventRepository eventRepository, UserRepository userRepository,
-                           TicketSetRepository ticketSetRepository, EventValidator validator, UserAuthorizer userAuthorizer)
+                           TicketSetRepository ticketSetRepository, EventValidator validator, UserAuthorizer userAuthorizer,
+                           @Value("${app.server.host}") String hostname)
     {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.ticketSetRepository = ticketSetRepository;
         this.validator = validator;
         this.userAuthorizer = userAuthorizer;
+        this.hostname = hostname;
+    }
+
+    /**
+     * @return List of events belonging to a particular user
+     */
+    @RequestMapping(method = RequestMethod.GET)
+    public ResponseEntity getEvents(@PathVariable UUID userId)
+    {
+        User user = userRepository.findById(userId);
+
+        if (user == null)
+            return NOT_FOUND;
+
+        if (!userAuthorizer.authorize(user))
+            return FORBIDDEN;
+
+        // constructs the response object
+        List<Map<String, Object>> events = eventRepository.findByUserId(userId).stream().map(event -> {
+            Map<String, Object> compact = new HashMap<>();
+            compact.put("id", getFullURL(eventURL(userId, event.getId())));
+            compact.put("title", event.getTitle());
+            return compact;
+        }).collect(Collectors.toList());
+
+        JSONObject json = new JSONObject();
+        json.put("id", getFullURL(eventURL(userId, null)));
+        json.put("events", events);
+
+        return new ResponseEntity(json, HttpStatus.OK);
     }
 
     /**
@@ -91,7 +135,7 @@ public class EventController
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity handleHttpMessageNotReadableException(HttpMessageNotReadableException ex)
     {
-        // todo use logger to log ex.getMessage()
+        // TODO: use logger to log ex.getMessage()
         return new ResponseEntity("{\"message\": \"The request sent by the client was syntactically incorrect.\"}", HttpStatus.BAD_REQUEST);
     }
 
@@ -244,7 +288,7 @@ public class EventController
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
-    // todo deals with situation when basket items still reference this ticket set
+    // TODO: deals with situation when basket items still reference this ticket set
     @RequestMapping(value = "/{eventId}/ticket-sets/{ticketSetId}", method = RequestMethod.DELETE)
     public ResponseEntity deleteTicketSet(@PathVariable UUID userId, @PathVariable long eventId, @PathVariable long ticketSetId)
     {
@@ -254,11 +298,13 @@ public class EventController
             return NOT_FOUND;
 
         Event event = ticketSet.getEvent();
+
         // TicketSet doesn't belong to event
         if (!event.getId().equals(eventId))
             return NOT_FOUND;
 
         User user = event.getUser();
+
         // Event doesn't belong to user
         if (!user.getId().equals(userId))
             return NOT_FOUND;
@@ -275,23 +321,36 @@ public class EventController
      * @param userId  not null
      * @param eventId is not included in the result if it's null
      * @return Event URL
+     * @throws IllegalArgumentException if userId == null
      */
-    private String eventURL(UUID userId, Long eventId)
+    public static String eventURL(UUID userId, Long eventId)
     {
-        assert userId != null;
+        if (userId == null)
+            throw new IllegalArgumentException("userId must not be null.");
         return "/api/users/" + userId + "/events" + (eventId != null ? "/" + eventId : "");
     }
 
     /**
-     * @param userId      not null
-     * @param eventId     not null
+     * @param userId
+     * @param eventId
      * @param ticketSetId is not included in the result if it's null
      * @return Ticket Set URL
+     * @require userId != null
+     * @require eventId != null
      */
-    private String ticketSetURL(UUID userId, Long eventId, Long ticketSetId)
+    public static String ticketSetURL(UUID userId, Long eventId, Long ticketSetId)
     {
-        assert userId != null;
-        assert eventId != null;
+        if (userId == null || eventId == null)
+            throw new IllegalArgumentException("userId and eventId must not be null.");
         return eventURL(userId, eventId) + "/ticket-sets" + (ticketSetId == null ? "" : "/" + ticketSetId);
+    }
+
+    /**
+     * @param url
+     * @return the full URL to a resource containing hostname
+     */
+    private String getFullURL(String url)
+    {
+        return hostname + url;
     }
 }

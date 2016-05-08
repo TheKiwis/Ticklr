@@ -1,8 +1,8 @@
 package integration;
 
 import config.RootConfig;
-import config.environment.Environment;
-import config.web.WebConfig;
+import config.environment.Profile;
+import config.web.TestWebConfig;
 import org.dbunit.DataSourceBasedDBTestCase;
 import org.dbunit.dataset.DefaultDataSet;
 import org.dbunit.dataset.IDataSet;
@@ -32,13 +32,13 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
  * @author ngnmhieu
  */
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = {RootConfig.class, WebConfig.class})
+@ContextConfiguration(classes = {RootConfig.class, TestWebConfig.class})
 @WebAppConfiguration("src/main/java/")
 @TestExecutionListeners({
         DependencyInjectionTestExecutionListener.class,
         FlywayTestExecutionListener.class
 })
-@ActiveProfiles(Environment.TEST)
+@ActiveProfiles(Profile.TEST)
 @FlywayTest
 abstract public class CommonIntegrationTest extends DataSourceBasedDBTestCase
 {
@@ -52,6 +52,8 @@ abstract public class CommonIntegrationTest extends DataSourceBasedDBTestCase
 
     @Autowired
     protected WebApplicationContext wac;
+
+    protected String hostname = "http://integration.localhost";
 
     @Override
     protected DataSource getDataSource()

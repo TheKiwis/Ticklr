@@ -20,7 +20,7 @@ import org.springframework.web.context.WebApplicationContext;
 public class ApplicationBeans
 {
     @Bean
-    public JwtHelper jwtAuthenticator(@Value("${auth.secret}") String authSecret)
+    public JwtHelper jwtAuthenticator(@Value("${app.auth.secret}") String authSecret)
     {
         return new JwtHelper(authSecret);
     }

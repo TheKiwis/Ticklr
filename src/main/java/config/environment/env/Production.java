@@ -1,10 +1,9 @@
-package config.environment.development;
+package config.environment.env;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
-import config.environment.Environment;
+import config.environment.Profile;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Profile;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -15,8 +14,8 @@ import java.util.Properties;
 /**
  * @author ngnmhieu
  */
-@Profile(Environment.DEVELOPMENT)
-public class DevelopmentEnvironment
+@org.springframework.context.annotation.Profile(Profile.PRODUCTION)
+public class Production
 {
     @Bean
     public DataSource dataSource()
@@ -42,10 +41,11 @@ public class DevelopmentEnvironment
     public PropertyPlaceholderConfigurer propertyPlaceholderConfigurer()
     {
         Properties properties = new Properties();
-        properties.setProperty("auth.secret", "dev_secret");
+        properties.setProperty("app.auth.secret", "prod_secret");
 
         PropertyPlaceholderConfigurer placeholderConfigurer = new PropertyPlaceholderConfigurer();
         placeholderConfigurer.setProperties(properties);
+        placeholderConfigurer.setIgnoreUnresolvablePlaceholders(true);
 
         return placeholderConfigurer;
     }

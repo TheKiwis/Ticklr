@@ -1,12 +1,15 @@
 package app.services;
 
 import app.data.Event;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * @author ngnmhieu
@@ -34,6 +37,7 @@ public class EventRepository
 
     /**
      * Create a new event or update an existing one
+     *
      * @param event
      */
     public Event saveOrUpdate(Event event)
@@ -62,5 +66,17 @@ public class EventRepository
         } catch (NoResultException e) {
             return null;
         }
+    }
+
+    /**
+     * Finds all the events of the user corresponding to userId
+     * @param userId
+     * @return
+     */
+    public List<Event> findByUserId(UUID userId)
+    {
+        return em.createQuery("SELECT e FROM Event e WHERE e.user.id = :userId")
+                .setParameter("userId", userId)
+                .getResultList();
     }
 }

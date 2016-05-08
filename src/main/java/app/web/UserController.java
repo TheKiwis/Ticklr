@@ -45,7 +45,7 @@ public class UserController
         this.jwtHelper = jwtHelper;
     }
 
-    // todo only user authorization
+    // TODO: only authorized user
     @RequestMapping(value = "/{userId}", method = RequestMethod.GET)
     public ResponseEntity show(@PathVariable UUID userId)
     {

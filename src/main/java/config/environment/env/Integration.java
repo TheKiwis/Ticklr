@@ -1,7 +1,6 @@
-package config.environment.test;
+package config.environment.env;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
-import config.environment.Environment;
 import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
@@ -16,8 +15,8 @@ import java.util.Properties;
 /**
  * @author ngnmhieu
  */
-@Profile(Environment.TEST)
-public class TestEnvironment
+@org.springframework.context.annotation.Profile(config.environment.Profile.TEST)
+public class Integration
 {
     /**
      * @return local data source or travis-ci data source
@@ -73,10 +72,11 @@ public class TestEnvironment
     public PropertyPlaceholderConfigurer propertyPlaceholderConfigurer()
     {
         Properties properties = new Properties();
-        properties.setProperty("auth.secret", "test_secret");
+        properties.setProperty("app.auth.secret", "test_secret");
 
         PropertyPlaceholderConfigurer placeholderConfigurer = new PropertyPlaceholderConfigurer();
         placeholderConfigurer.setProperties(properties);
+        placeholderConfigurer.setIgnoreUnresolvablePlaceholders(true);
 
         return placeholderConfigurer;
     }

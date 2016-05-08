@@ -12,9 +12,10 @@ import org.springframework.web.bind.annotation.*;
 @Controller
 public class HomeController
 {
-    //@RequestMapping(value = "/index", method = RequestMethod.GET)
-    //public String index()
-    //{
-    //    return "index.html";
-    //}
+    @RequestMapping(value = "/test", method = RequestMethod.GET)
+    @ResponseBody
+    public User test()
+    {
+        return new User("user", "password");
+    }
 }

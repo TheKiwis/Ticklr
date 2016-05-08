@@ -29,7 +29,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  */
 public class AuthenticationIT extends CommonIntegrationTest
 {
-    @Value("${auth.secret}")
+    @Value("${app.auth.secret}")
     private String authSecret;
 
     private JwtHelper jwt;

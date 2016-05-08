@@ -1,18 +1,20 @@
 package config.web;
 
-import config.environment.Environment;
-import config.web.WebConfig;
+import config.environment.Profile;
+import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Profile;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+
+import java.util.Properties;
 
 /**
  * @author ngnmhieu
  * @since 04.05.16
  */
 @Configuration
-@Profile(Environment.DEVELOPMENT)
-public class DevWebConfig extends WebConfig
+@org.springframework.context.annotation.Profile(Profile.DEVELOPMENT)
+public class DevWebConfig extends BaseWebConfig
 {
     public void addCorsMappings(CorsRegistry registry)
     {
@@ -21,5 +23,22 @@ public class DevWebConfig extends WebConfig
                 .allowedMethods("*")
                 .allowedHeaders("*")
                 .exposedHeaders("Location");
+    }
+
+    /**
+     * This propertyPlaceholderConfigurer only resolves values inside servlet-container
+     * other values that are resolved in root-container are ignored by this
+     */
+    @Bean
+    public PropertyPlaceholderConfigurer servletPropertyPlaceholderConfigurer()
+    {
+        Properties properties = new Properties();
+        properties.setProperty("app.server.host", "http://localhost:8080");
+
+        PropertyPlaceholderConfigurer placeholderConfigurer = new PropertyPlaceholderConfigurer();
+        placeholderConfigurer.setProperties(properties);
+        placeholderConfigurer.setIgnoreUnresolvablePlaceholders(true);
+
+        return placeholderConfigurer;
     }
 }
