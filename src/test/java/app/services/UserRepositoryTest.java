@@ -87,6 +87,4 @@ public class UserRepositoryTest
         assertEquals(mockUser, userRepository.save(mockUser));
         verify(em, times(1)).persist(mockUser);
     }
-
-    // todo saveOrUpdate fail
 }

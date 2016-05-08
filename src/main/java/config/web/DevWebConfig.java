@@ -19,6 +19,7 @@ public class DevWebConfig extends WebConfig
         registry.addMapping("/**")
                 .allowedOrigins("*")
                 .allowedMethods("*")
-                .allowedHeaders("*");
+                .allowedHeaders("*")
+                .exposedHeaders("Location");
     }
 }

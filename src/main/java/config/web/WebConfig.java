@@ -18,13 +18,10 @@ import java.util.List;
 @ComponentScan(basePackages = "app.web")
 public class WebConfig extends WebMvcConfigurerAdapter
 {
-    @Bean
-    public ViewResolver viewResolver()
+    @Override
+    public void addViewControllers(ViewControllerRegistry registry)
     {
-        InternalResourceViewResolver resolver = new InternalResourceViewResolver();
-        resolver.setPrefix("/WEB-INF/views/");
-        resolver.setSuffix(".jsp");
-        return resolver;
+        registry.addViewController("/").setViewName("/index.html");
     }
 
     @Override
