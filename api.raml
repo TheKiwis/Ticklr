@@ -4,9 +4,6 @@ version: v1
 baseUri: http://localhost:8080/api/
 protocols: [HTTP, HTTPS]
 mediaType: application/json
-description: |
-Notes about design decisions are temporarily written here.
-DateTime inputs and outputs are formatted in ISO-8601.
 
 /users:
   post:
@@ -30,12 +27,19 @@ DateTime inputs and outputs are formatted in ISO-8601.
         body:
           application/json:
             example: |
-              # TODO: consider if it should be an array or object with one attribute errors
               {
               }
       409:
         description: Conflict due to duplicated email.
-  /request-auth-token:
+  /{userId}:
+    get:
+      responses:
+        200:
+        401:
+    /basket:
+    /events:
+/auth:
+  /request-token:
     post:
       body:
         application/json:
@@ -57,10 +61,3 @@ DateTime inputs and outputs are formatted in ISO-8601.
                 }
         401:
           description: User can not be authenticated, try again.
-  /{userId}:
-    get:
-      responses:
-        200:
-        401:
-    /basket:
-    /events:

@@ -1,4 +1,4 @@
-package app.web;
+package app.web.event;
 
 import app.data.*;
 import app.data.validation.EventValidator;

@@ -1,4 +1,4 @@
-package app.web;
+package app.web.event;
 
 import app.data.*;
 import app.data.validation.EventValidator;
@@ -45,10 +45,10 @@ public class EventController
     private String hostname;
 
     /**
-     * @param eventRepository
-     * @param userRepository
-     * @param ticketSetRepository
-     * @param validator
+     * @param eventRepository     manages event entities
+     * @param userRepository      manages user entities
+     * @param ticketSetRepository manages ticketset entities
+     * @param validator           validates event input
      * @param userAuthorizer
      * @param hostname            hostname of the server on which the app is running
      */
@@ -82,13 +82,13 @@ public class EventController
         // constructs the response object
         List<Map<String, Object>> events = eventRepository.findByUserId(userId).stream().map(event -> {
             Map<String, Object> compact = new HashMap<>();
-            compact.put("id", getFullURL(eventURL(userId, event.getId())));
+            compact.put("id", getFullURL(eventURI(userId, event.getId())));
             compact.put("title", event.getTitle());
             return compact;
         }).collect(Collectors.toList());
 
         JSONObject json = new JSONObject();
-        json.put("id", getFullURL(eventURL(userId, null)));
+        json.put("id", getFullURL(eventURI(userId, null)));
         json.put("events", events);
 
         return new ResponseEntity(json, HttpStatus.OK);
@@ -124,7 +124,7 @@ public class EventController
 
             Event event = eventRepository.saveOrUpdate(requestEvent);
 
-            headers.setLocation(URI.create(eventURL(userId, event.getId())));
+            headers.setLocation(URI.create(eventURI(userId, event.getId())));
         } else {
             status = HttpStatus.BAD_REQUEST;
         }
@@ -170,7 +170,7 @@ public class EventController
 
         if (!bindingResult.hasFieldErrors()) {
             Event updatedEvent = eventRepository.saveOrUpdate(event.merge(requestEvent));
-            headers.setLocation(URI.create(eventURL(userId, updatedEvent.getId())));
+            headers.setLocation(URI.create(eventURI(userId, updatedEvent.getId())));
         } else {
             status = HttpStatus.BAD_REQUEST;
         }
@@ -323,7 +323,7 @@ public class EventController
      * @return Event URL
      * @throws IllegalArgumentException if userId == null
      */
-    public static String eventURL(UUID userId, Long eventId)
+    public static String eventURI(UUID userId, Long eventId)
     {
         if (userId == null)
             throw new IllegalArgumentException("userId must not be null.");
@@ -342,7 +342,7 @@ public class EventController
     {
         if (userId == null || eventId == null)
             throw new IllegalArgumentException("userId and eventId must not be null.");
-        return eventURL(userId, eventId) + "/ticket-sets" + (ticketSetId == null ? "" : "/" + ticketSetId);
+        return eventURI(userId, eventId) + "/ticket-sets" + (ticketSetId == null ? "" : "/" + ticketSetId);
     }
 
     /**

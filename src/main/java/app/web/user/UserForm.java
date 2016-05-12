@@ -1,4 +1,4 @@
-package app.web.forms;
+package app.web.user;
 
 import app.data.User;
 import org.hibernate.validator.constraints.Email;

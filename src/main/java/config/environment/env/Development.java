@@ -4,6 +4,8 @@ import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
 import config.environment.Profile;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -38,17 +40,15 @@ public class Development
     }
 
     /**
-     * This propertyPlaceholderConfigurer only resolves values inside root-container
-     * other values that are resolved in servlet-container are ignored by this
+     * This PropertySourcesPlaceholderConfigurer object only resolves values inside
+     * root-container other values that are resolved in servlet-container are ignored
      */
     @Bean
-    public PropertyPlaceholderConfigurer propertyPlaceholderConfigurer()
+    public PropertySourcesPlaceholderConfigurer rootPropertySourcesPlaceholderConfigurer()
     {
-        Properties properties = new Properties();
-        properties.setProperty("app.auth.secret", "dev_secret");
+        PropertySourcesPlaceholderConfigurer placeholderConfigurer = new PropertySourcesPlaceholderConfigurer();
 
-        PropertyPlaceholderConfigurer placeholderConfigurer = new PropertyPlaceholderConfigurer();
-        placeholderConfigurer.setProperties(properties);
+        placeholderConfigurer.setLocation(new ClassPathResource("META-INF/config.properties"));
         placeholderConfigurer.setIgnoreUnresolvablePlaceholders(true);
 
         return placeholderConfigurer;

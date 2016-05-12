@@ -5,6 +5,8 @@ import org.flywaydb.core.Flyway;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.*;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
@@ -68,14 +70,16 @@ public class Integration
         return flyway;
     }
 
+    /**
+     * This PropertySourcesPlaceholderConfigurer object only resolves values inside
+     * root-container other values that are resolved in servlet-container are ignored
+     */
     @Bean
-    public PropertyPlaceholderConfigurer propertyPlaceholderConfigurer()
+    public PropertySourcesPlaceholderConfigurer rootPropertySourcesPlaceholderConfigurer()
     {
-        Properties properties = new Properties();
-        properties.setProperty("app.auth.secret", "test_secret");
+        PropertySourcesPlaceholderConfigurer placeholderConfigurer = new PropertySourcesPlaceholderConfigurer();
 
-        PropertyPlaceholderConfigurer placeholderConfigurer = new PropertyPlaceholderConfigurer();
-        placeholderConfigurer.setProperties(properties);
+        placeholderConfigurer.setLocation(new ClassPathResource("META-INF/config.properties"));
         placeholderConfigurer.setIgnoreUnresolvablePlaceholders(true);
 
         return placeholderConfigurer;

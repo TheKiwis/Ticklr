@@ -12,6 +12,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestExecutionListeners;
@@ -53,7 +54,8 @@ abstract public class CommonIntegrationTest extends DataSourceBasedDBTestCase
     @Autowired
     protected WebApplicationContext wac;
 
-    protected String hostname = "http://integration.localhost";
+    @Value("${app.server.host}")
+    protected String hostname;
 
     @Override
     protected DataSource getDataSource()

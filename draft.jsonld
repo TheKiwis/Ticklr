@@ -1,0 +1,27 @@
+{
+    "@context": {
+        "title": "https://schema.org/title",
+        "description": "https://schema.org/description",
+        "startTime": "https://schema.org/startTime",
+        "endTime": "https://schema.org/endTime",
+        "canceled": "https://localhost:8080/cancellation",
+        "visibility": "http://lcoalhost:8080/visibility",
+        ""
+    },
+
+    "@id": "http://localhost:8080/users/[user-uuid]/events/[event-id]",
+    "@type": "https://schema.org/Event",
+
+    "title": "Hafen Geburtstag",
+    "description": "Birthday celebration of Hamburg's Port",
+    "startTime": "2016-05-07T20:00:00.000Z",
+    "endTime": "2016-05-07T22:00:00.000Z",
+    "canceled": false,
+    "visibility": "public",
+
+    "ticketSets": [
+        "http://localhost:8080/users/123e4567-e89b-12d3-a456-426655440000/events/1/ticket-sets/1",
+        "http://localhost:8080/users/123e4567-e89b-12d3-a456-426655440000/events/1/ticket-sets/2",
+        "http://localhost:8080/users/123e4567-e89b-12d3-a456-426655440000/events/1/ticket-sets/3"
+    ]
+}

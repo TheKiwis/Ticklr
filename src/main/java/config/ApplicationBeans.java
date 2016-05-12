@@ -19,12 +19,6 @@ import org.springframework.web.context.WebApplicationContext;
 @Configuration
 public class ApplicationBeans
 {
-    @Bean
-    public JwtHelper jwtAuthenticator(@Value("${app.auth.secret}") String authSecret)
-    {
-        return new JwtHelper(authSecret);
-    }
-
     /**
      * This bean is defined with Request scope, thus is created
      * in each request.

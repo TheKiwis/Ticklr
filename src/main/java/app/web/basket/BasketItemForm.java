@@ -1,7 +1,4 @@
-package app.web.forms;
-
-import app.data.Basket;
-import app.data.BasketItem;
+package app.web.basket;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;

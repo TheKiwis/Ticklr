@@ -42,6 +42,7 @@ public class Production
     {
         Properties properties = new Properties();
         properties.setProperty("app.auth.secret", "prod_secret");
+        properties.setProperty("app.server.host", "http://ticklr.de");
 
         PropertyPlaceholderConfigurer placeholderConfigurer = new PropertyPlaceholderConfigurer();
         placeholderConfigurer.setProperties(properties);

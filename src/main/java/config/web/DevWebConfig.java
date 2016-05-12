@@ -4,6 +4,8 @@ import config.environment.Profile;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 
 import java.util.Properties;
@@ -26,17 +28,15 @@ public class DevWebConfig extends BaseWebConfig
     }
 
     /**
-     * This propertyPlaceholderConfigurer only resolves values inside servlet-container
-     * other values that are resolved in root-container are ignored by this
+     * This PropertySourcesPlaceholderConfigurer object only resolves values inside
+     * servlet-container other values that are resolved in root-container are ignored
      */
     @Bean
-    public PropertyPlaceholderConfigurer servletPropertyPlaceholderConfigurer()
+    public PropertySourcesPlaceholderConfigurer servletPropertySourcesPlaceholderConfigurer()
     {
-        Properties properties = new Properties();
-        properties.setProperty("app.server.host", "http://localhost:8080");
+        PropertySourcesPlaceholderConfigurer placeholderConfigurer = new PropertySourcesPlaceholderConfigurer();
 
-        PropertyPlaceholderConfigurer placeholderConfigurer = new PropertyPlaceholderConfigurer();
-        placeholderConfigurer.setProperties(properties);
+        placeholderConfigurer.setLocation(new ClassPathResource("META-INF/config.properties"));
         placeholderConfigurer.setIgnoreUnresolvablePlaceholders(true);
 
         return placeholderConfigurer;

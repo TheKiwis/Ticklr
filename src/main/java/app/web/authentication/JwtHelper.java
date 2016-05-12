@@ -1,10 +1,15 @@
 package app.web.authentication;
 
 import app.data.User;
+import app.web.user.UserController;
+import app.web.user.UserURI;
 import io.jsonwebtoken.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.token.DefaultToken;
 import org.springframework.security.core.token.Token;
+import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
@@ -18,19 +23,26 @@ import java.util.Date;
  *
  * @author Duc Nguyen
  */
+@Component
 public class JwtHelper
 {
     // default expiration days
     public static final int DEFAULT_EXPIRED_DAYS = 7;
 
+    // constructs URLs for user resource
+    private final UserURI userURI;
+
     private byte[] authSecretBytes;
 
     /**
      * @param authSecret
+     * @param uri constructs URL for user resource
      */
-    public JwtHelper(String authSecret)
+    @Autowired
+    public JwtHelper(@Value("${app.auth.secret}") String authSecret, UserURI uri)
     {
         this.authSecretBytes = authSecret.getBytes(StandardCharsets.UTF_8);
+        this.userURI = uri;
     }
 
     /**
@@ -84,6 +96,7 @@ public class JwtHelper
                 .setHeaderParam("typ", "JWT")
                 .setSubject(user.getId().toString())
                 .setExpiration(expiredDate)
+                .claim("url", userURI.resourceURL(user.getId()))
                 .signWith(SignatureAlgorithm.HS256, authSecretBytes).compact();
         DefaultToken token = new DefaultToken(jwtToken, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC), "");
         return token;

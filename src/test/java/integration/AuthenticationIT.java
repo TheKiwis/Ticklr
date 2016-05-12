@@ -1,7 +1,9 @@
 package integration;
 
 import app.data.User;
+import app.web.user.UserController;
 import app.web.authentication.JwtHelper;
+import app.web.user.UserURI;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import io.jsonwebtoken.Jwts;
@@ -19,8 +21,10 @@ import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.UUID;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -32,20 +36,26 @@ public class AuthenticationIT extends CommonIntegrationTest
     @Value("${app.auth.secret}")
     private String authSecret;
 
-    private JwtHelper jwt;
+    @Value("${app.server.host}")
+    private String hostname;
 
-    private static final String AUTH_URI = "/api/users/request-auth-token";
+    private static final String AUTH_URI = "/api/auth/request-token";
 
     private UUID userId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
 
     private User user;
+
+    private JwtHelper jwt;
+
+    private UserURI userURI;
 
     @Before
     @Override
     public void setUp() throws Exception
     {
         super.setUp();
-        jwt = new JwtHelper(authSecret);
+        userURI = new UserURI(hostname);
+        jwt = new JwtHelper(authSecret, userURI);
         user = (User) em.createQuery("SELECT u FROM User u WHERE u.email = 'user@example.com'").getSingleResult();
     }
 
@@ -94,9 +104,12 @@ public class AuthenticationIT extends CommonIntegrationTest
 
         String jwtToken = jwt.generateToken(user).getKey();
 
+        String userURL = userURI.resourceURL(UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b"));
+
         mockMvc.perform(post(AUTH_URI)
                 .contentType("application/json")
                 .content(getAuthBody(email, "123456789")))
+                .andExpect(header().string("Location", containsString(userURL)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.key").value(jwtToken));
     }

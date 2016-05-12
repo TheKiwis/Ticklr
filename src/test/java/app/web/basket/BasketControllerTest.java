@@ -1,12 +1,13 @@
-package app.web;
+package app.web.basket;
 
 import app.data.*;
 import app.services.BasketRepository;
 import app.services.TicketSetRepository;
 import app.services.UserRepository;
 import app.web.authorization.UserAuthorizer;
-import app.web.forms.BasketItemForm;
-import app.web.forms.BasketItemUpdateForm;
+import app.web.basket.BasketController;
+import app.web.basket.BasketItemForm;
+import app.web.basket.BasketItemUpdateForm;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

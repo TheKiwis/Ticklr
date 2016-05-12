@@ -5,7 +5,7 @@ import static org.hamcrest.CoreMatchers.*;
 import app.data.Event;
 import app.data.TicketSet;
 import app.data.User;
-import app.web.EventController;
+import app.web.event.EventController;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dbunit.dataset.IDataSet;
@@ -68,7 +68,7 @@ public class EventIT extends CommonIntegrationTest
      */
     private String eventURL(UUID userId, Long eventId)
     {
-        return EventController.eventURL(userId, eventId);
+        return EventController.eventURI(userId, eventId);
     }
 
     @Before

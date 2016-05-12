@@ -1,5 +1,6 @@
 package integration;
 
+import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
@@ -77,7 +78,7 @@ public class UserIT extends CommonIntegrationTest
                 .contentType("application/json")
                 .content(registrationForm("unique_email@example.com", "123456789")))
                 .andExpect(status().isCreated())
-                .andExpect(header().string("Location", startsWith(getUserURL(null))));
+                .andExpect(header().string("Location", containsString(hostname + getUserURL(null))));
 
         query = em.createQuery("SELECT COUNT(u) FROM User u");
         assertEquals((count + 1), query.getSingleResult());

@@ -1,9 +1,10 @@
-package app.web;
+package app.web.user;
 
 import app.data.User;
 import app.services.UserRepository;
-import app.web.forms.UserForm;
+import app.web.user.UserForm;
 import app.web.authentication.JwtHelper;
+import app.web.user.UserController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -37,13 +38,12 @@ public class UserControllerTest
 
     UUID userId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
 
-    // Signature Secret for JWT
-    private static final String authSecret = "test_secret";
-
     @Before
     public void setup()
     {
-        controller = new UserController(userRepository, jwtHelper);
+        UserURI userURI = mock(UserURI.class);
+        when(userURI.resourceURL(any())).thenReturn("http://localhost/api/users/4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
+        controller = new UserController(userRepository, userURI);
     }
 
     @Test
@@ -120,66 +120,5 @@ public class UserControllerTest
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertFalse(((List) response.getBody()).isEmpty());
-    }
-
-    @Test
-    public void login_shouldReturnAuthenticationToken() throws Exception
-    {
-        // mock objects
-        when(userRepository
-                .findByEmail(anyString())
-                .authenticate(anyString())
-        ).thenReturn(true);
-        when(userRepository
-                .findByEmail(anyString())
-                .getId()).thenReturn(UUID.randomUUID());
-
-        Token token = mock(Token.class);
-        when(jwtHelper.generateToken(any())).thenReturn(token);
-
-        UserForm form = mock(UserForm.class);
-        when(form.getEmail()).thenReturn("user@example.com");
-
-        // test object
-        ResponseEntity response = controller.requestAuthToken(form);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(token, response.getBody());
-    }
-
-    @Test
-    public void login_shouldReturnHttpStatusUnauthorizedStatus()
-    {
-        // mock objects
-        when(userRepository
-                .findByEmail(anyString())
-                .authenticate(anyString())
-        ).thenReturn(false);
-
-        UserForm form = mock(UserForm.class);
-        when(form.getEmail()).thenReturn("user@example.com");
-
-        // test Object
-        ResponseEntity response = controller.requestAuthToken(form);
-
-        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-    }
-
-    @Test
-    public void login_shouldReturnHttpStatusUnauthorizedStatusForNonExistentUser()
-    {
-        // mock objects
-        when(userRepository
-                .findByEmail(anyString())
-        ).thenReturn(null);
-
-        UserForm form = mock(UserForm.class);
-        when(form.getEmail()).thenReturn("nonexistentuser@example.com");
-
-        // test Object
-        ResponseEntity response = controller.requestAuthToken(form);
-
-        assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-
     }
 }

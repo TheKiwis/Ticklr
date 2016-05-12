@@ -1,15 +1,12 @@
-package app.web;
+package app.web.user;
 
 import app.data.User;
 import app.services.UserRepository;
-import app.web.forms.UserForm;
-import app.web.authentication.JwtHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.security.core.token.Token;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -20,33 +17,34 @@ import java.util.UUID;
 
 /**
  * Contains REST API Endpoints for following services:
- *  - user registration
- *  - authentication token request
- *  - ...
+ * - user registration
+ * - ...
  *
  * @author ngnmhieu
  */
 @RestController
-@RequestMapping("/api/users")
 public class UserController
 {
-    private UserRepository repo;
+    private UserURI uri;
 
-    private JwtHelper jwtHelper;
+    private UserRepository repo;
 
     /**
      * @param repo fetches and saves User object
-     * @param jwtHelper Jwt Authentication helper object
      */
     @Autowired
-    public UserController(UserRepository repo, JwtHelper jwtHelper)
+    public UserController(UserRepository repo, UserURI uri)
     {
         this.repo = repo;
-        this.jwtHelper = jwtHelper;
+        this.uri = uri;
     }
 
-    // TODO: only authorized user
-    @RequestMapping(value = "/{userId}", method = RequestMethod.GET)
+    /**
+     * TODO: only authorized user
+     * @param userId
+     * @return
+     */
+    @RequestMapping(value = UserURI.RESOURCE_URI, method = RequestMethod.GET)
     public ResponseEntity show(@PathVariable UUID userId)
     {
         User user = repo.findById(userId);
@@ -59,7 +57,8 @@ public class UserController
 
     /**
      * Register user
-     * @param userForm contains registration information (e.g. email and password)
+     *
+     * @param userForm      contains registration information (e.g. email and password)
      * @param bindingResult validation information
      * @return
      */
@@ -75,7 +74,7 @@ public class UserController
 
             try {
                 User user = repo.save(userForm.getUser());
-                headers.setLocation(URI.create(getUserUri(user.getId())));
+                headers.setLocation(URI.create(uri.resourceURL(user.getId())));
             } catch (PersistenceException e) {
                 status = HttpStatus.CONFLICT; // duplicated email found
             }
@@ -87,43 +86,10 @@ public class UserController
         return new ResponseEntity(bindingResult.getFieldErrors(), headers, status);
     }
 
-    /**
-     * Grants client with authentication token (with expiration)
-     * Client uses this token for subsequent requests to access authorized resources
-     *
-     * @param form contains authentication information (i.e. email and password)
-     * @return
-     */
-    @RequestMapping(value= "/request-auth-token", method = RequestMethod.POST)
-    public ResponseEntity requestAuthToken(@RequestBody UserForm form)
-    {
-        User user = repo.findByEmail(form.getEmail());
-
-        Token token = null;
-        HttpStatus status;
-        if (user != null && user.authenticate(form.getPassword())) {
-            token = jwtHelper.generateToken(user);
-            status = HttpStatus.OK;
-        } else {
-            status = HttpStatus.UNAUTHORIZED;
-        }
-
-        return new ResponseEntity(token, status);
-    }
-
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity handleHttpMessageNotReadableException(HttpMessageNotReadableException ex)
     {
         // todo use logger to log ex.getMessage()
         return new ResponseEntity("{\"message\": \"The request sent by the client was syntactically incorrect.\"}", HttpStatus.BAD_REQUEST);
-    }
-
-    /**
-     * @param userId user's id; if userId == null, it's not appended
-     * @return /{USER_BASE_URI}[/userId]
-     */
-    private String getUserUri(UUID userId)
-    {
-        return "/api/users" + (userId == null ? "" : "/" + userId);
     }
 }
