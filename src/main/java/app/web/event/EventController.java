@@ -25,12 +25,13 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/users/{userId}/events")
 public class EventController
 {
     private static final ResponseEntity NOT_FOUND = new ResponseEntity(HttpStatus.NOT_FOUND);
 
     private static final ResponseEntity FORBIDDEN = new ResponseEntity(HttpStatus.FORBIDDEN);
+
+    private EventURI eventURI;
 
     private EventRepository eventRepository;
 
@@ -42,33 +43,31 @@ public class EventController
 
     private UserAuthorizer userAuthorizer;
 
-    private String hostname;
-
     /**
      * @param eventRepository     manages event entities
      * @param userRepository      manages user entities
      * @param ticketSetRepository manages ticketset entities
      * @param validator           validates event input
      * @param userAuthorizer
-     * @param hostname            hostname of the server on which the app is running
+     * @param eventURI
      */
     @Autowired
     public EventController(EventRepository eventRepository, UserRepository userRepository,
-                           TicketSetRepository ticketSetRepository, EventValidator validator, UserAuthorizer userAuthorizer,
-                           @Value("${app.server.host}") String hostname)
+                           TicketSetRepository ticketSetRepository, EventValidator validator,
+                           UserAuthorizer userAuthorizer, EventURI eventURI)
     {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.ticketSetRepository = ticketSetRepository;
         this.validator = validator;
         this.userAuthorizer = userAuthorizer;
-        this.hostname = hostname;
+        this.eventURI = eventURI;
     }
 
     /**
      * @return List of events belonging to a particular user
      */
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(value = EventURI.EVENTS_URI, method = RequestMethod.GET)
     public ResponseEntity getEvents(@PathVariable UUID userId)
     {
         User user = userRepository.findById(userId);
@@ -82,13 +81,13 @@ public class EventController
         // constructs the response object
         List<Map<String, Object>> events = eventRepository.findByUserId(userId).stream().map(event -> {
             Map<String, Object> compact = new HashMap<>();
-            compact.put("id", getFullURL(eventURI(userId, event.getId())));
+            compact.put("id", eventURI.eventURL(userId, event.getId()));
             compact.put("title", event.getTitle());
             return compact;
         }).collect(Collectors.toList());
 
         JSONObject json = new JSONObject();
-        json.put("id", getFullURL(eventURI(userId, null)));
+        json.put("id", eventURI.eventURL(user.getId(), null));
         json.put("events", events);
 
         return new ResponseEntity(json, HttpStatus.OK);
@@ -99,7 +98,7 @@ public class EventController
      * @param bindingResult
      * @return
      */
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(value = EventURI.EVENTS_URI,method = RequestMethod.POST)
     public ResponseEntity createEvent(@PathVariable UUID userId, @RequestBody(required = false) Event requestEvent, BindingResult bindingResult)
     {
         User user = userRepository.findById(userId);
@@ -124,7 +123,7 @@ public class EventController
 
             Event event = eventRepository.saveOrUpdate(requestEvent);
 
-            headers.setLocation(URI.create(eventURI(userId, event.getId())));
+            headers.setLocation(URI.create(eventURI.eventURL(userId, event.getId())));
         } else {
             status = HttpStatus.BAD_REQUEST;
         }
@@ -144,7 +143,7 @@ public class EventController
      * @param bindingResult
      * @return
      */
-    @RequestMapping(value = "/{eventId}", method = RequestMethod.PUT)
+    @RequestMapping(value = EventURI.EVENT_URI, method = RequestMethod.PUT)
     public ResponseEntity updateEvent(@PathVariable UUID userId, @PathVariable Long eventId, @RequestBody(required = false) Event requestEvent, BindingResult bindingResult)
     {
         Event event = eventRepository.findById(eventId);
@@ -170,7 +169,7 @@ public class EventController
 
         if (!bindingResult.hasFieldErrors()) {
             Event updatedEvent = eventRepository.saveOrUpdate(event.merge(requestEvent));
-            headers.setLocation(URI.create(eventURI(userId, updatedEvent.getId())));
+            headers.setLocation(URI.create(eventURI.eventURL(userId, updatedEvent.getId())));
         } else {
             status = HttpStatus.BAD_REQUEST;
         }
@@ -178,7 +177,7 @@ public class EventController
         return new ResponseEntity(bindingResult.getFieldErrors(), headers, status);
     }
 
-    @RequestMapping(value = "/{eventId}", method = RequestMethod.GET)
+    @RequestMapping(value = EventURI.EVENT_URI, method = RequestMethod.GET)
     public ResponseEntity showEvent(@PathVariable UUID userId, @PathVariable Long eventId)
     {
         User user = userRepository.findById(userId);
@@ -197,7 +196,7 @@ public class EventController
         return new ResponseEntity(event, HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/{eventId}", method = RequestMethod.DELETE)
+    @RequestMapping(value = EventURI.EVENT_URI, method = RequestMethod.DELETE)
     public ResponseEntity cancelEvent(@PathVariable UUID userId, @PathVariable Long eventId)
     {
         User user = userRepository.findById(userId);
@@ -221,7 +220,7 @@ public class EventController
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
-    @RequestMapping(value = "/{eventId}/ticket-sets", method = RequestMethod.POST)
+    @RequestMapping(value = EventURI.TICKET_SETS_URI, method = RequestMethod.POST)
     public ResponseEntity addTicketSet(@PathVariable UUID userId, @PathVariable Long eventId, @RequestBody(required = false) @Valid TicketSet ticketSet, BindingResult bindingResult)
     {
         User user = userRepository.findById(userId);
@@ -249,12 +248,12 @@ public class EventController
         eventRepository.saveOrUpdate(event);
 
         HttpHeaders headers = new HttpHeaders();
-        headers.setLocation(URI.create(ticketSetURL(userId, event.getId(), ticketSet.getId())));
+        headers.setLocation(URI.create(eventURI.ticketSetURL(userId, event.getId(), ticketSet.getId())));
 
         return new ResponseEntity(headers, HttpStatus.CREATED);
     }
 
-    @RequestMapping(value = "/{eventId}/ticket-sets/{ticketSetId}", method = RequestMethod.PUT)
+    @RequestMapping(value = EventURI.TICKET_SET_URI, method = RequestMethod.PUT)
     public ResponseEntity updateTicketSet(@PathVariable UUID userId, @PathVariable long eventId,
                                           @PathVariable long ticketSetId, @RequestBody(required = false) @Valid TicketSet updatedTicketSet,
                                           BindingResult bindingResult)
@@ -289,7 +288,7 @@ public class EventController
     }
 
     // TODO: deals with situation when basket items still reference this ticket set
-    @RequestMapping(value = "/{eventId}/ticket-sets/{ticketSetId}", method = RequestMethod.DELETE)
+    @RequestMapping(value = EventURI.TICKET_SET_URI, method = RequestMethod.DELETE)
     public ResponseEntity deleteTicketSet(@PathVariable UUID userId, @PathVariable long eventId, @PathVariable long ticketSetId)
     {
         TicketSet ticketSet = ticketSetRepository.findById(ticketSetId);
@@ -315,42 +314,5 @@ public class EventController
         ticketSetRepository.delete(ticketSet);
 
         return new ResponseEntity(HttpStatus.OK);
-    }
-
-    /**
-     * @param userId  not null
-     * @param eventId is not included in the result if it's null
-     * @return Event URL
-     * @throws IllegalArgumentException if userId == null
-     */
-    public static String eventURI(UUID userId, Long eventId)
-    {
-        if (userId == null)
-            throw new IllegalArgumentException("userId must not be null.");
-        return "/api/users/" + userId + "/events" + (eventId != null ? "/" + eventId : "");
-    }
-
-    /**
-     * @param userId
-     * @param eventId
-     * @param ticketSetId is not included in the result if it's null
-     * @return Ticket Set URL
-     * @require userId != null
-     * @require eventId != null
-     */
-    public static String ticketSetURL(UUID userId, Long eventId, Long ticketSetId)
-    {
-        if (userId == null || eventId == null)
-            throw new IllegalArgumentException("userId and eventId must not be null.");
-        return eventURI(userId, eventId) + "/ticket-sets" + (ticketSetId == null ? "" : "/" + ticketSetId);
-    }
-
-    /**
-     * @param url
-     * @return the full URL to a resource containing hostname
-     */
-    private String getFullURL(String url)
-    {
-        return hostname + url;
     }
 }

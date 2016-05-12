@@ -6,6 +6,7 @@ import app.data.Event;
 import app.data.TicketSet;
 import app.data.User;
 import app.web.event.EventController;
+import app.web.event.EventURI;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dbunit.dataset.IDataSet;
@@ -50,6 +51,8 @@ public class EventIT extends CommonIntegrationTest
 
     private UUID invalidUserId;
 
+    private EventURI eventURI;
+
     /**
      * @param userId
      * @param eventId
@@ -58,7 +61,7 @@ public class EventIT extends CommonIntegrationTest
      */
     private String ticketSetURL(UUID userId, Long eventId, Long ticketSetId)
     {
-        return EventController.ticketSetURL(userId, eventId, ticketSetId);
+        return eventURI.ticketSetURL(userId, eventId, ticketSetId);
     }
 
     /**
@@ -68,7 +71,13 @@ public class EventIT extends CommonIntegrationTest
      */
     private String eventURL(UUID userId, Long eventId)
     {
-        return EventController.eventURI(userId, eventId);
+        return eventURI.eventURL(userId, eventId);
+    }
+
+    @Before
+    public void setup()
+    {
+        eventURI = new EventURI(hostname);
     }
 
     @Before
@@ -111,7 +120,7 @@ public class EventIT extends CommonIntegrationTest
         String url = eventURL(sampleUserId, null);
         mockMvc.perform(addAuthHeader(get(url)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(containsString(hostname + url)))
+                .andExpect(jsonPath("$.id").value(url))
                 .andExpect(jsonPath("$.events").isArray())
                 .andExpect(jsonPath("$.events").isNotEmpty())
                 .andExpect(jsonPath("$.events[0].id").isNotEmpty())

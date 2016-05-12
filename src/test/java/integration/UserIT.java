@@ -24,9 +24,6 @@ import java.util.UUID;
  */
 public class UserIT extends CommonIntegrationTest
 {
-    @Value("${auth.secret}")
-    private String authSecret;
-
     // authentication token
     private String authHeader;
 

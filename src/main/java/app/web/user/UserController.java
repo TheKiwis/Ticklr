@@ -44,7 +44,7 @@ public class UserController
      * @param userId
      * @return
      */
-    @RequestMapping(value = UserURI.RESOURCE_URI, method = RequestMethod.GET)
+    @RequestMapping(value = UserURI.USER_URI, method = RequestMethod.GET)
     public ResponseEntity show(@PathVariable UUID userId)
     {
         User user = repo.findById(userId);
@@ -62,7 +62,7 @@ public class UserController
      * @param bindingResult validation information
      * @return
      */
-    @RequestMapping(method = RequestMethod.POST)
+    @RequestMapping(value = UserURI.USERS_URI, method = RequestMethod.POST)
     public ResponseEntity processRegistration(@RequestBody @Valid UserForm userForm, BindingResult bindingResult)
     {
         HttpHeaders headers = new HttpHeaders();
@@ -74,7 +74,7 @@ public class UserController
 
             try {
                 User user = repo.save(userForm.getUser());
-                headers.setLocation(URI.create(uri.resourceURL(user.getId())));
+                headers.setLocation(URI.create(uri.userURL(user.getId())));
             } catch (PersistenceException e) {
                 status = HttpStatus.CONFLICT; // duplicated email found
             }

@@ -22,7 +22,6 @@ import java.util.UUID;
  * @since 08.03.16
  */
 @RestController
-@RequestMapping("/api/users/{userId}/basket")
 public class BasketController
 {
     protected BasketRepository basketRepository;
@@ -33,16 +32,21 @@ public class BasketController
 
     protected UserAuthorizer userAuthorizer;
 
+    protected BasketURI basketURI;
+
     @Autowired
-    public BasketController(BasketRepository basketRepository, UserRepository userRepository, TicketSetRepository ticketSetRepository, UserAuthorizer userAuthorizer)
+    public BasketController(BasketRepository basketRepository, UserRepository userRepository,
+                            TicketSetRepository ticketSetRepository, UserAuthorizer userAuthorizer,
+                            BasketURI basketURI)
     {
         this.basketRepository = basketRepository;
         this.userRepository = userRepository;
         this.ticketSetRepository = ticketSetRepository;
         this.userAuthorizer = userAuthorizer;
+        this.basketURI = basketURI;
     }
 
-    @RequestMapping(method = RequestMethod.GET)
+    @RequestMapping(value = BasketURI.BASKET_URI,method = RequestMethod.GET)
     public ResponseEntity show(@PathVariable UUID userId)
     {
         Basket basket = null;
@@ -67,7 +71,7 @@ public class BasketController
     }
 
 
-    @RequestMapping(value = "/items", method = RequestMethod.POST)
+    @RequestMapping(value = BasketURI.ITEMS_URI, method = RequestMethod.POST)
     public ResponseEntity addItem(@PathVariable UUID userId, @Valid BasketItemForm basketItemForm, BindingResult bindingResult)
     {
         User user = userRepository.findById(userId);
@@ -115,7 +119,7 @@ public class BasketController
         return new ResponseEntity(status);
     }
 
-    @RequestMapping(value = "/items/{itemId}", method = RequestMethod.DELETE)
+    @RequestMapping(value = BasketURI.ITEM_URI, method = RequestMethod.DELETE)
     public ResponseEntity deleteItem(@PathVariable UUID userId, @PathVariable long itemId)
     {
 
@@ -135,7 +139,7 @@ public class BasketController
         return new ResponseEntity(HttpStatus.OK);
     }
 
-    @RequestMapping(value = "/items/{itemId}", method = RequestMethod.PUT)
+    @RequestMapping(value = BasketURI.ITEM_URI, method = RequestMethod.PUT)
     public ResponseEntity updateItem(@PathVariable UUID userId, @PathVariable Long itemId, BasketItemUpdateForm basketItemUpdateForm, BindingResult bindingResult)
     {
 

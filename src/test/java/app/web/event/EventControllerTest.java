@@ -65,7 +65,7 @@ public class EventControllerTest
     {
         // always authorized
         when(userAuthorizer.authorize(any())).thenReturn(true);
-        controller = new EventController(eventRepository, userRepository, ticketSetRepository, validator, userAuthorizer, "http://localhost");
+        controller = new EventController(eventRepository, userRepository, ticketSetRepository, validator, userAuthorizer, new EventURI("http://localhost"));
 
         // mockEvent belongs to User with userId
         when(mockEvent.getUser().getId()).thenReturn(userId);

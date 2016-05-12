@@ -63,7 +63,7 @@ public class BasketControllerTest
     @Before
     public void setUp() throws Exception
     {
-        basketController = new BasketController(basketRepository, userRepository, ticketSetRepository, userAuthorizer);
+        basketController = new BasketController(basketRepository, userRepository, ticketSetRepository, userAuthorizer, new BasketURI("http://localhost"));
 
         when(mockBasket.getId()).thenReturn(basketId);
 

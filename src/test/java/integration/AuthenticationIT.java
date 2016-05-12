@@ -1,7 +1,6 @@
 package integration;
 
 import app.data.User;
-import app.web.user.UserController;
 import app.web.authentication.JwtHelper;
 import app.web.user.UserURI;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -104,7 +103,7 @@ public class AuthenticationIT extends CommonIntegrationTest
 
         String jwtToken = jwt.generateToken(user).getKey();
 
-        String userURL = userURI.resourceURL(UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b"));
+        String userURL = userURI.userURL(UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b"));
 
         mockMvc.perform(post(AUTH_URI)
                 .contentType("application/json")

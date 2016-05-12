@@ -3,6 +3,7 @@ package app.web.authentication;
 import app.data.User;
 import app.services.UserRepository;
 import app.web.user.UserForm;
+import app.web.user.UserURI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
@@ -22,26 +23,25 @@ import java.util.UUID;
  * @since 12.05.16
  */
 @RestController
-@RequestMapping("/api/auth")
 public class AuthController
 {
     private UserRepository repo;
 
-    private JwtHelper jwtHelper;
+    private UserURI userURI;
 
-    private String hostname;
+    private JwtHelper jwtHelper;
 
     /**
      * @param repo      fetches and saves User object
      * @param jwtHelper Jwt Authentication helper object
-     * @param hostname  hostname of the server on which the app is running
+     * @param userURI
      */
     @Autowired
-    public AuthController(UserRepository repo, JwtHelper jwtHelper, @Value("${app.server.host}") String hostname)
+    public AuthController(UserRepository repo, JwtHelper jwtHelper, UserURI userURI)
     {
         this.repo = repo;
         this.jwtHelper = jwtHelper;
-        this.hostname = hostname;
+        this.userURI = userURI;
     }
 
     /**
@@ -51,7 +51,7 @@ public class AuthController
      * @param form contains authentication information (i.e. email and password)
      * @return
      */
-    @RequestMapping(value = "/request-token", method = RequestMethod.POST)
+    @RequestMapping(value = AuthURI.AUTH_URI, method = RequestMethod.POST)
     public ResponseEntity requestAuthToken(@RequestBody UserForm form)
     {
         User user = repo.findByEmail(form.getEmail());
@@ -59,28 +59,10 @@ public class AuthController
         if (user != null && user.authenticate(form.getPassword())) {
             Token token = jwtHelper.generateToken(user);
             HttpHeaders headers = new HttpHeaders();
-            headers.setLocation(URI.create(getFullURL(userURI(user.getId()))));
+            headers.setLocation(URI.create(userURI.userURL(user.getId())));
             return new ResponseEntity(token, headers, HttpStatus.OK);
         }
 
         return new ResponseEntity(HttpStatus.UNAUTHORIZED);
-    }
-
-    /**
-     * @param userId user's id; if userId == null, it's not appended
-     * @return /{USER_BASE_URI}[/userId]
-     */
-    public static String userURI(UUID userId)
-    {
-        return "/api/users" + (userId == null ? "" : "/" + userId);
-    }
-
-    /**
-     * @param url
-     * @return the full URL to a resource containing hostname
-     */
-    private String getFullURL(String url)
-    {
-        return hostname + url;
     }
 }

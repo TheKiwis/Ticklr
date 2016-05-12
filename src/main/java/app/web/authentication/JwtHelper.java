@@ -1,7 +1,6 @@
 package app.web.authentication;
 
 import app.data.User;
-import app.web.user.UserController;
 import app.web.user.UserURI;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -96,7 +95,7 @@ public class JwtHelper
                 .setHeaderParam("typ", "JWT")
                 .setSubject(user.getId().toString())
                 .setExpiration(expiredDate)
-                .claim("url", userURI.resourceURL(user.getId()))
+                .claim("url", userURI.userURL(user.getId()))
                 .signWith(SignatureAlgorithm.HS256, authSecretBytes).compact();
         DefaultToken token = new DefaultToken(jwtToken, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC), "");
         return token;

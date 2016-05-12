@@ -13,8 +13,8 @@ import java.util.UUID;
 @Component
 public class UserURI
 {
-    public static final String BASE_URI = "/api/users";
-    public static final String RESOURCE_URI = BASE_URI + "/{userId}";
+    public static final String USERS_URI = "/api/users";
+    public static final String USER_URI = USERS_URI + "/{userId}";
 
     // hostname of the server on which the app is running
     private String hostname;
@@ -34,17 +34,17 @@ public class UserURI
      * @param userId user's id; if userId == null, it's not appended
      * @return URI to the resource (absolute path)
      */
-    public String resourceURI(UUID userId)
+    public String userURI(UUID userId)
     {
-        return BASE_URI + (userId == null ? "" : "/" + userId);
+        return USERS_URI + (userId == null ? "" : "/" + userId);
     }
 
     /**
      * @param userId
      * @return URL (including hostname) of the user resource
      */
-    public String resourceURL(UUID userId)
+    public String userURL(UUID userId)
     {
-        return hostname + resourceURI(userId);
+        return hostname + userURI(userId);
     }
 }

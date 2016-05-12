@@ -2,9 +2,7 @@ package app.web.user;
 
 import app.data.User;
 import app.services.UserRepository;
-import app.web.user.UserForm;
 import app.web.authentication.JwtHelper;
-import app.web.user.UserController;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -13,7 +11,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.token.Token;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 
@@ -42,7 +39,7 @@ public class UserControllerTest
     public void setup()
     {
         UserURI userURI = mock(UserURI.class);
-        when(userURI.resourceURL(any())).thenReturn("http://localhost/api/users/4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
+        when(userURI.userURL(any())).thenReturn("http://localhost/api/users/4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
         controller = new UserController(userRepository, userURI);
     }
 

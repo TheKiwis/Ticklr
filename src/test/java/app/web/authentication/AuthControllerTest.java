@@ -2,6 +2,7 @@ package app.web.authentication;
 
 import app.services.UserRepository;
 import app.web.user.UserForm;
+import app.web.user.UserURI;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -38,7 +39,7 @@ public class AuthControllerTest
     @Before
     public void setup()
     {
-        controller = new AuthController(userRepository, jwtHelper, "http://localhost");
+        controller = new AuthController(userRepository, jwtHelper, new UserURI("http://localhost"));
     }
 
     @Test
