@@ -2,9 +2,13 @@ package app.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.mapping.*;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import java.util.UUID;
 
 /**
@@ -25,6 +29,9 @@ public class User
 
     @Column(name = "password")
     private String password;
+
+    @OneToOne(mappedBy = "user", fetch = FetchType.EAGER)
+    protected Basket basket;
 
     protected User()
     {

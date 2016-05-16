@@ -120,11 +120,12 @@ public class EventIT extends CommonIntegrationTest
         String url = eventURL(sampleUserId, null);
         mockMvc.perform(addAuthHeader(get(url)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(url))
-                .andExpect(jsonPath("$.events").isArray())
-                .andExpect(jsonPath("$.events").isNotEmpty())
-                .andExpect(jsonPath("$.events[0].id").isNotEmpty())
-                .andExpect(jsonPath("$.events[0].title").isNotEmpty());
+                .andExpect(jsonPath("$.href").value(url))
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.items").isNotEmpty())
+                .andExpect(jsonPath("$.items[0].id").isNotEmpty())
+                .andExpect(jsonPath("$.items[0].title").isNotEmpty())
+                .andExpect(jsonPath("$.items[0].href").isNotEmpty());
     }
 
     @Test
@@ -184,6 +185,7 @@ public class EventIT extends CommonIntegrationTest
         mockMvc.perform(addAuthHeader(get(location)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.href").value(location))
                 .andExpect(jsonPath("$.title").value(sampleTitle))
                 .andExpect(jsonPath("$.description").value(sampleDesc))
                 .andExpect(jsonPath("$.startTime").value(startsWith(sampleStartTime)))

@@ -2,6 +2,9 @@ package app.web.user;
 
 import app.data.User;
 import app.services.UserRepository;
+import app.web.authorization.UserAuthorizer;
+import app.web.basket.BasketURI;
+import app.web.event.EventURI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -25,7 +28,13 @@ import java.util.UUID;
 @RestController
 public class UserController
 {
-    private UserURI uri;
+    private BasketURI basketURI;
+
+    private EventURI eventURI;
+
+    private UserAuthorizer userAuthorizer;
+
+    private UserURI userURI;
 
     private UserRepository repo;
 
@@ -33,16 +42,19 @@ public class UserController
      * @param repo fetches and saves User object
      */
     @Autowired
-    public UserController(UserRepository repo, UserURI uri)
+    public UserController(UserRepository repo, UserURI userURI, EventURI eventURI,
+                          BasketURI basketURI, UserAuthorizer userAuthorizer)
     {
         this.repo = repo;
-        this.uri = uri;
+        this.userURI = userURI;
+        this.eventURI = eventURI;
+        this.basketURI = basketURI;
+        this.userAuthorizer = userAuthorizer;
     }
 
     /**
-     * TODO: only authorized user
      * @param userId
-     * @return
+     * @return inforamtion about a user
      */
     @RequestMapping(value = UserURI.USER_URI, method = RequestMethod.GET)
     public ResponseEntity show(@PathVariable UUID userId)
@@ -52,18 +64,20 @@ public class UserController
         if (user == null)
             return new ResponseEntity(HttpStatus.NOT_FOUND);
 
-        return new ResponseEntity(user, HttpStatus.OK);
+        if (!userAuthorizer.authorize(user))
+            return new ResponseEntity(user, HttpStatus.FORBIDDEN);
+
+        return new ResponseEntity(new UserResponse(user, userURI, eventURI, basketURI), HttpStatus.OK);
     }
 
     /**
-     * Register user
+     * Creates a user
      *
      * @param userForm      contains registration information (e.g. email and password)
      * @param bindingResult validation information
-     * @return
      */
     @RequestMapping(value = UserURI.USERS_URI, method = RequestMethod.POST)
-    public ResponseEntity processRegistration(@RequestBody @Valid UserForm userForm, BindingResult bindingResult)
+    public ResponseEntity create(@RequestBody @Valid UserForm userForm, BindingResult bindingResult)
     {
         HttpHeaders headers = new HttpHeaders();
         HttpStatus status;
@@ -74,7 +88,7 @@ public class UserController
 
             try {
                 User user = repo.save(userForm.getUser());
-                headers.setLocation(URI.create(uri.userURL(user.getId())));
+                headers.setLocation(URI.create(userURI.userURL(user.getId())));
             } catch (PersistenceException e) {
                 status = HttpStatus.CONFLICT; // duplicated email found
             }

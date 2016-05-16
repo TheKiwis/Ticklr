@@ -78,19 +78,12 @@ public class EventController
         if (!userAuthorizer.authorize(user))
             return FORBIDDEN;
 
-        // constructs the response object
-        List<Map<String, Object>> events = eventRepository.findByUserId(userId).stream().map(event -> {
-            Map<String, Object> compact = new HashMap<>();
-            compact.put("id", eventURI.eventURL(userId, event.getId()));
-            compact.put("title", event.getTitle());
-            return compact;
-        }).collect(Collectors.toList());
+        List<EventResponse> eventResponses = eventRepository.findByUserId(userId)
+                .stream().map(event -> new EventResponse(event, eventURI)).collect(Collectors.toList());
 
-        JSONObject json = new JSONObject();
-        json.put("id", eventURI.eventURL(user.getId(), null));
-        json.put("events", events);
+        EventsResponse response = new EventsResponse(eventURI.eventURL(user.getId(), null), eventResponses);
 
-        return new ResponseEntity(json, HttpStatus.OK);
+        return new ResponseEntity(response, HttpStatus.OK);
     }
 
     /**
@@ -98,7 +91,7 @@ public class EventController
      * @param bindingResult
      * @return
      */
-    @RequestMapping(value = EventURI.EVENTS_URI,method = RequestMethod.POST)
+    @RequestMapping(value = EventURI.EVENTS_URI, method = RequestMethod.POST)
     public ResponseEntity createEvent(@PathVariable UUID userId, @RequestBody(required = false) Event requestEvent, BindingResult bindingResult)
     {
         User user = userRepository.findById(userId);
@@ -193,7 +186,7 @@ public class EventController
         if (!userAuthorizer.authorize(user))
             return FORBIDDEN;
 
-        return new ResponseEntity(event, HttpStatus.OK);
+        return new ResponseEntity(new EventResponse(event, eventURI), HttpStatus.OK);
     }
 
     @RequestMapping(value = EventURI.EVENT_URI, method = RequestMethod.DELETE)
@@ -253,6 +246,7 @@ public class EventController
         return new ResponseEntity(headers, HttpStatus.CREATED);
     }
 
+    // TODO: we have to create some kind of notification resource if the price changes and there are basket items that references it.
     @RequestMapping(value = EventURI.TICKET_SET_URI, method = RequestMethod.PUT)
     public ResponseEntity updateTicketSet(@PathVariable UUID userId, @PathVariable long eventId,
                                           @PathVariable long ticketSetId, @RequestBody(required = false) @Valid TicketSet updatedTicketSet,
@@ -287,7 +281,7 @@ public class EventController
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
 
-    // TODO: deals with situation when basket items still reference this ticket set
+    // TODO: Cannot delete the ticket set if some basket items still reference it.
     @RequestMapping(value = EventURI.TICKET_SET_URI, method = RequestMethod.DELETE)
     public ResponseEntity deleteTicketSet(@PathVariable UUID userId, @PathVariable long eventId, @PathVariable long ticketSetId)
     {

@@ -1,0 +1,308 @@
+#%RAML 0.8
+title: Ticklr API 
+version: v1
+baseUri: http://localhost:8080/api/
+protocols: [HTTP, HTTPS]
+mediaType: application/json
+
+traits:
+  - authorized:
+      headers:
+        Authorization:
+          description: Authentication information (JWT Token)
+          example: "Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9.TJVA95OrM7E2cBab30RMHrHDcEfxjoYZgeFONFh7HgQ"
+      responses:
+        401:
+          description: User cannot be authenticated due to invalid authentication information.
+        403:
+          description: User does not have permissions to access this resource.
+    
+
+/users:
+  post:
+    description: Creates a new user. # TODO activation link will be sent and user is not yet activated
+    body:
+      application/json:
+        example: |
+          {
+            "email"    : "unique_email@gmail.com",
+            "password" : "123456789"
+          }
+    responses:
+      201:
+        description: User successfully registered.
+        headers:
+          Location:
+            description: Location of the newly created user
+            example: "Location: /users/27a4563a45ab4a7aacd15af9"
+      400:
+        description: Part of the input data is invalid.
+        body:
+          application/json:
+            example: |
+              {
+                # TODO
+              }
+      409:
+        description: There is a conflict due to duplicated email.
+
+  /{userId}:
+    is: [authorized]
+    uriParameters:
+      userId:
+        description: UUID that uniquely identifies a user in the system.
+        type: string
+    get:
+      description: Returns a user. 
+      responses:
+        200:
+          body:
+            application/json:
+              example: |
+                {
+                  "id": "http://example.com/api/users/103d34a8-1420-74e9-153d-7a35e1ea8619",
+                  "email": "user@example.com"
+                }
+    /events:
+      is: [authorized]
+      get:
+        description: Returns all events belonging to the user.
+        responses:
+          200:
+            body:
+              application/json:
+                example: |
+                  {
+                    "id": "http://localhost:8080/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events",
+                    "events": [
+                      {
+                        "id": "http://localhost:8080/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/1",
+                        "title": "New Event"
+                      },
+                      {
+                        "id": "http://localhost:8080/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/2",
+                        "title": "New Event"
+                      }
+                    ]
+                  }
+          404:
+            description: User not found.
+      post:
+        is: [authorized]
+        description: Creates a new event.
+        body:
+          application/json:
+            example: |
+              {
+                "title": "New Event",
+                "description": "",
+                "startTime": "2016-05-14T00:00:00+02:00",
+                "endTime": "2016-05-14T01:00:00+02:00",
+                "visibility": "PRIVATE",
+                "canceled": false
+              }
+        responses:
+          201:
+            description: Event created.
+            headers:
+              Location:
+                example: "Location: http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14"
+          400:
+            description: User not found.
+      /{eventId}:
+        is: [authorized]
+        get:
+          description: Returns an event.
+          responses:
+            200:
+              body:
+                application/json:
+                  example: |
+                    {
+                      "href": "http://localhost/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/123",
+                      "id": 1,
+                      "title": "New Event",
+                      "description": "",
+                      "startTime": "2016-05-14T00:00:00+02:00",
+                      "endTime": "2016-05-14T01:00:00+02:00",
+                      "visibility": "PRIVATE",
+                      "canceled": false,
+                      "ticketSets": [],
+                      "expired": false,
+                      "happening": false
+                    }
+            404:
+              description: Event not found.
+        put:
+          description: Updates an event.
+          body:
+            application/json:
+              example: |
+                {
+                  "title": "Event Sample Title",
+                  "description": "Sample Description",
+                  "startTime": "2016-05-14T00:00:00.000Z",
+                  "endTime": "2016-05-14T01:00:00+02:00.000Z",
+                  "visibility": "PUBLIC",
+                  "canceled": false
+                }
+          responses:
+            204:
+              description: Event has been successfully updated.
+            404:
+              description: Event not found.
+            400:
+              description: Part of the updated data is invalid. Please try again.
+        delete:
+          description: Cancels an event.
+          responses:
+            204:
+              description: Event has been successfully cancelled.
+            404:
+              description: Event not found.
+
+        /ticket-sets:
+          is: [authorized]
+          get:
+            description: # TODO
+          post:
+            description: Creates a new ticket set.
+            body:
+              # TODO it's not application/json yet
+              application/json:
+                example: |
+                  {
+                    "title": "5er Group Ticket",
+                    "price": "25.30"
+                    # TODO Currency?
+                  }
+            responses:
+              201:
+                description: Ticket set has been successfully created.
+                headers: # TODO
+                  Location:
+                    example: "Location: http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14/ticket-sets/2" # TODO
+              404:
+                description: Resource not found.
+
+          /{ticketSetId}:
+            is: [authorized]
+            get:
+              description: # TODO
+            delete:
+              description: Deletes a ticket set.
+              responses:
+                204:
+                  description: Ticket set has been successfully deleted.
+                404:
+                  description: Ticket set not found.
+            put: 
+              description: Updates a ticket set.
+              body:
+                application/json:
+                  example: |
+                    {
+                      "title": "5er Group Ticket",
+                      "price": "25.30"
+                      # TODO currency?
+                    }
+              responses:
+                204:
+                  description: Ticket set has been successfully updated.
+                404:
+                  description: Ticket set not found.
+                400: 
+                  description: Part of the updated data is invalid. Please try again.
+
+    /basket:
+      is: [authorized]
+      get:   
+        description: Returns the basket belonging to a user.
+        responses:
+          200:
+            body:
+              application/json:
+                example: |
+                  {
+                    # TODO: change it!!
+                    "id": 1,
+                    "user": {
+                      "id": "103d44a8-1240-49e9-935d-7a35e5ea6819",
+                      "email": "ngnmhieu@gmail.com"
+                    },
+                    "basketItems": [],
+                    "createdTime": "2016-05-13T21:33:26.861+0000",
+                    "updatedTime": null
+                  }
+          404:
+            description: User not found.
+      /items:
+        is: [authorized]
+        get:
+          description: # TODO
+        post:
+          description: Adds a new item to the basket.
+          body:
+            application/json:
+              example: |
+                {
+                  "quantity": 20,
+                }
+          responses:
+            201:
+              description: Item has been successfully added to basket.
+              headers:
+                Location:
+                  example: "Location: http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/basket/items/123" # TODO
+            400:
+              description: User not found.
+
+        /{itemId}:
+          is: [authorized]
+          get:
+            description: # TODO
+          put:
+            description: Updates a basket item.
+            body:
+              application/json:
+                example: |
+                  {
+                    "quantity": 2,
+                    "ticketSetId": 123, # TODO this should be an url...
+                  }
+            responses:
+              204:
+                description: Basket item has been successfully updated.
+              400:
+                description: Basket item  not found.
+          delete:
+            description: Deletes a basket item.
+            responses:
+              204:
+                description: Basket item has been successfully deleted.
+              400:
+                description: Basket item  not found.
+
+/auth:
+  /request-token:
+    post:
+      description: Returns authentication token if user provides valid credentials (correct email and password).
+      body:
+        application/json:
+          example: |
+            {
+              "email"    : "unique_email@gmail.com",
+              "password" : "123456789"
+            }
+      responses:
+        200:
+          description: Authentication succeeds, return authentication token to user.
+          body:
+              example: |
+                {
+                  "key": "eyJ0eXQiLCJhbGcAiO1IUzI1iJKViOiJNiJ9.eyJlldUBnbWFpbC5zdWIiOiJuZ25taGjb20iLCJleHAiOjE0NjE4ODA4MDB9.ZmddFiD4vB9p0cWL6ahbaqLbLLGTXTjbJwH5QmbS2YL",
+                  "keyCreationTime": 1461311670,
+                  "extendedInformation": ""
+                }
+        401:
+          description: User cannot be authenticated due to incorrect credentials, please try again.

@@ -8,6 +8,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import app.data.User;
+import app.web.basket.BasketURI;
+import app.web.event.EventURI;
+import app.web.user.UserURI;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dbunit.dataset.IDataSet;
@@ -29,6 +32,20 @@ public class UserIT extends CommonIntegrationTest
 
     UUID userId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
 
+    private BasketURI basketURI;
+
+    private UserURI userURI;
+
+    private EventURI eventURI;
+
+    @Before
+    public void setup()
+    {
+        userURI = new UserURI(hostname);
+        eventURI = new EventURI(hostname);
+        basketURI = new BasketURI(hostname);
+    }
+
     @Before
     public void login() throws Exception
     {
@@ -47,11 +64,21 @@ public class UserIT extends CommonIntegrationTest
                 .header("Authorization", authHeader))
                 .andExpect(jsonPath("$.id").value(userId.toString()))
                 .andExpect(jsonPath("$.email").value("user@example.com"))
-                .andExpect(jsonPath("$.password").doesNotExist());
+                .andExpect(jsonPath("$.password").doesNotExist())
+                .andExpect(jsonPath("$.href").value(userURI.userURL(userId)))
+                .andExpect(jsonPath("$.events.href").value(eventURI.eventURL(userId, null)))
+                .andExpect(jsonPath("$.basket.href").value(basketURI.basketURL(userId)));
     }
 
     @Test
+    public void shouldReturnHTTPForbiddenIfUserIsNotAuthorized() throws Exception
+    {
+        mockMvc.perform(get(getUserURL(UUID.fromString("c4fcb3fe-1a98-11e6-b6ba-3e1d05defe78")))
+                .header("Authorization", authHeader))
+                .andExpect(status().isForbidden());
+    }
 
+    @Test
     public void shouldReturnHttpNotFoundIfNoUserFound() throws Exception
     {
         UUID unknownUserId = UUID.fromString("f7fa0180-0f17-11e6-b94e-0002a5d5c51b");

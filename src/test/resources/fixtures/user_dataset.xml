@@ -1,3 +1,4 @@
 <dataset>
     <users id="uuid'4eab8080-0f0e-11e6-9f74-0002a5d5c51b'" email="user@example.com" password="$2a$10$7DiTrG0atup/drERomar.eg4N0yVhRDvd7VHmAGKpxZP.XTzwCq16"/>
+    <users id="uuid'c4fcb3fe-1a98-11e6-b6ba-3e1d05defe78'" email="another_user@example.com" password="$2a$10$7DiTrG0atup/drERomar.eg4N0yVhRDvd7VHmAGKpxZP.XTzwCq16"/>
 </dataset>
