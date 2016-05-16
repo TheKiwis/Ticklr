@@ -140,11 +140,12 @@ public class EventControllerTest
     {
         when(userRepository.findById(userId)).thenReturn(mockUser);
         when(eventRepository.findById(eventId)).thenReturn(mockEvent);
+        when(mockEvent.getId()).thenReturn(1l);
 
         ResponseEntity response = controller.showEvent(userId, eventId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        assertEquals(mockEvent, response.getBody());
+        assertEquals(Long.valueOf(1l), ((EventResponse)response.getBody()).id);
     }
 
     @Test
