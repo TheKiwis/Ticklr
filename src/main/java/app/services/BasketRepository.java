@@ -9,7 +9,8 @@ import javax.persistence.*;
 import java.util.UUID;
 
 /**
- * Created by DucNguyenMinh on 08.03.16.
+ * @author DucNguyenMinh
+ * @since 08.03.16
  */
 @Repository
 @Transactional
@@ -77,6 +78,7 @@ public class BasketRepository
 
     /**
      * Find item associated with the given ticket-set in the given basket
+     *
      * @param basketId
      * @param ticketSetId
      * @return null if nothing found

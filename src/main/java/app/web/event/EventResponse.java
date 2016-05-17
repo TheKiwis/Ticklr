@@ -22,9 +22,9 @@ public class EventResponse
 
     public ZonedDateTime endTime;
 
-    public Event.Visibility visibility;
-
     public boolean canceled;
+
+    public boolean isPublic;
 
     public boolean happening;
 
@@ -38,8 +38,8 @@ public class EventResponse
         this.description = event.getDescription();
         this.startTime = event.getStartTime();
         this.endTime = event.getEndTime();
-        this.visibility = event.getVisibility();
         this.canceled = event.isCanceled();
+        this.isPublic = event.isPublic();
         this.happening = event.isHappening();
         this.expired = event.isExpired();
     }

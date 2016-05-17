@@ -21,7 +21,6 @@ public class EventTest
         assertEquals(null, event.getId());
         assertEquals("New Event", event.getTitle());
         assertEquals("", event.getDescription());
-        assertEquals(Event.Visibility.PRIVATE, event.getVisibility());
         assertEquals(false, event.isCanceled());
         assertNull(event.getUser());
 

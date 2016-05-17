@@ -1,9 +1,6 @@
 package app.data;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonValue;
 import org.hibernate.annotations.*;
 import org.hibernate.validator.constraints.NotEmpty;
 
@@ -13,8 +10,6 @@ import javax.persistence.Entity;
 import javax.persistence.Table;
 import javax.validation.constraints.NotNull;
 import java.time.ZonedDateTime;
-import java.time.ZonedDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
@@ -43,12 +38,11 @@ public class Event
     @Column(name = "end_time")
     protected ZonedDateTime endTime;
 
-    @Column(name = "visibility")
-    @Enumerated(EnumType.STRING)
-    protected Visibility visibility;
-
     @Column(name = "canceled")
     protected boolean canceled;
+
+    @Column(name = "public")
+    protected boolean isPublic;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -74,12 +68,11 @@ public class Event
      * - startTime = now + 7 days
      * - endTime = startTime + 1 hours
      * - status = DRAFT
-     * - visibility = PRIVATE
      * - canceled = false
      */
     public Event()
     {
-        this("New Event", "", null, null, Visibility.PRIVATE, false, null);
+        this("New Event", "", null, null, false, false, null);
 
         setStartTime(ZonedDateTime.now().withHour(0).withMinute(0).withSecond(0).withNano(0).plusDays(7));
         setEndTime(startTime.plusHours(1));
@@ -90,36 +83,18 @@ public class Event
      * @param description event's description
      * @param startTime   time when the event starts
      * @param endTime     time when the event ends
-     * @param visibility  visibility of the event @see Visibility
      * @param canceled    has this event been canceled
      * @param user        the user who owns this event
      */
-    public Event(String title, String description, ZonedDateTime startTime, ZonedDateTime endTime, Visibility visibility, boolean canceled, User user)
+    public Event(String title, String description, ZonedDateTime startTime, ZonedDateTime endTime, boolean canceled, boolean isPublic, User user)
     {
         this.title = title;
         this.description = description;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.visibility = visibility;
+        this.isPublic = isPublic;
         this.canceled = canceled;
         this.user = user;
-    }
-
-    /**
-     * @return visibility of this event
-     * @see Visibility for possible values
-     */
-    public Visibility getVisibility()
-    {
-        return visibility;
-    }
-
-    /**
-     * @param visibility of this event
-     */
-    public void setVisibility(Visibility visibility)
-    {
-        this.visibility = visibility;
     }
 
     /**
@@ -247,13 +222,27 @@ public class Event
     }
 
     /**
-     * Set canceled state of event
-     *
      * @param canceled
      */
     public void setCanceled(boolean canceled)
     {
         this.canceled = canceled;
+    }
+
+    /**
+     * @return is this event public or private
+     */
+    public boolean isPublic()
+    {
+        return isPublic;
+    }
+
+    /**
+     * @param isPublic
+     */
+    public void setIsPublic(boolean isPublic)
+    {
+        this.isPublic = isPublic;
     }
 
     /**
@@ -264,7 +253,7 @@ public class Event
      */
     public Event merge(Event other)
     {
-        Event event = new Event(other.title, other.description, other.startTime, other.endTime, other.visibility, other.canceled, null);
+        Event event = new Event(other.title, other.description, other.startTime, other.endTime, other.canceled, other.isPublic, null);
 
         event.id = this.id;
 
@@ -290,14 +279,6 @@ public class Event
         return now.isAfter(startTime) && now.isBefore(endTime);
     }
 
-    /**
-     * Possible visibilities of an event
-     */
-    public enum Visibility
-    {
-        PUBLIC, PRIVATE;
-    }
-
     @Override
     public boolean equals(Object o)
     {
@@ -306,11 +287,13 @@ public class Event
 
         Event event = (Event) o;
 
+        if (canceled != event.canceled) return false;
+        if (isPublic != event.isPublic) return false;
         if (title != null ? !title.equals(event.title) : event.title != null) return false;
         if (description != null ? !description.equals(event.description) : event.description != null) return false;
         if (startTime != null ? !startTime.equals(event.startTime) : event.startTime != null) return false;
         if (endTime != null ? !endTime.equals(event.endTime) : event.endTime != null) return false;
-        if (canceled != event.canceled) return false;
-        return visibility == event.visibility;
+        if (createdTime != null ? !createdTime.equals(event.createdTime) : event.createdTime != null) return false;
+        return updatedTime != null ? updatedTime.equals(event.updatedTime) : event.updatedTime == null;
     }
 }
