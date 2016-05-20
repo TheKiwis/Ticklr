@@ -90,7 +90,7 @@ public class EventController
      * @return
      */
     @RequestMapping(value = EventURI.EVENTS_URI, method = RequestMethod.POST)
-    public ResponseEntity createEvent(@PathVariable UUID userId, @RequestBody(required = false) Event requestEvent, BindingResult bindingResult)
+    public ResponseEntity createEvent(@PathVariable UUID userId, @Valid @RequestBody(required = false) Event requestEvent, BindingResult bindingResult)
     {
         User user = userRepository.findById(userId);
 
@@ -135,7 +135,7 @@ public class EventController
      * @return
      */
     @RequestMapping(value = EventURI.EVENT_URI, method = RequestMethod.PUT)
-    public ResponseEntity updateEvent(@PathVariable UUID userId, @PathVariable Long eventId, @RequestBody(required = false) Event requestEvent, BindingResult bindingResult)
+    public ResponseEntity updateEvent(@PathVariable UUID userId, @PathVariable Long eventId, @Valid @RequestBody(required = false) Event requestEvent, BindingResult bindingResult)
     {
         Event event = eventRepository.findById(eventId);
 

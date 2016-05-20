@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<diagram program="umlet" version="14.2">
+  <zoom_level>10</zoom_level>
+  <element>
+    <id>UMLGeneric</id>
+    <coordinates>
+      <x>360</x>
+      <y>120</y>
+      <w>610</w>
+      <h>420</h>
+    </coordinates>
+    <panel_attributes>Ticklr
+halign=left</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLActor</id>
+    <coordinates>
+      <x>140</x>
+      <y>180</y>
+      <w>80</w>
+      <h>110</h>
+    </coordinates>
+    <panel_attributes>Organiser</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLUseCase</id>
+    <coordinates>
+      <x>410</x>
+      <y>150</y>
+      <w>160</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>Create new event</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>UMLUseCase</id>
+    <coordinates>
+      <x>400</x>
+      <y>240</y>
+      <w>160</w>
+      <h>50</h>
+    </coordinates>
+    <panel_attributes>Edit an event</panel_attributes>
+    <additional_attributes/>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>190</x>
+      <y>170</y>
+      <w>240</w>
+      <h>60</h>
+    </coordinates>
+    <panel_attributes/>
+    <additional_attributes>10.0;40.0;220.0;10.0</additional_attributes>
+  </element>
+  <element>
+    <id>Relation</id>
+    <coordinates>
+      <x>190</x>
+      <y>200</y>
+      <w>230</w>
+      <h>80</h>
+    </coordinates>
+    <panel_attributes/>
+    <additional_attributes>10.0;10.0;210.0;60.0</additional_attributes>
+  </element>
+</diagram>

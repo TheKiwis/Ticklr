@@ -358,24 +358,35 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void shouldNotUpdateEventOnInvalidRequest() throws Exception
     {
+        // the event should not be updated
         Event beforePut = em.find(Event.class, sampleEventId);
-
         mockMvc.perform(put(eventURL(sampleUserId, sampleEventId))
                 .header("Authorization", authString)
                 .contentType("application/json")
                 .content(getEventForm(sampleTitle, sampleDesc, sampleStartTime, "Invalid Time", false, true)))
                 .andExpect(status().isBadRequest());
-
-        // the event should not be updated
         Event afterPut = em.find(Event.class, sampleEventId);
         assertTrue(afterPut.equals(beforePut));
+
+
+        // the event should not be updated
+        beforePut = em.find(Event.class, sampleEventId);
+        mockMvc.perform(put(eventURL(sampleUserId, sampleEventId))
+                .header("Authorization", authString)
+                .contentType("application/json")
+                .content(getEventForm("", sampleDesc, sampleStartTime, sampleEndTime, false, true)))
+                .andExpect(status().isBadRequest());
+        afterPut = em.find(Event.class, sampleEventId);
+        assertTrue(afterPut.equals(beforePut));
+
+
 
         // should not create new event
         long countBefore = em.createQuery("SELECT COUNT(e) FROM Event e").getFirstResult();
         mockMvc.perform(post(eventURL(sampleUserId, null))
                 .header("Authorization", authString)
                 .contentType("application/json")
-                .content(getEventForm(sampleTitle, sampleDesc, sampleStartTime, "Invalid Time", false, true)))
+                .content(getEventForm("", sampleDesc, sampleStartTime, sampleEndTime, false, true)))
                 .andExpect(status().isBadRequest());
         long countAfter = em.createQuery("SELECT COUNT(e) FROM Event e").getFirstResult();
         assertEquals(countBefore, countAfter);

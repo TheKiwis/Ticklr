@@ -24,6 +24,17 @@
     information about the ticket sets or just the link to the list.
   + We could offer both of them by enabling the client to choose through query
     parameter like `/events?ticket-sets=false` or  `/events?ticket-sets=false`
+    or `/events?expand=ticket-sets,attendees`.
+
+- [ ] Compare the architecture of Ticklr with the architecture presented by UncleBob in [Architecture the Lost Years] (https://www.youtube.com/watch?v=hALFGQNeEnU)
+  s
+
+- Authentication
+
+  + More: https://en.wikipedia.org/wiki/Computer_access_control
+  + Claims-based identity
+  + OWASP
+
 
 
 REST API

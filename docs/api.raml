@@ -34,7 +34,7 @@ traits:
         headers:
           Location:
             description: Location of the newly created user
-            example: "Location: /users/27a4563a45ab4a7aacd15af9"
+            example: "Location: http://localhost/api/users/27a4563a45ab4a7aacd15af9"
       400:
         description: Part of the input data is invalid.
         body:
@@ -94,11 +94,12 @@ traits:
           application/json:
             example: |
               {
-                "title": "New Event",
-                "description": "",
+                # TODO rewrite tests
+                "title": "BBQ in der Stadtspark",
+                "description": "Dolor rem voluptatem nesciunt ducimus quod atque nam!",
                 "startTime": "2016-05-14T00:00:00+02:00",
                 "endTime": "2016-05-14T01:00:00+02:00",
-                "visibility": "PRIVATE",
+                "public": true,
                 "canceled": false
               }
         responses:
