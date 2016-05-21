@@ -24,11 +24,9 @@ public class User
     @GenericGenerator(name = "uuid", strategy = "uuid2")
     private UUID id;
 
-    @Column(name = "email", unique = true)
-    private String email;
-
-    @Column(name = "password")
-    private String password;
+    @OneToOne(optional = false)
+    @JoinColumn(name = "identity_id")
+    protected Identity identity;
 
     @OneToOne(mappedBy = "user", fetch = FetchType.EAGER)
     protected Basket basket;
@@ -37,16 +35,15 @@ public class User
     {
     }
 
-    public User(String email, String password)
+    public User(UUID id, Identity identity)
     {
-        setEmail(email);
-        setPassword(password);
+        this(identity);
+        setId(id);
     }
 
-    public User(UUID id, String email, String password)
+    public User(Identity identity)
     {
-        this(email, password);
-        setId(id);
+        setIdentity(identity);
     }
 
     public UUID getId()
@@ -59,49 +56,16 @@ public class User
         this.id = id;
     }
 
-    public String getEmail()
-    {
-        return email;
-    }
-
-    public void setEmail(String email)
-    {
-        this.email = email;
-    }
-
-    @JsonIgnore
-    public String getPassword()
-    {
-        return password;
-    }
-
-    public void setPassword(String password)
-    {
-        this.password = password;
-    }
-
-    @Override
-    public boolean equals(Object o)
-    {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        User user = (User) o;
-
-        if (id != null ? !id.equals(user.id) : user.id != null) return false;
-        return email.equals(user.email);
-
-    }
-
     /**
-     * Authenticate current user with a plain password
-     *
-     * @param inputPassword
-     * @return
+     * @return Identity that uniquely identifies this User
      */
-    public boolean authenticate(String inputPassword)
+    public Identity getIdentity()
     {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        return encoder.matches(inputPassword, password);
+        return identity;
+    }
+
+    public void setIdentity(Identity identity)
+    {
+        this.identity = identity;
     }
 }

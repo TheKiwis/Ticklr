@@ -1,5 +1,6 @@
 package app.web.user;
 
+import app.data.Identity;
 import app.data.User;
 import app.services.UserRepository;
 import app.web.authentication.JwtHelper;
@@ -58,12 +59,13 @@ public class UserControllerTest
     {
         User mockUser = mock(User.class);
 
+        when(mockUser.getIdentity()).thenReturn(new Identity("email", "password"));
+
         when(userRepository.findById(userId)).thenReturn(mockUser);
 
         ResponseEntity response = controller.show(userId);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
-        //assertEquals(mockUser, ((UserResponse)response.getBody()).id );
     }
 
     @Test

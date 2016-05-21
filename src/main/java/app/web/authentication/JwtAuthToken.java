@@ -5,35 +5,41 @@ import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.util.Collection;
+import java.util.Collections;
 
 /**
- * JwtAuthenticationToken serves as a wrapper for a JWT Token, which will be used by JwtAuthenticationProvider
+ * JwtAuthToken serves as a wrapper for a JWT Token, which will be used by JwtAuthProvider
  *
  * @author ngnmhieu
  */
-public class JwtAuthenticationToken extends AbstractAuthenticationToken
+public class JwtAuthToken extends AbstractAuthenticationToken
 {
     // ~ Instance fields
     // ================================================================================================
 
-    private final Object principal;
-    private Object credentials;
+    private final User principal;
+    private final Object credentials;
 
     // ~ Constructors
     // ===================================================================================================
 
     /**
      * This constructor can be safely used by any code that wishes to create a
-     * <code>JwtAuthenticationToken</code>, as the {@link #isAuthenticated()}
+     * <code>JwtAuthToken</code>, as the {@link #isAuthenticated()}
      * will return <code>false</code>. The principal is not relevant until
      * the token is authenticated by <code>AuthenticationManager</code> or
      * <code>AuthenticationProvider</code>
      *
-     * @param credentials the raw JWT Token
+     * @param credentials the raw (maybe based64-encoded) JWT Token
+     *
+     * @ensure isAuthenticated() == false
+     * @ensure getPrincipal() == null
+     * @ensure getCredentials() == credentials
+     * @ensure getAuthorities().isEmpty()
      */
-    public JwtAuthenticationToken(String credentials)
+    public JwtAuthToken(String credentials)
     {
-        super(null);
+        super(Collections.EMPTY_LIST);
         this.credentials = credentials;
         this.principal = null;
         setAuthenticated(false);
@@ -45,15 +51,18 @@ public class JwtAuthenticationToken extends AbstractAuthenticationToken
      * producing a trusted (i.e. {@link #isAuthenticated()} = <code>true</code>)
      * authentication credentials.
      *
-     * @param principal
-     * @param credentials
-     * @param authorities
+     * @param principal the identity of the authenticated user
+     *
+     * @ensure getPrincipal() == principal
+     * @ensure getCredentials() == null
+     * @ensure isAuthenticated() == true
+     * @ensure getAuthorities().isEmpty()
      */
-    public JwtAuthenticationToken(User principal, String credentials, Collection<? extends GrantedAuthority> authorities)
+    public JwtAuthToken(User principal)
     {
-        super(authorities);
+        super(Collections.EMPTY_LIST);
         this.principal = principal;
-        this.credentials = credentials;
+        this.credentials = null;
         setAuthenticated(true);
     }
 

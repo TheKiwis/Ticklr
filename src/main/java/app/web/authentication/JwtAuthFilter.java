@@ -1,7 +1,6 @@
 package app.web.authentication;
 
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -17,7 +16,7 @@ import java.io.IOException;
 /**
  * @author ngnmhieu
  */
-public class JwtAuthenticationFilter extends OncePerRequestFilter
+public class JwtAuthFilter extends OncePerRequestFilter
 {
     // authenticationManager authenticates the request
     private AuthenticationManager authenticationManager;
@@ -26,12 +25,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
     private AuthenticationEntryPoint entryPoint;
 
     /**
-     * Constructs a new JwtAuthenticationFilter
+     * Constructs a new JwtAuthFilter
      *
      * @param authenticationManager
      * @param entryPoint
      */
-    public JwtAuthenticationFilter(AuthenticationManager authenticationManager, AuthenticationEntryPoint entryPoint)
+    public JwtAuthFilter(AuthenticationManager authenticationManager, AuthenticationEntryPoint entryPoint)
     {
         this.authenticationManager = authenticationManager;
         this.entryPoint = entryPoint;
@@ -59,7 +58,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter
             try {
                 String token = header.substring(7);
 
-                JwtAuthenticationToken authToken = new JwtAuthenticationToken(token);
+                JwtAuthToken authToken = new JwtAuthToken(token);
 
                 // authentication manager will throw AuthenticationException if the authentication fails
                 Authentication authResult = authenticationManager.authenticate(authToken);

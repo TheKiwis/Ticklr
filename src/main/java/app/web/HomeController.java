@@ -1,5 +1,6 @@
 package app.web;
 
+import app.data.Identity;
 import app.data.User;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -16,6 +17,6 @@ public class HomeController
     @ResponseBody
     public User test()
     {
-        return new User("user", "password");
+        return new User(new Identity("user", "password"));
     }
 }

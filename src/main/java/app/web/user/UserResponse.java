@@ -53,7 +53,7 @@ public class UserResponse
     public UserResponse(User user, UserURI userURI, EventURI eventURI, BasketURI basketURI)
     {
         id = user.getId();
-        email = user.getEmail();
+        email = user.getIdentity().getEmail();
         href = userURI.userURL(user.getId());
         events = new EventsResponse(eventURI.eventURL(user.getId(), null));
         basket = new BasketResponse(basketURI.basketURL(user.getId()));

@@ -1,5 +1,6 @@
 package app.web.authentication;
 
+import app.data.Identity;
 import app.data.User;
 import app.web.user.UserURI;
 import io.jsonwebtoken.*;
@@ -42,7 +43,7 @@ public class JwtHelperTest
     @Before
     public void setUp()
     {
-        user = new User(UUID.randomUUID(), "user@example.com", "123456789");
+        user = new User(UUID.randomUUID(), new Identity("user@example.com", "123456789"));
         subject = user.getId().toString();
 
         Date expiredDate = getExpiredDate(JwtHelper.DEFAULT_EXPIRED_DAYS);

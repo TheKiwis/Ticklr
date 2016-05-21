@@ -10,6 +10,8 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.context.annotation.ScopedProxyMode;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.context.WebApplicationContext;
 
 /**
@@ -24,7 +26,7 @@ public class ApplicationBeans
      * in each request.
      *
      * @return Authentication information, which contains the Principal.
-     *         The Principal is retrieved via getPrincipal() method.
+     * The Principal is retrieved via getPrincipal() method.
      */
     @Bean
     @Scope(value = WebApplicationContext.SCOPE_REQUEST, proxyMode = ScopedProxyMode.INTERFACES)
@@ -41,5 +43,14 @@ public class ApplicationBeans
     public UserAuthorizer userAuthorizer(Authentication authInfo)
     {
         return new UserAuthorizer(authInfo);
+    }
+
+    /**
+     * @return PasswordEncoder encodes user's raw password, which will be saved into the database
+     */
+    @Bean
+    public PasswordEncoder passwordEncoder()
+    {
+        return new BCryptPasswordEncoder();
     }
 }

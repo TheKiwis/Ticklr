@@ -14,7 +14,7 @@ import java.util.UUID;
 /**
  * @author ngnmhieu
  */
-public class JwtAuthenticationProvider implements AuthenticationProvider
+public class JwtAuthProvider implements AuthenticationProvider
 {
     // UserRepository is used to fetch user
     private UserRepository userRepository;
@@ -22,7 +22,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider
     // performs JWT Token verification
     private JwtHelper authenticator;
 
-    public JwtAuthenticationProvider(UserRepository userRepository, JwtHelper authenticator)
+    public JwtAuthProvider(UserRepository userRepository, JwtHelper authenticator)
     {
         this.userRepository = userRepository;
         this.authenticator = authenticator;
@@ -50,7 +50,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider
         if (user == null)
             throw new BadCredentialsException("User not found");
 
-        JwtAuthenticationToken authResult = new JwtAuthenticationToken(user, credentials, new ArrayList());
+        JwtAuthToken authResult = new JwtAuthToken(user);
 
         authResult.setDetails(authDetails);
 
@@ -60,7 +60,7 @@ public class JwtAuthenticationProvider implements AuthenticationProvider
     @Override
     public boolean supports(Class<?> authentication)
     {
-        return (JwtAuthenticationToken.class
+        return (JwtAuthToken.class
                 .isAssignableFrom(authentication));
     }
 }

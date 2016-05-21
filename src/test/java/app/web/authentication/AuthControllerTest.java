@@ -12,6 +12,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.token.Token;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.UUID;
 
@@ -36,20 +38,21 @@ public class AuthControllerTest
 
     AuthController controller;
 
+    @Mock
+    PasswordEncoder passwordEncoder;
+
     @Before
     public void setup()
     {
-        controller = new AuthController(userRepository, jwtHelper, new UserURI("http://localhost"));
+        controller = new AuthController(userRepository, jwtHelper, passwordEncoder, new UserURI("http://localhost"));
     }
 
     @Test
     public void login_shouldReturnAuthenticationToken() throws Exception
     {
         // mock objects
-        when(userRepository
-                .findByEmail(anyString())
-                .authenticate(anyString())
-        ).thenReturn(true);
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
+
         when(userRepository
                 .findByEmail(anyString())
                 .getId()).thenReturn(UUID.randomUUID());
@@ -71,10 +74,7 @@ public class AuthControllerTest
     public void login_shouldReturnHttpStatusUnauthorizedStatus()
     {
         // mock objects
-        when(userRepository
-                .findByEmail(anyString())
-                .authenticate(anyString())
-        ).thenReturn(false);
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
         UserForm form = mock(UserForm.class);
         when(form.getEmail()).thenReturn("user@example.com");

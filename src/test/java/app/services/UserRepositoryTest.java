@@ -4,8 +4,8 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
+import app.data.Identity;
 import app.data.User;
-import app.services.UserRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -26,6 +26,9 @@ public class UserRepositoryTest
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     EntityManager em;
 
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    IdentityRepository identityRepository;
+
     @Mock
     User user;
 
@@ -36,7 +39,7 @@ public class UserRepositoryTest
     @Before
     public void setUp()
     {
-        userRepository = new UserRepository(em);
+        userRepository = new UserRepository(em, identityRepository);
     }
 
     @Test
@@ -64,7 +67,7 @@ public class UserRepositoryTest
                 .getSingleResult()
         ).thenReturn(user);
 
-        UserRepository repo = new UserRepository(em);
+        UserRepository repo = new UserRepository(em, identityRepository);
         assertEquals(user, repo.findByEmail("someEmail@gmail.com"));
     }
 
@@ -81,10 +84,14 @@ public class UserRepositoryTest
     }
 
     @Test
-    public void save_ShouldCreateNewUser() throws Exception
+    public void save_ShouldPersistNewUserAndCreateNewIdentity() throws Exception
     {
         User mockUser = mock(User.class);
+        Identity id = mock(Identity.class);
+        when(mockUser.getIdentity()).thenReturn(id);
+
         assertEquals(mockUser, userRepository.save(mockUser));
         verify(em, times(1)).persist(mockUser);
+        verify(identityRepository, times(1)).save(id);
     }
 }

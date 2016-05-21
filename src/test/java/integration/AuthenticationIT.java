@@ -55,13 +55,13 @@ public class AuthenticationIT extends CommonIntegrationTest
         super.setUp();
         userURI = new UserURI(hostname);
         jwt = new JwtHelper(authSecret, userURI);
-        user = (User) em.createQuery("SELECT u FROM User u WHERE u.email = 'user@example.com'").getSingleResult();
+        user = (User) em.createQuery("SELECT u FROM User u WHERE u.identity.email = 'user@example.com'").getSingleResult();
     }
 
     @Test
     public void shouldLoadTestFixture() throws Exception
     {
-        assertEquals("user@example.com", user.getEmail());
+        assertEquals("user@example.com", user.getIdentity().getEmail());
     }
 
     // For the purpose of mapping json response to object - see login()
@@ -132,7 +132,7 @@ public class AuthenticationIT extends CommonIntegrationTest
     public void shouldRespondWithUnauthorizedWhenProvidedWithNonExistentUser() throws Exception
     {
         String email = "nonexistentuser@example.com";
-        long userCount = (long) em.createQuery("SELECT COUNT(u) FROM User u WHERE u.email = :email").setParameter("email", email).getSingleResult();
+        long userCount = (long) em.createQuery("SELECT COUNT(u) FROM User u WHERE u.identity.email = :email").setParameter("email", email).getSingleResult();
         assertEquals(0, userCount);
 
         mockMvc.perform(post(AUTH_URI)

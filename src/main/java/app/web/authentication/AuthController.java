@@ -10,6 +10,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.token.Token;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
@@ -25,6 +26,8 @@ import java.util.UUID;
 @RestController
 public class AuthController
 {
+    private PasswordEncoder passwordEncoder;
+
     private UserRepository repo;
 
     private UserURI userURI;
@@ -37,11 +40,12 @@ public class AuthController
      * @param userURI
      */
     @Autowired
-    public AuthController(UserRepository repo, JwtHelper jwtHelper, UserURI userURI)
+    public AuthController(UserRepository repo, JwtHelper jwtHelper, PasswordEncoder passwordEncoder, UserURI userURI)
     {
         this.repo = repo;
         this.jwtHelper = jwtHelper;
         this.userURI = userURI;
+        this.passwordEncoder = passwordEncoder;
     }
 
     /**
@@ -56,7 +60,7 @@ public class AuthController
     {
         User user = repo.findByEmail(form.getEmail());
 
-        if (user != null && user.authenticate(form.getPassword())) {
+        if (user != null && passwordEncoder.matches(form.getPassword(), user.getIdentity().getPassword())) {
             Token token = jwtHelper.generateToken(user);
             HttpHeaders headers = new HttpHeaders();
             headers.setLocation(URI.create(userURI.userURL(user.getId())));

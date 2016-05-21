@@ -1,5 +1,6 @@
 package app.web.user;
 
+import app.data.Identity;
 import app.data.User;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
@@ -45,7 +46,6 @@ public class UserForm
 
     public User getUser()
     {
-        BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
-        return new User(email, encoder.encode(password));
+        return new User(new Identity(email, password));
     }
 }

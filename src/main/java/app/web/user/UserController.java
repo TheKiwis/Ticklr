@@ -54,7 +54,7 @@ public class UserController
 
     /**
      * @param userId
-     * @return inforamtion about a user
+     * @return information about a user
      */
     @RequestMapping(value = UserURI.USER_URI, method = RequestMethod.GET)
     public ResponseEntity show(@PathVariable UUID userId)

@@ -28,7 +28,7 @@ import static org.mockito.Mockito.*;
  * @author ngnmhieu
  */
 @RunWith(MockitoJUnitRunner.class)
-public class JwtAuthenticationFilterTest
+public class JwtAuthFilterTest
 {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     AuthenticationManager authenticationManager;
@@ -53,7 +53,7 @@ public class JwtAuthenticationFilterTest
         // mock authentication fails
         when(authenticationManager.authenticate(any())).thenThrow(BadCredentialsException.class);
 
-        Filter filter = new JwtAuthenticationFilter(authenticationManager, entryPoint);
+        Filter filter = new JwtAuthFilter(authenticationManager, entryPoint);
 
         filter.doFilter(servletRequest, servletResponse, filterChain);
 
@@ -68,7 +68,7 @@ public class JwtAuthenticationFilterTest
         // mock authentication fails
         when(authenticationManager.authenticate(any())).thenThrow(BadCredentialsException.class);
 
-        Filter filter = new JwtAuthenticationFilter(authenticationManager, entryPoint);
+        Filter filter = new JwtAuthFilter(authenticationManager, entryPoint);
 
         filter.doFilter(servletRequest, servletResponse, filterChain);
 
@@ -87,7 +87,7 @@ public class JwtAuthenticationFilterTest
 
         when(servletRequest.getHeader("Authorization")).thenReturn("Bearer " + credential);
 
-        Filter filter = new JwtAuthenticationFilter(authenticationManager, entryPoint);
+        Filter filter = new JwtAuthFilter(authenticationManager, entryPoint);
 
         filter.doFilter(servletRequest, servletResponse, filterChain);
 
@@ -104,7 +104,7 @@ public class JwtAuthenticationFilterTest
         when(servletRequest.getHeader("Authorization")).thenReturn("Bearer header.body.signature");
 
         // mock authentication succeeds
-        Filter filter = new JwtAuthenticationFilter(authenticationManager, entryPoint);
+        Filter filter = new JwtAuthFilter(authenticationManager, entryPoint);
 
         filter.doFilter(servletRequest, servletResponse, filterChain);
 
@@ -117,7 +117,7 @@ public class JwtAuthenticationFilterTest
         when(servletRequest.getHeader("Authorization")).thenReturn(null);
 
         // mock authentication succeeds
-        Filter filter = new JwtAuthenticationFilter(authenticationManager, entryPoint);
+        Filter filter = new JwtAuthFilter(authenticationManager, entryPoint);
 
         filter.doFilter(servletRequest, servletResponse, filterChain);
 
@@ -138,7 +138,7 @@ public class JwtAuthenticationFilterTest
         Authentication authResult = mock(Authentication.class);
         when(authenticationManager.authenticate(any())).thenReturn(authResult);
 
-        Filter filter = new JwtAuthenticationFilter(authenticationManager, entryPoint);
+        Filter filter = new JwtAuthFilter(authenticationManager, entryPoint);
 
         filter.doFilter(servletRequest, servletResponse, filterChain);
 

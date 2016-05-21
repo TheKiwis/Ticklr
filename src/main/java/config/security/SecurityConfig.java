@@ -1,8 +1,8 @@
 package config.security;
 
 import app.services.UserRepository;
-import app.web.authentication.JwtAuthenticationProvider;
-import app.web.authentication.JwtAuthenticationFilter;
+import app.web.authentication.JwtAuthFilter;
+import app.web.authentication.JwtAuthProvider;
 import app.web.authentication.JwtHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -39,7 +39,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     @Bean
     public AuthenticationProvider jwtAuthenticationProvider()
     {
-        return new JwtAuthenticationProvider(userRepository, jwtHelper);
+        return new JwtAuthProvider(userRepository, jwtHelper);
     }
 
     @Override
@@ -62,8 +62,8 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     }
 
     @Bean
-    public JwtAuthenticationFilter jwtAuthenticationFilter() throws Exception
+    public JwtAuthFilter jwtAuthenticationFilter() throws Exception
     {
-        return new JwtAuthenticationFilter(authenticationManagerBean(), new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
+        return new JwtAuthFilter(authenticationManagerBean(), new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED));
     }
 }

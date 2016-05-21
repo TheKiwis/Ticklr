@@ -58,7 +58,7 @@ public class UserIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldReturnUserInformation() throws Exception
+    public void happy_should_return_user_information() throws Exception
     {
         mockMvc.perform(get(getUserURL(userId))
                 .header("Authorization", authHeader))
@@ -71,26 +71,7 @@ public class UserIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldReturnHTTPForbiddenIfUserIsNotAuthorized() throws Exception
-    {
-        mockMvc.perform(get(getUserURL(UUID.fromString("c4fcb3fe-1a98-11e6-b6ba-3e1d05defe78")))
-                .header("Authorization", authHeader))
-                .andExpect(status().isForbidden());
-    }
-
-    @Test
-    public void shouldReturnHttpNotFoundIfNoUserFound() throws Exception
-    {
-        UUID unknownUserId = UUID.fromString("f7fa0180-0f17-11e6-b94e-0002a5d5c51b");
-        assertNull(em.find(User.class, unknownUserId));
-
-        mockMvc.perform(get(getUserURL(unknownUserId))
-                .header("Authorization", authHeader))
-                .andExpect(status().isNotFound());
-    }
-
-    @Test
-    public void shouldSaveUser() throws Exception
+    public void happy_should_create_user() throws Exception
     {
         Query query;
 
@@ -109,7 +90,23 @@ public class UserIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldReturnEmptyValidationErrorsAndCreatedStatus() throws Exception
+    public void happy_new_user_login_with_the_same_password() throws Exception
+    {
+        String email = "a_new_user@example.com";
+        String password = "original_password";
+
+        mockMvc.perform(post(getUserURL(null))
+                .accept("application/json")
+                .contentType("application/json")
+                .content(registrationForm(email, password)))
+                .andExpect(status().isCreated());
+
+        String token = AuthenticationIT.getAuthTokenFor(email, password, mockMvc);
+        assertTrue(token.startsWith("Bearer "));
+    }
+
+    @Test
+    public void happy_should_return_HTTP_Created_with_empty_validation_errors() throws Exception
     {
         mockMvc.perform(
                 post(getUserURL(null))
@@ -121,7 +118,26 @@ public class UserIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldReturnValidationErrorWithBadRequestHTTPStatus() throws Exception
+    public void sad_should_return_HTTP_Forbidden_if_user_is_not_authorized() throws Exception
+    {
+        mockMvc.perform(get(getUserURL(UUID.fromString("c4fcb3fe-1a98-11e6-b6ba-3e1d05defe78")))
+                .header("Authorization", authHeader))
+                .andExpect(status().isForbidden());
+    }
+
+    @Test
+    public void sad_should_return_HTTP_NotFound_if_no_user_found() throws Exception
+    {
+        UUID unknownUserId = UUID.fromString("f7fa0180-0f17-11e6-b94e-0002a5d5c51b");
+        assertNull(em.find(User.class, unknownUserId));
+
+        mockMvc.perform(get(getUserURL(unknownUserId))
+                .header("Authorization", authHeader))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void sad_should_return_HTTP_BadRequest_with_validation_error() throws Exception
     {
         mockMvc.perform(
                 post(getUserURL(null))
@@ -133,7 +149,7 @@ public class UserIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldRejectRequestWithDuplicatedEmail() throws Exception
+    public void sad_shouldRejectRequestWithDuplicatedEmail() throws Exception
     {
         mockMvc.perform(
                 post(getUserURL(null))
@@ -146,8 +162,8 @@ public class UserIT extends CommonIntegrationTest
     @Test
     public void shouldLoadTestFixture() throws Exception
     {
-        User u = (User) em.createQuery("SELECT u FROM User u WHERE u.email = 'user@example.com'").getSingleResult();
-        assertEquals("user@example.com", u.getEmail());
+        User u = (User) em.createQuery("SELECT u FROM User u WHERE u.identity.email = 'user@example.com'").getSingleResult();
+        assertEquals("user@example.com", u.getIdentity().getEmail());
     }
 
     private String registrationForm(String email, String password) throws JsonProcessingException
