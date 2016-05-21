@@ -53,8 +53,7 @@ public class UserRepositoryTest
     @Test
     public void findById_shouldReturnNullIfNoUserFound() throws Exception
     {
-        when(em.find(User.class, userId)
-        ).thenThrow(NoResultException.class);
+        when(em.find(User.class, userId)).thenReturn(null);
 
         assertNull(userRepository.findById(userId));
     }

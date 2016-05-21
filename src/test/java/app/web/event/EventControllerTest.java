@@ -5,7 +5,7 @@ import app.data.validation.EventValidator;
 import app.services.EventRepository;
 import app.services.TicketSetRepository;
 import app.services.UserRepository;
-import app.web.authorization.UserAuthorizer;
+import app.web.authorization.IdentityAuthorizer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -54,7 +54,7 @@ public class EventControllerTest
     User mockUser;
 
     @Mock
-    UserAuthorizer userAuthorizer;
+    IdentityAuthorizer identityAuthorizer;
 
     private Long ticketSetId = 10l;
     private UUID userId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
@@ -64,8 +64,8 @@ public class EventControllerTest
     public void setUp()
     {
         // always authorized
-        when(userAuthorizer.authorize(any())).thenReturn(true);
-        controller = new EventController(eventRepository, userRepository, ticketSetRepository, validator, userAuthorizer, new EventURI("http://localhost"));
+        when(identityAuthorizer.authorize(any())).thenReturn(true);
+        controller = new EventController(eventRepository, userRepository, ticketSetRepository, validator, identityAuthorizer, new EventURI("http://localhost"));
 
         // mockEvent belongs to User with userId
         when(mockEvent.getUser().getId()).thenReturn(userId);

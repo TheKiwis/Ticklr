@@ -8,7 +8,7 @@ import static org.junit.Assert.*;
  * @author ngnmhieu
  * @since 13.03.16
  */
-public class UserAuthorizerTest
+public class IdentityAuthorizerTest
 {
 
     @Test

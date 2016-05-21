@@ -1,14 +1,13 @@
 package app.web.authentication;
 
-import app.data.User;
-import app.services.UserRepository;
+import app.data.Identity;
+import app.services.IdentityRepository;
 import io.jsonwebtoken.Claims;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 /**
@@ -16,15 +15,14 @@ import java.util.UUID;
  */
 public class JwtAuthProvider implements AuthenticationProvider
 {
-    // UserRepository is used to fetch user
-    private UserRepository userRepository;
+    private IdentityRepository identityRepository;
 
     // performs JWT Token verification
     private JwtHelper authenticator;
 
-    public JwtAuthProvider(UserRepository userRepository, JwtHelper authenticator)
+    public JwtAuthProvider(IdentityRepository identityRepository, JwtHelper authenticator)
     {
-        this.userRepository = userRepository;
+        this.identityRepository = identityRepository;
         this.authenticator = authenticator;
     }
 
@@ -40,17 +38,17 @@ public class JwtAuthProvider implements AuthenticationProvider
 
         String subject = authDetails.getSubject();
 
-        User user = null;
+        Identity id = null;
         try {
-            user = userRepository.findById(UUID.fromString(subject));
+            id = identityRepository.findById(UUID.fromString(subject));
         } catch (IllegalArgumentException e) {
             throw new BadCredentialsException("Invalid UUID", e);
         }
 
-        if (user == null)
-            throw new BadCredentialsException("User not found");
+        if (id == null)
+            throw new BadCredentialsException("Identity not found");
 
-        JwtAuthToken authResult = new JwtAuthToken(user);
+        JwtAuthToken authResult = new JwtAuthToken(id);
 
         authResult.setDetails(authDetails);
 

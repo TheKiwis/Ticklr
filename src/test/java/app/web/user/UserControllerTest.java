@@ -4,7 +4,7 @@ import app.data.Identity;
 import app.data.User;
 import app.services.UserRepository;
 import app.web.authentication.JwtHelper;
-import app.web.authorization.UserAuthorizer;
+import app.web.authorization.IdentityAuthorizer;
 import app.web.basket.BasketURI;
 import app.web.event.EventURI;
 import org.junit.Before;
@@ -48,10 +48,10 @@ public class UserControllerTest
         EventURI eventURI = mock(EventURI.class);
         BasketURI basketURI = mock(BasketURI.class);
 
-        UserAuthorizer userAuthorizer = mock(UserAuthorizer.class);
-        when(userAuthorizer.authorize(any())).thenReturn(true);
+        IdentityAuthorizer identityAuthorizer = mock(IdentityAuthorizer.class);
+        when(identityAuthorizer.authorize(any())).thenReturn(true);
 
-        controller = new UserController(userRepository, userURI, eventURI, basketURI, userAuthorizer);
+        controller = new UserController(userRepository, userURI, eventURI, basketURI, identityAuthorizer);
     }
 
     @Test

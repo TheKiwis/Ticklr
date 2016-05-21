@@ -2,7 +2,7 @@ package app.web.user;
 
 import app.data.User;
 import app.services.UserRepository;
-import app.web.authorization.UserAuthorizer;
+import app.web.authorization.IdentityAuthorizer;
 import app.web.basket.BasketURI;
 import app.web.event.EventURI;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +32,7 @@ public class UserController
 
     private EventURI eventURI;
 
-    private UserAuthorizer userAuthorizer;
+    private IdentityAuthorizer identityAuthorizer;
 
     private UserURI userURI;
 
@@ -43,13 +43,13 @@ public class UserController
      */
     @Autowired
     public UserController(UserRepository repo, UserURI userURI, EventURI eventURI,
-                          BasketURI basketURI, UserAuthorizer userAuthorizer)
+                          BasketURI basketURI, IdentityAuthorizer identityAuthorizer)
     {
         this.repo = repo;
         this.userURI = userURI;
         this.eventURI = eventURI;
         this.basketURI = basketURI;
-        this.userAuthorizer = userAuthorizer;
+        this.identityAuthorizer = identityAuthorizer;
     }
 
     /**
@@ -64,7 +64,7 @@ public class UserController
         if (user == null)
             return new ResponseEntity(HttpStatus.NOT_FOUND);
 
-        if (!userAuthorizer.authorize(user))
+        if (!identityAuthorizer.authorize(user.getIdentity()))
             return new ResponseEntity(user, HttpStatus.FORBIDDEN);
 
         return new ResponseEntity(new UserResponse(user, userURI, eventURI, basketURI), HttpStatus.OK);

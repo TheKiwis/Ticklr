@@ -11,6 +11,7 @@ import java.util.UUID;
 
 /**
  * Manages persistent User objects
+ *
  * @author ngnmhieu
  */
 @Repository
@@ -45,11 +46,7 @@ public class UserRepository
      */
     public User findById(UUID userId)
     {
-        try {
-            return em.find(User.class, userId);
-        } catch (NoResultException e) {
-            return null;
-        }
+        return em.find(User.class, userId);
     }
 
 

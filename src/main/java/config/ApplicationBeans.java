@@ -1,9 +1,7 @@
 package config;
 
-import app.web.authentication.JwtHelper;
-import app.web.authorization.UserAuthorizer;
+import app.web.authorization.IdentityAuthorizer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Scope;
@@ -40,13 +38,13 @@ public class ApplicationBeans
      */
     @Bean
     @Autowired
-    public UserAuthorizer userAuthorizer(Authentication authInfo)
+    public IdentityAuthorizer userAuthorizer(Authentication authInfo)
     {
-        return new UserAuthorizer(authInfo);
+        return new IdentityAuthorizer(authInfo);
     }
 
     /**
-     * @return PasswordEncoder encodes user's raw password, which will be saved into the database
+     * @return PasswordEncoder encodes identity's raw password, which will be saved into the database
      */
     @Bean
     public PasswordEncoder passwordEncoder()

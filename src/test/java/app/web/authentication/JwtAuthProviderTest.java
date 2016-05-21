@@ -1,8 +1,11 @@
 package app.web.authentication;
 
+import app.data.Identity;
 import app.data.User;
+import app.services.IdentityRepository;
 import app.services.UserRepository;
 import io.jsonwebtoken.Claims;
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -31,34 +34,44 @@ public class JwtAuthProviderTest
 
     @Mock
     JwtHelper authenticator;
+
+    @Mock
+    private IdentityRepository identityRepository;
+
+    private AuthenticationProvider authenticationProvider;
+
+    @Before
+    public void setUp() throws Exception
+    {
+        authenticationProvider = new JwtAuthProvider(identityRepository, authenticator);
+    }
+
     @Test
     public void supports_shouldSupportOnlyJwtAuthenticationToken() throws Exception
     {
-        assertTrue(new JwtAuthProvider(userRepository, authenticator).supports(JwtAuthToken.class));
-        assertFalse(new JwtAuthProvider(userRepository, authenticator).supports(UsernamePasswordAuthenticationToken.class));
+        assertTrue(authenticationProvider.supports(JwtAuthToken.class));
+        assertFalse(authenticationProvider.supports(UsernamePasswordAuthenticationToken.class));
     }
 
     @Test
     public void shouldReturnPopulatedAuthenticationObject() throws Exception
     {
-        UUID userId = UUID.randomUUID();
+        UUID identityId = UUID.randomUUID();
 
-        // mocks
-        User mockUser = mock(User.class);
-        when(userRepository.findById(userId)).thenReturn(mockUser);
+        Identity mockIdentity = mock(Identity.class);
+        when(identityRepository.findById(identityId)).thenReturn(mockIdentity);
 
         Authentication mockAuth = mock(JwtAuthToken.class);
 
         Claims mockClaim = mock(Claims.class);
         when(authenticator.authenticate(any())).thenReturn(mockClaim);
-        when(mockClaim.getSubject()).thenReturn(userId.toString());
+        when(mockClaim.getSubject()).thenReturn(identityId.toString());
 
         // create test object
-        AuthenticationProvider authenticationProvider = new JwtAuthProvider(userRepository, authenticator);
         Authentication authResult = authenticationProvider.authenticate(mockAuth);
 
         assertTrue(authResult instanceof JwtAuthToken);
-        assertEquals(mockUser, authResult.getPrincipal());
+        assertEquals(mockIdentity, authResult.getPrincipal());
         assertEquals(mockClaim, authResult.getDetails());
         assertNull(authResult.getCredentials());
     }
@@ -73,7 +86,6 @@ public class JwtAuthProviderTest
         when(authenticator.authenticate(any())).thenThrow(BadCredentialsException.class);
 
         // create test object
-        AuthenticationProvider authenticationProvider = new JwtAuthProvider(userRepository, authenticator);
         authenticationProvider.authenticate(mockAuth);
     }
 
@@ -89,12 +101,11 @@ public class JwtAuthProviderTest
         when(claims.getSubject()).thenReturn("INVALID_UUID");
 
         // create test object
-        AuthenticationProvider authenticationProvider = new JwtAuthProvider(userRepository, authenticator);
         authenticationProvider.authenticate(mockAuth);
     }
 
     @Test(expected = BadCredentialsException.class)
-    public void shouldThrowAuthenticationExceptionIfUserNotFound() throws Exception
+    public void shouldThrowAuthenticationExceptionIfIdentityNotFound() throws Exception
     {
         // mocks
         Authentication mockAuth = mock(JwtAuthToken.class);
@@ -103,10 +114,9 @@ public class JwtAuthProviderTest
         Claims claims = mock(Claims.class);
         when(authenticator.authenticate(any())).thenReturn(claims);
         when(claims.getSubject()).thenReturn(UUID.randomUUID().toString());
-        when(userRepository.findById(any())).thenReturn(null);
+        when(identityRepository.findById(any())).thenReturn(null);
 
         // create test object
-        AuthenticationProvider authenticationProvider = new JwtAuthProvider(userRepository, authenticator);
         authenticationProvider.authenticate(mockAuth);
     }
 
@@ -118,11 +128,8 @@ public class JwtAuthProviderTest
         when(mockAuth.getCredentials()).thenReturn("credential");
 
         // create test object
-        AuthenticationProvider authenticationProvider = new JwtAuthProvider(userRepository, authenticator);
         assertFalse(authenticationProvider.supports(mockAuth.getClass()));
         assertNull(authenticationProvider.authenticate(mockAuth));
 
     }
-
-    // todo assign authorities for authorization
 }

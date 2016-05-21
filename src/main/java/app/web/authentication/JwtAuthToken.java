@@ -17,7 +17,7 @@ public class JwtAuthToken extends AbstractAuthenticationToken
     // ~ Instance fields
     // ================================================================================================
 
-    private final User principal;
+    private final Object principal;
     private final Object credentials;
 
     // ~ Constructors
@@ -58,7 +58,7 @@ public class JwtAuthToken extends AbstractAuthenticationToken
      * @ensure isAuthenticated() == true
      * @ensure getAuthorities().isEmpty()
      */
-    public JwtAuthToken(User principal)
+    public JwtAuthToken(Object principal)
     {
         super(Collections.EMPTY_LIST);
         this.principal = principal;

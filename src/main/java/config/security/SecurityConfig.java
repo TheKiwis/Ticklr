@@ -1,5 +1,6 @@
 package config.security;
 
+import app.services.IdentityRepository;
 import app.services.UserRepository;
 import app.web.authentication.JwtAuthFilter;
 import app.web.authentication.JwtAuthProvider;
@@ -25,7 +26,7 @@ import org.springframework.security.web.authentication.www.BasicAuthenticationFi
 public class SecurityConfig extends WebSecurityConfigurerAdapter
 {
     @Autowired
-    UserRepository userRepository;
+    IdentityRepository identityRepository;
 
     @Autowired
     JwtHelper jwtHelper;
@@ -39,7 +40,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     @Bean
     public AuthenticationProvider jwtAuthenticationProvider()
     {
-        return new JwtAuthProvider(userRepository, jwtHelper);
+        return new JwtAuthProvider(identityRepository, jwtHelper);
     }
 
     @Override

@@ -54,17 +54,11 @@ public class AuthenticationIT extends CommonIntegrationTest
     {
         super.setUp();
         userURI = new UserURI(hostname);
-        jwt = new JwtHelper(authSecret, userURI);
+        jwt = new JwtHelper(authSecret);
         user = (User) em.createQuery("SELECT u FROM User u WHERE u.identity.email = 'user@example.com'").getSingleResult();
     }
 
-    @Test
-    public void shouldLoadTestFixture() throws Exception
-    {
-        assertEquals("user@example.com", user.getIdentity().getEmail());
-    }
-
-    // For the purpose of mapping json response to object - see login()
+    // For the purpose of mapping json response to object - see getAuthTokenFor()
     private static class AuthToken {
         public String key;
         public Integer keyCreationTime;
@@ -97,11 +91,11 @@ public class AuthenticationIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldRespondWithJWTTokenWhenProvidedWithValidCredential() throws Exception
+    public void happy_should_return_JWT_Token_with_valid_credential() throws Exception
     {
         String email = "user@example.com";
 
-        String jwtToken = jwt.generateToken(user).getKey();
+        String jwtToken = jwt.generateToken(user.getIdentity()).getKey();
 
         String userURL = userURI.userURL(UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b"));
 
@@ -114,7 +108,17 @@ public class AuthenticationIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldRespondWithJWTTokenWhenProvidedWithInvalidCredential() throws Exception
+    public void happy_should_Return_Resource_When_Provided_With_Valid_Jwt_Token() throws Exception
+    {
+        Token jwtToken = jwt.generateToken(user.getIdentity());
+
+        mockMvc.perform(get("/api/users/" + userId)
+                .header("Authorization", "Bearer " + jwtToken.getKey()))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void sad_should_not_return_JWT_Token_with_invalid_credential() throws Exception
     {
         // invalid password
         mockMvc.perform(post(AUTH_URI)
@@ -129,7 +133,7 @@ public class AuthenticationIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldRespondWithUnauthorizedWhenProvidedWithNonExistentUser() throws Exception
+    public void sad_should_return_with_HTTP_Unauthorized_when_user_not_exist() throws Exception
     {
         String email = "nonexistentuser@example.com";
         long userCount = (long) em.createQuery("SELECT COUNT(u) FROM User u WHERE u.identity.email = :email").setParameter("email", email).getSingleResult();
@@ -141,18 +145,9 @@ public class AuthenticationIT extends CommonIntegrationTest
                 .andExpect(status().isUnauthorized());
     }
 
-    @Test
-    public void shouldReturnResourceWhenProvidedWithValidJwtToken() throws Exception
-    {
-        Token jwtToken = jwt.generateToken(user);
-
-        mockMvc.perform(get("/api/users/" + userId)
-                .header("Authorization", "Bearer " + jwtToken.getKey()))
-                .andExpect(status().isOk());
-    }
 
     @Test
-    public void shouldNotReturnResourceWhenProvidedWithMalformedToken() throws Exception
+    public void sad_should_not_return_resource_when_malformed_token() throws Exception
     {
         mockMvc.perform(get("/admin")
                 .header("Authorization", "Bearer erggdfsyserysdghsrty.sdfghsdyyydfhys"))
@@ -160,7 +155,7 @@ public class AuthenticationIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldNotReturnResourceWhenProvidedWithTokenSignedWithInvalidSecret() throws Exception
+    public void sad_should_not_return_resource_token_signed_with_invalid_secret() throws Exception
     {
         String anotherSecret = "another_secret";
 
@@ -177,7 +172,7 @@ public class AuthenticationIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldNotReturnResourceWhenProvidedWithExpiredToken() throws Exception
+    public void sad_should_not_return_resource_when_provided_with_expired_token() throws Exception
     {
         String jwtToken = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
@@ -189,6 +184,12 @@ public class AuthenticationIT extends CommonIntegrationTest
         mockMvc.perform(get("/admin")
                 .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    public void shouldLoadTestFixture() throws Exception
+    {
+        assertEquals("user@example.com", user.getIdentity().getEmail());
     }
 
     @Override

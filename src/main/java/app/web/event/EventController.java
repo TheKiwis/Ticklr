@@ -5,10 +5,8 @@ import app.data.validation.EventValidator;
 import app.services.EventRepository;
 import app.services.TicketSetRepository;
 import app.services.UserRepository;
-import app.web.authorization.UserAuthorizer;
-import net.minidev.json.JSONObject;
+import app.web.authorization.IdentityAuthorizer;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -39,26 +37,26 @@ public class EventController
 
     private TicketSetRepository ticketSetRepository;
 
-    private UserAuthorizer userAuthorizer;
+    private IdentityAuthorizer identityAuthorizer;
 
     /**
      * @param eventRepository     manages event entities
      * @param userRepository      manages user entities
      * @param ticketSetRepository manages ticketset entities
      * @param validator           validates event input
-     * @param userAuthorizer
+     * @param identityAuthorizer
      * @param eventURI
      */
     @Autowired
     public EventController(EventRepository eventRepository, UserRepository userRepository,
                            TicketSetRepository ticketSetRepository, EventValidator validator,
-                           UserAuthorizer userAuthorizer, EventURI eventURI)
+                           IdentityAuthorizer identityAuthorizer, EventURI eventURI)
     {
         this.eventRepository = eventRepository;
         this.userRepository = userRepository;
         this.ticketSetRepository = ticketSetRepository;
         this.validator = validator;
-        this.userAuthorizer = userAuthorizer;
+        this.identityAuthorizer = identityAuthorizer;
         this.eventURI = eventURI;
     }
 
@@ -73,7 +71,7 @@ public class EventController
         if (user == null)
             return NOT_FOUND;
 
-        if (!userAuthorizer.authorize(user))
+        if (!identityAuthorizer.authorize(user.getIdentity()))
             return FORBIDDEN;
 
         List<EventResponse> eventResponses = eventRepository.findByUserId(userId)
@@ -97,7 +95,7 @@ public class EventController
         if (user == null)
             return NOT_FOUND;
 
-        if (!userAuthorizer.authorize(user))
+        if (!identityAuthorizer.authorize(user.getIdentity()))
             return FORBIDDEN;
 
         HttpHeaders headers = new HttpHeaders();
@@ -147,7 +145,7 @@ public class EventController
         if (!user.getId().equals(userId))
             return NOT_FOUND;
 
-        if (!userAuthorizer.authorize(user))
+        if (!identityAuthorizer.authorize(user.getIdentity()))
             return FORBIDDEN;
 
         if (requestEvent == null)
@@ -181,7 +179,7 @@ public class EventController
         if (event == null || !event.getUser().getId().equals(userId))
             return NOT_FOUND;
 
-        if (!userAuthorizer.authorize(user))
+        if (!identityAuthorizer.authorize(user.getIdentity()))
             return FORBIDDEN;
 
         return new ResponseEntity(new EventResponse(event, eventURI), HttpStatus.OK);
@@ -201,7 +199,7 @@ public class EventController
         if (event == null || !event.getUser().getId().equals(userId))
             return NOT_FOUND;
 
-        if (!userAuthorizer.authorize(user))
+        if (!identityAuthorizer.authorize(user.getIdentity()))
             return FORBIDDEN;
 
         event.setCanceled(true);
@@ -225,7 +223,7 @@ public class EventController
         if (event == null || !event.getUser().getId().equals(userId))
             return NOT_FOUND;
 
-        if (!userAuthorizer.authorize(user))
+        if (!identityAuthorizer.authorize(user.getIdentity()))
             return FORBIDDEN;
 
         if (ticketSet == null)
@@ -265,7 +263,7 @@ public class EventController
         if (!user.getId().equals(userId))
             return NOT_FOUND;
 
-        if (!userAuthorizer.authorize(user))
+        if (!identityAuthorizer.authorize(user.getIdentity()))
             return FORBIDDEN;
 
         if (updatedTicketSet == null)
@@ -300,7 +298,7 @@ public class EventController
         if (!user.getId().equals(userId))
             return NOT_FOUND;
 
-        if (!userAuthorizer.authorize(user))
+        if (!identityAuthorizer.authorize(user.getIdentity()))
             return FORBIDDEN;
 
         ticketSetRepository.delete(ticketSet);

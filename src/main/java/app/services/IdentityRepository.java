@@ -2,6 +2,7 @@ package app.services;
 
 import app.data.Identity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.method.P;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
@@ -10,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
+import java.util.UUID;
 
 /**
  * @author ngnmhieu
@@ -54,5 +56,15 @@ public class IdentityRepository
         em.flush();
 
         return identity;
+    }
+
+    /**
+     * @param uuid
+     * @return the identity that whose id matches the given uuid
+     *         null if no identity is found
+     */
+    public Identity findById(UUID uuid)
+    {
+        return em.find(Identity.class, uuid);
     }
 }

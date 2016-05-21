@@ -4,10 +4,7 @@ import app.data.*;
 import app.services.BasketRepository;
 import app.services.TicketSetRepository;
 import app.services.UserRepository;
-import app.web.authorization.UserAuthorizer;
-import app.web.basket.BasketController;
-import app.web.basket.BasketItemForm;
-import app.web.basket.BasketItemUpdateForm;
+import app.web.authorization.IdentityAuthorizer;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -41,7 +38,7 @@ public class BasketControllerTest
     private TicketSetRepository ticketSetRepository;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    private UserAuthorizer userAuthorizer;
+    private IdentityAuthorizer identityAuthorizer;
 
     BasketController basketController;
 
@@ -63,11 +60,11 @@ public class BasketControllerTest
     @Before
     public void setUp() throws Exception
     {
-        basketController = new BasketController(basketRepository, userRepository, ticketSetRepository, userAuthorizer, new BasketURI("http://localhost"));
+        basketController = new BasketController(basketRepository, userRepository, ticketSetRepository, identityAuthorizer, new BasketURI("http://localhost"));
 
         when(mockBasket.getId()).thenReturn(basketId);
 
-        when(userAuthorizer.authorize(any())).thenReturn(true);
+        when(identityAuthorizer.authorize(any())).thenReturn(true);
     }
 
     @Test
@@ -183,9 +180,8 @@ public class BasketControllerTest
     public void deleteItem_shouldDeleteItem() throws Exception
     {
         BasketItem mockItem = mock(BasketItem.class);
-
+        when(userRepository.findById(userId)).thenReturn(mock(User.class));
         when(basketRepository.findItemById(itemId)).thenReturn(mockItem);
-
         when(basketRepository.findByUserId(userId).getBasketItems().contains(mockItem)).thenReturn(true);
 
         ResponseEntity response = basketController.deleteItem(userId, itemId);

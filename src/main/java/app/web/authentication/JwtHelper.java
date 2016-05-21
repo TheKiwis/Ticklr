@@ -1,7 +1,6 @@
 package app.web.authentication;
 
-import app.data.User;
-import app.web.user.UserURI;
+import app.data.Identity;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -28,20 +27,15 @@ public class JwtHelper
     // default expiration days
     public static final int DEFAULT_EXPIRED_DAYS = 7;
 
-    // constructs URLs for user resource
-    private final UserURI userURI;
-
     private byte[] authSecretBytes;
 
     /**
      * @param authSecret
-     * @param uri constructs URL for user resource
      */
     @Autowired
-    public JwtHelper(@Value("${app.auth.secret}") String authSecret, UserURI uri)
+    public JwtHelper(@Value("${app.auth.secret}") String authSecret)
     {
         this.authSecretBytes = authSecret.getBytes(StandardCharsets.UTF_8);
-        this.userURI = uri;
     }
 
     /**
@@ -83,19 +77,18 @@ public class JwtHelper
     /**
      * Generates a JWT Token with provided information and signs it with authSecret
      *
-     * @param user          subject claim
+     * @param id
      * @param expiredInDays
      * @return JWT Token
      */
-    public Token generateToken(User user, int expiredInDays)
+    public Token generateToken(Identity id, int expiredInDays)
     {
         Date expiredDate = getExpiredDate(expiredInDays);
 
         String jwtToken = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
-                .setSubject(user.getId().toString())
+                .setSubject(id.getId().toString())
                 .setExpiration(expiredDate)
-                .claim("url", userURI.userURL(user.getId()))
                 .signWith(SignatureAlgorithm.HS256, authSecretBytes).compact();
         DefaultToken token = new DefaultToken(jwtToken, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC), "");
         return token;
@@ -104,12 +97,12 @@ public class JwtHelper
     /**
      * Generates JWT Token with the default expired day @see {@link JwtHelper ::DEFAULT_EXPIRED_DAYS}
      *
-     * @param user user, for which of the token is generated (using user's ID or email)
+     * @param id the identity, for which of the token is generated
      * @return
      */
-    public Token generateToken(User user)
+    public Token generateToken(Identity id)
     {
-        return this.generateToken(user, DEFAULT_EXPIRED_DAYS);
+        return this.generateToken(id, DEFAULT_EXPIRED_DAYS);
     }
 
     private Date getExpiredDate(int expiredInDays)

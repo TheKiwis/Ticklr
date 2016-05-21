@@ -89,6 +89,7 @@ public class JwtAuthFilter extends OncePerRequestFilter
             SecurityContextHolder.clearContext();
 
             // response via AuthenticationEntryPoint
+            // TODO: Response of this Entry point does not include configurations in BaseWebConfig
             entryPoint.commence(request, response, authenticationException);
 
             if (debug) {

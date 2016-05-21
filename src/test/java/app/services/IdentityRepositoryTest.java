@@ -64,4 +64,14 @@ public class IdentityRepositoryTest
         repo.save(id);
         verify(em, atLeastOnce()).merge(id);
     }
+
+    @Test
+    public void findById_should_return_an_identity() throws Exception
+    {
+        UUID uuid = UUID.randomUUID();
+        Identity mockIdentity = mock(Identity.class);
+        when(em.find(Identity.class, uuid)).thenReturn(mockIdentity);
+
+        assertEquals(mockIdentity, repo.findById(uuid));
+    }
 }

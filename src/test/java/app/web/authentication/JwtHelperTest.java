@@ -2,7 +2,6 @@ package app.web.authentication;
 
 import app.data.Identity;
 import app.data.User;
-import app.web.user.UserURI;
 import io.jsonwebtoken.*;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,7 +14,6 @@ import java.util.Date;
 import java.util.UUID;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 /**
  * @author DucNguyenMinh
@@ -36,25 +34,20 @@ public class JwtHelperTest
 
     private User user;
 
-    private String hostname = "http://localhost";
-
-    private String url = hostname + "api/users/sample-id";;
-
     @Before
     public void setUp()
     {
-        user = new User(UUID.randomUUID(), new Identity("user@example.com", "123456789"));
+        user = new User(UUID.randomUUID(), new Identity(UUID.randomUUID(), "user@example.com", "123456789"));
         subject = user.getId().toString();
 
         Date expiredDate = getExpiredDate(JwtHelper.DEFAULT_EXPIRED_DAYS);
 
-        this.jwtHelper = new JwtHelper(AUTH_SECRET, new UserURI(hostname));
+        this.jwtHelper = new JwtHelper(AUTH_SECRET);
 
         this.validToken = Jwts.builder()
                 .setHeaderParam("typ", "JWT")
                 .setSubject(subject)
                 .setExpiration(expiredDate)
-                .claim("url", url)
                 .signWith(SignatureAlgorithm.HS256, AUTH_SECRET_BYTE).compact();
     }
 
@@ -64,15 +57,7 @@ public class JwtHelperTest
     {
         Date expiredDate = getExpiredDate(10);
 
-        String jwtTokenExpiredIn10Days = Jwts.builder()
-                .setHeaderParam("typ", "JWT")
-                .setSubject(subject)
-                .setExpiration(expiredDate)
-                .claim("url", url)
-                .signWith(SignatureAlgorithm.HS256, AUTH_SECRET_BYTE).compact();
-
-
-        Token jwtToken = jwtHelper.generateToken(user, 10);
+        Token jwtToken = jwtHelper.generateToken(user.getIdentity(), 10);
 
         Jws<Claims> token = Jwts.parser().setSigningKey(AUTH_SECRET_BYTE).parseClaimsJws(jwtToken.getKey());
         Date exp = token.getBody().getExpiration();
@@ -84,7 +69,7 @@ public class JwtHelperTest
     {
         Date expectedExpiredDate = getExpiredDate(7);
 
-        Token jwtToken = jwtHelper.generateToken(user);
+        Token jwtToken = jwtHelper.generateToken(user.getIdentity());
         Jws<Claims> token = Jwts.parser().setSigningKey(AUTH_SECRET_BYTE).parseClaimsJws(jwtToken.getKey());
         Date exp = token.getBody().getExpiration();
 
@@ -98,14 +83,13 @@ public class JwtHelperTest
         Claims claims = jwtHelper.authenticate(validToken);
 
         assertEquals(subject, claims.getSubject());
-        assertEquals(url, claims.get("url"));
     }
 
 
     @Test(expected = BadCredentialsException.class)
     public void authenticate_shouldThrowBadCredentialsException()
     {
-        JwtHelper authenticator = new JwtHelper("another_Secret", new UserURI(hostname));
+        JwtHelper authenticator = new JwtHelper("another_Secret");
         String token = "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ1c2VyQGV4YW1wbGUuY29tIn0.Wx5VgMKG0VZaj7c-bi5ditbQOEQqb9YQyJHFLLvFMFs";
         authenticator.authenticate(token);
     }

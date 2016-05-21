@@ -61,7 +61,7 @@ public class AuthController
         User user = repo.findByEmail(form.getEmail());
 
         if (user != null && passwordEncoder.matches(form.getPassword(), user.getIdentity().getPassword())) {
-            Token token = jwtHelper.generateToken(user);
+            Token token = jwtHelper.generateToken(user.getIdentity());
             HttpHeaders headers = new HttpHeaders();
             headers.setLocation(URI.create(userURI.userURL(user.getId())));
             return new ResponseEntity(token, headers, HttpStatus.OK);
