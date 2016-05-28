@@ -2,7 +2,6 @@ package app.services;
 
 import app.data.Basket;
 import app.data.BasketItem;
-import app.services.BasketRepository;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,7 +47,7 @@ public class BasketRepositoryTest
         when(query.getSingleResult()).thenReturn(mockBasket);
 
 
-        assertEquals(mockBasket, basketRepository.findByUserId(userId));
+        assertEquals(mockBasket, basketRepository.findByBuyerId(userId));
     }
 
 
@@ -61,7 +60,7 @@ public class BasketRepositoryTest
         when(query.getSingleResult()).thenThrow(NoResultException.class);
 
 
-        assertNull(basketRepository.findByUserId(userId));
+        assertNull(basketRepository.findByBuyerId(userId));
     }
 
     @Test

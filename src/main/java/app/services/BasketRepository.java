@@ -29,14 +29,14 @@ public class BasketRepository
     }
 
     /**
-     * @param userId ID of the user who owns the basket
+     * @param buyerId ID of the user who owns the basket
      * @return null if nothing found
      */
-    public Basket findByUserId(UUID userId)
+    public Basket findByBuyerId(UUID buyerId)
     {
-        Query query = em.createQuery("SELECT b FROM Basket b WHERE b.user.id = :user_id");
+        Query query = em.createQuery("SELECT b FROM Basket b WHERE b.buyer.id = :buyer_id");
 
-        query.setParameter("user_id", userId);
+        query.setParameter("buyer_id", buyerId);
 
         Basket basket = null;
 

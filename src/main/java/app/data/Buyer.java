@@ -1,22 +1,16 @@
 package app.data;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.mapping.*;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import javax.persistence.*;
-import javax.persistence.Column;
-import javax.persistence.OneToOne;
-import javax.persistence.Table;
 import java.util.UUID;
 
 /**
  * @author ngnmhieu
  */
 @Entity
-@Table(name = "users")
-public class User
+@Table(name = "buyers")
+public class Buyer
 {
     @Id
     @Column(name = "id")
@@ -28,17 +22,20 @@ public class User
     @JoinColumn(name = "identity_id")
     protected Identity identity;
 
-    protected User()
+    @OneToOne(mappedBy = "buyer", fetch = FetchType.EAGER)
+    protected Basket basket;
+
+    protected Buyer()
     {
     }
 
-    public User(UUID id, Identity identity)
+    public Buyer(UUID id, Identity identity)
     {
         this(identity);
         setId(id);
     }
 
-    public User(Identity identity)
+    public Buyer(Identity identity)
     {
         setIdentity(identity);
     }

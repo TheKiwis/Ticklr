@@ -6,7 +6,8 @@ import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 
 /**
- * Created by DucNguyenMinh on 08.03.16.
+ * @author DucNguyenMinh
+ * @since 08.03.16.
  */
 public class BasketTest
 {
@@ -14,10 +15,10 @@ public class BasketTest
     public void addItem_shouldAddAnItemToBasket() throws Exception
     {
         BasketItem item = mock(BasketItem.class);
-        Basket basket = new Basket(mock(User.class));
+        Basket basket = new Basket(mock(Buyer.class));
 
-        assertTrue(basket.getBasketItems().isEmpty());
+        assertTrue(basket.getItems().isEmpty());
         basket.addItem(item);
-        assertTrue(basket.getBasketItems().contains(item));
+        assertTrue(basket.getItems().contains(item));
     }
 }

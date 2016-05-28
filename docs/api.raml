@@ -16,16 +16,55 @@ traits:
           description: User cannot be authenticated due to invalid authentication information.
         403:
           description: User does not have permissions to access this resource.
+
+  - auth_endpoint:
+      description: User acquires Authentication Token by providing valid credentials (correct email and password).
+      body:
+        application/json:
+          example: |
+            {
+              "email"    : "user@example.com",
+              "password" : "123456789"
+            }
+      responses:
+        200:
+          description: Authentication succeeds, Authentication Token is returned to user.
+          body:
+            application/json:
+              example: |
+                {
+                  "key": "eyJ0eXQiLCJhbGcAiO1IUzI1iJKViOiJNiJ9.eyJlldUBnbWFpbC5zdWIiOiJuZ25taGjb20iLCJleHAiOjE0NjE4ODA4MDB9.ZmddFiD4vB9p0cWL6ahbaqLbLLGTXTjbJwH5QmbS2YL",
+                  "keyCreationTime": 1461311670,
+                  "extendedInformation": ""
+                }
+        401:
+          description: User cannot be authenticated due to incorrect credentials, please try again.
+
+  - has_validation_error:
+      responses:
+        400:
+          description: There are validation errors.
+          body:
+            application/json:
+              example: |
+                {
+                  "errorCode": "VALIDATION_ERROR"
+                }
+  - has_resource_not_found:
+      responses:
+        404:
+          description: Resource not found.
     
 
 /users:
   post:
-    description: Creates a new user. # TODO activation link will be sent and user is not yet activated
+    is: [has_validation_error]
+    description: Creates a new user
     body:
       application/json:
         example: |
           {
-            "email"    : "unique_email@gmail.com",
+            "email"    : "user@example.com",
             "password" : "123456789"
           }
     responses:
@@ -35,19 +74,11 @@ traits:
           Location:
             description: Location of the newly created user
             example: "Location: http://localhost/api/users/27a4563a45ab4a7aacd15af9"
-      400:
-        description: Part of the input data is invalid.
-        body:
-          application/json:
-            example: |
-              {
-                # TODO
-              }
       409:
         description: There is a conflict due to duplicated email.
 
   /{userId}:
-    is: [authorized]
+    is: [authorized, has_resource_not_found]
     uriParameters:
       userId:
         description: UUID that uniquely identifies a user in the system.
@@ -64,7 +95,7 @@ traits:
                   "email": "user@example.com"
                 }
     /events:
-      is: [authorized]
+      is: [authorized, has_resource_not_found]
       get:
         description: Returns all events belonging to the user.
         responses:
@@ -73,8 +104,8 @@ traits:
               application/json:
                 example: |
                   {
-                    "id": "http://localhost:8080/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events",
-                    "events": [
+                    "href": "http://localhost:8080/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events",
+                    "items": [
                       {
                         "id": "http://localhost:8080/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/1",
                         "title": "New Event"
@@ -85,10 +116,8 @@ traits:
                       }
                     ]
                   }
-          404:
-            description: User not found.
       post:
-        is: [authorized]
+        is: [has_validation_error]
         description: Creates a new event.
         body:
           application/json:
@@ -108,10 +137,8 @@ traits:
             headers:
               Location:
                 example: "Location: http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14"
-          400:
-            description: User not found.
       /{eventId}:
-        is: [authorized]
+        is: [authorized, has_resource_not_found]
         get:
           description: Returns an event.
           responses:
@@ -132,9 +159,8 @@ traits:
                       "expired": false,
                       "happening": false
                     }
-            404:
-              description: Event not found.
         put:
+          is: [has_validation_error]
           description: Updates an event.
           body:
             application/json:
@@ -150,97 +176,221 @@ traits:
           responses:
             204:
               description: Event has been successfully updated.
-            404:
-              description: Event not found.
-            400:
-              description: Part of the updated data is invalid. Please try again.
         delete:
           description: Cancels an event.
           responses:
             204:
               description: Event has been successfully cancelled.
-            404:
-              description: Event not found.
 
         /ticket-sets:
-          is: [authorized]
+          is: [authorized, has_resource_not_found]
           get:
-            description: # TODO
+            description: Ticket-sets collection of an event.
+            responses:
+              200:
+                body:
+                  application/json:
+                    example: |
+                      {
+                        "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14/ticket-sets"
+                        "items": [
+                          {
+                            "id": 2,
+                            "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14/ticket-sets/2"
+                            "title": "5er group ticket for a team",
+                            "price": 25.00,
+                            "stock": 20,
+                            "event": {
+                              "id": 14,
+                              "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14"
+                            }
+                          },
+                          {
+                            "id": 3,
+                            "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14/ticket-sets/3"
+                            "title": "1er ticket",
+                            "price": 5.00,
+                            "stock": 20,
+                            "event": {
+                              "id": 14,
+                              "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14"
+                            }
+                          }
+                        ]
+                      }
           post:
+            is: [has_validation_error]
             description: Creates a new ticket set.
             body:
-              # TODO it's not application/json yet
               application/json:
                 example: |
                   {
-                    "title": "5er Group Ticket",
-                    "price": "25.30"
-                    # TODO Currency?
+                    "title": "5er group ticket for a team",
+                    "price": 25.30,
+                    "stock": 20
                   }
             responses:
               201:
                 description: Ticket set has been successfully created.
-                headers: # TODO
+                headers:
                   Location:
-                    example: "Location: http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14/ticket-sets/2" # TODO
-              404:
-                description: Resource not found.
+                    example: "Location: http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14/ticket-sets/2"
 
           /{ticketSetId}:
-            is: [authorized]
+            is: [authorized, has_resource_not_found]
             get:
-              description: # TODO
+              description: Returns a Ticket Set
+              body:
+                application/json:
+                  example: |
+                    {
+                      "id": 2,
+                      "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14/ticket-sets/2"
+                      "title": "5er group ticket for a team",
+                      "price": 25.00,
+                      "stock": 20,
+                      "event": {
+                        "id": 14,
+                        "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14"
+                      }
+                    }
             delete:
               description: Deletes a ticket set.
               responses:
                 204:
                   description: Ticket set has been successfully deleted.
-                404:
-                  description: Ticket set not found.
             put: 
+              is: [has_validation_error]
               description: Updates a ticket set.
               body:
                 application/json:
                   example: |
                     {
                       "title": "5er Group Ticket",
-                      "price": "25.30"
-                      # TODO currency?
+                      "price": 25.30,
+                      "stock": 50
                     }
               responses:
                 204:
                   description: Ticket set has been successfully updated.
-                404:
-                  description: Ticket set not found.
-                400: 
-                  description: Part of the updated data is invalid. Please try again.
+
+/buyers:
+
+  # post:
+  #   is: [has_validation_error]
+  #   description: Creates a new User.
+  #   body:
+  #     application/json:
+  #       example: |
+  #         {
+  #           "email"    : "user@example.com",
+  #           "password" : "123456789"
+  #         }
+  #   responses:
+  #     201:
+  #       description: User successfully registered.
+  #       headers:
+  #         Location:
+  #           description: Location of the newly created user
+  #           example: "Location: http://localhost/api/users/27a4563a45ab4a7aacd15af9"
+  #     409:
+  #       description: There is a conflict due to duplicated email.
+
+  /{buyerId}:
+    is: [authorized, has_resource_not_found]
+    uriParameters:
+      buyerId:
+        description: UUID that uniquely identifies the buyer in the system.
+        type: string
+    get:
+      description: Returns a buyer. 
+      responses:
+        200:
+          body:
+            application/json:
+              example: |
+                {
+                  "id": "103d34a8-1420-74e9-153d-7a35e1ea8619",
+                  "href": "http://example.com/api/users/103d34a8-1420-74e9-153d-7a35e1ea8619",
+                  "email": "user@example.com",
+                  "basket": {
+                    "href": "http://example.com/api/users/103d34a8-1420-74e9-153d-7a35e1ea8619/basket"
+                  }
+                }
 
     /basket:
-      is: [authorized]
+      is: [authorized, has_resource_not_found]
       get:   
-        description: Returns the basket belonging to a user.
+        description: Returns the basket belonging to a buyer.
         responses:
           200:
             body:
               application/json:
                 example: |
                   {
-                    # TODO: change it!!
-                    "id": 1,
+                    "href": "http://example.com/api/buyers/103d44a8-1240-49e9-935d-7a35e5ea6819/basket",
                     "user": {
-                      "id": "103d44a8-1240-49e9-935d-7a35e5ea6819",
-                      "email": "ngnmhieu@gmail.com"
+                      "href": "http://example.com/api/buyers/103d44a8-1240-49e9-935d-7a35e5ea6819"
                     },
-                    "basketItems": [],
-                    "createdTime": "2016-05-13T21:33:26.861+0000",
-                    "updatedTime": null
+                    "items": {
+                      "href": "http://example.com/api/buyers/103d44a8-1240-49e9-935d-7a35e5ea6819/basket/items",
+                      "items": [
+                        {
+                          "id": 1,
+                          "href": "http://example.com/api/buyers/103d44a8-1240-49e9-935d-7a35e5ea6819/basket/items/1",
+                          "quantity": 2,
+                          "ticketSet" {
+                            "id": 5,
+                            "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14/ticket-sets/5"
+                          }
+                        },
+                        {
+                          "id": 2,
+                          "href": "http://example.com/api/buyers/103d44a8-1240-49e9-935d-7a35e5ea6819/basket/items/2",
+                          "quantity": 1,
+                          "ticketSet" {
+                            "id": 9,
+                            "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/20/ticket-sets/9"
+                          }
+                        }
+                      ]
+                    }
                   }
-          404:
-            description: User not found.
+
       /items:
-        is: [authorized]
+        is: [authorized, has_resource_not_found]
         get:
-          description: # TODO
+          description: Returns Basket Items Collection
+          responses:
+            200:
+              body:
+                application/json:
+                  example: |
+                    {
+                      "href": "http://example.com/api/buyers/103d44a8-1240-49e9-935d-7a35e5ea6819/basket/items"
+                      "items": [
+                        {
+                          "id": 1,
+                          "href": "http://example.com/api/buyers/103d44a8-1240-49e9-935d-7a35e5ea6819/basket/items/1",
+                          "quantity": 2,
+                          "unitPrice": 20.5,
+                          "ticketSet" {
+                            "id": 5,
+                            "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14/ticket-sets/5"
+                          }
+                        },
+                        {
+                          "id": 2,
+                          "href": "http://example.com/api/buyers/103d44a8-1240-49e9-935d-7a35e5ea6819/basket/items/2",
+                          "quantity": 1,
+                          "unitPrice": 20.5,
+                          "ticketSet" {
+                            "id": 9,
+                            "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/20/ticket-sets/9"
+                          }
+                        }
+                      ]
+                    }
         post:
           description: Adds a new item to the basket.
           body:
@@ -248,62 +398,78 @@ traits:
               example: |
                 {
                   "quantity": 20,
+                  "ticketSetId": 25
                 }
           responses:
             201:
               description: Item has been successfully added to basket.
               headers:
                 Location:
-                  example: "Location: http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/basket/items/123" # TODO
+                  example: "Location: http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/basket/items/123"
             400:
-              description: User not found.
+              description: |
+                Error has occurred while creating new basket item. This could be due to one of the following reasons:
+                  - Validation errors
+                  - Ticket set is not available for purchase (out of stock)
+
+                Error codes: [VALIDATION_ERROR, TICKET_SET_OUT_OF_STOCK]
+                
+              body:
+                application/json:
+                  example: |
+                    {
+                      "errorCode": "TICKET_SET_OUT_OF_STOCK"
+                    }
 
         /{itemId}:
-          is: [authorized]
+          is: [authorized, has_resource_not_found]
           get:
-            description: # TODO
+            description: Returns a Basket Item.
+            body:
+              application/json:
+                example: |
+                  {
+                    "id": 2,
+                    "href": "http://example.com/api/buyers/103d44a8-1240-49e9-935d-7a35e5ea6819/basket/items/2",
+                    "quantity": 1,
+                    "unitPrice": "20.5",
+                    "ticketSet" {
+                      "id": 9,
+                      "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/20/ticket-sets/9"
+                    }
+                  }
           put:
             description: Updates a basket item.
             body:
               application/json:
                 example: |
                   {
-                    "quantity": 2,
-                    "ticketSetId": 123, # TODO this should be an url...
+                    "quantity": 2
                   }
             responses:
               204:
-                description: Basket item has been successfully updated.
+                description: Basket Item has been successfully updated.
               400:
-                description: Basket item  not found.
+                description: |
+                  Error has occurred while creating new basket item. This could be due to one of the following reasons:
+                    - Validation errors
+                    - Ticket set is not available for purchase (out of stock)
+
+                  Error codes: [VALIDATION_ERROR, TICKET_SET_OUT_OF_STOCK]
+                  
+                body:
+                  application/json:
+                    example: |
+                      {
+                        "errorCode": "TICKET_SET_OUT_OF_STOCK"
+                      }
           delete:
-            description: Deletes a basket item.
+            description: Deletes a Basket Item.
             responses:
               204:
                 description: Basket item has been successfully deleted.
-              400:
-                description: Basket item  not found.
 
 /auth:
   /request-token:
     post:
-      description: Returns authentication token if user provides valid credentials (correct email and password).
-      body:
-        application/json:
-          example: |
-            {
-              "email"    : "unique_email@gmail.com",
-              "password" : "123456789"
-            }
-      responses:
-        200:
-          description: Authentication succeeds, return authentication token to user.
-          body:
-              example: |
-                {
-                  "key": "eyJ0eXQiLCJhbGcAiO1IUzI1iJKViOiJNiJ9.eyJlldUBnbWFpbC5zdWIiOiJuZ25taGjb20iLCJleHAiOjE0NjE4ODA4MDB9.ZmddFiD4vB9p0cWL6ahbaqLbLLGTXTjbJwH5QmbS2YL",
-                  "keyCreationTime": 1461311670,
-                  "extendedInformation": ""
-                }
-        401:
-          description: User cannot be authenticated due to incorrect credentials, please try again.
+      is: [auth_endpoint]

@@ -1,6 +1,5 @@
 package app.data;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
 import org.hibernate.annotations.*;
 
 import javax.persistence.*;
@@ -26,35 +25,39 @@ public class Basket
     protected Long id;
 
     @OneToOne(optional = false)
-    @JoinColumn(name = "user_id")
-    protected User user;
+    @JoinColumn(name = "buyer_id")
+    protected Buyer buyer;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_time", updatable = false)
     @CreationTimestamp
-    protected Date created_time;
+    protected Date createdTime;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "updated_time", insertable = false, updatable = false)
     @Generated(GenerationTime.ALWAYS)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSS")
-    protected Date updated_time;
+    protected Date updatedTime;
 
     @OneToMany(mappedBy = "basket", fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    protected Collection<BasketItem> basketItems = new ArrayList<>();
+    protected Collection<BasketItem> items = new ArrayList<>();
 
     protected Basket()
     {
     }
 
-    public Basket(User user)
+    public Basket(Buyer buyer)
     {
-        this.user = user;
+        this.buyer = buyer;
     }
 
-    public void setUser(User user)
+    public Buyer getBuyer()
     {
-        this.user = user;
+        return buyer;
+    }
+
+    public void setBuyer(Buyer buyer)
+    {
+        this.buyer = buyer;
     }
 
     public Long getId()
@@ -62,27 +65,12 @@ public class Basket
         return id;
     }
 
-    public User getUser()
-    {
-        return user;
-    }
-
-    public Date getCreatedTime()
-    {
-        return created_time;
-    }
-
-    public Date getUpdatedTime()
-    {
-        return updated_time;
-    }
-
     /**
      * @return Items an immutable collection of BasketItem's contained in this Basket
      */
-    public Collection<BasketItem> getBasketItems()
+    public Collection<BasketItem> getItems()
     {
-        return Collections.unmodifiableCollection(basketItems);
+        return Collections.unmodifiableCollection(items);
     }
 
     /**
@@ -90,7 +78,7 @@ public class Basket
      */
     public void addItem(BasketItem item)
     {
-        basketItems.add(item);
+        items.add(item);
         item.basket = this;
     }
 
@@ -100,6 +88,6 @@ public class Basket
      */
     public void removeItem(BasketItem item)
     {
-        basketItems.remove(item);
+        items.remove(item);
     }
 }

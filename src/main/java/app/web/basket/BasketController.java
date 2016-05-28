@@ -3,7 +3,7 @@ package app.web.basket;
 import app.data.*;
 import app.services.BasketRepository;
 import app.services.TicketSetRepository;
-import app.services.UserRepository;
+import app.services.BuyerRepository;
 import app.web.authorization.IdentityAuthorizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,9 +25,10 @@ import java.util.UUID;
 public class BasketController
 {
     public static final ResponseEntity NOT_FOUND = new ResponseEntity(HttpStatus.NOT_FOUND);
+
     protected BasketRepository basketRepository;
 
-    protected UserRepository userRepository;
+    protected BuyerRepository buyerRepository;
 
     protected TicketSetRepository ticketSetRepository;
 
@@ -36,36 +37,36 @@ public class BasketController
     protected BasketURI basketURI;
 
     @Autowired
-    public BasketController(BasketRepository basketRepository, UserRepository userRepository,
+    public BasketController(BasketRepository basketRepository, BuyerRepository buyerRepository,
                             TicketSetRepository ticketSetRepository, IdentityAuthorizer identityAuthorizer,
                             BasketURI basketURI)
     {
         this.basketRepository = basketRepository;
-        this.userRepository = userRepository;
+        this.buyerRepository = buyerRepository;
         this.ticketSetRepository = ticketSetRepository;
         this.identityAuthorizer = identityAuthorizer;
         this.basketURI = basketURI;
     }
 
     @RequestMapping(value = BasketURI.BASKET_URI, method = RequestMethod.GET)
-    public ResponseEntity show(@PathVariable UUID userId)
+    public ResponseEntity show(@PathVariable UUID buyerId)
     {
         Basket basket = null;
 
         HttpStatus status = HttpStatus.OK;
 
-        User user = userRepository.findById(userId);
+        Buyer buyer = buyerRepository.findById(buyerId);
 
-        if (user == null)
+        if (buyer == null)
             return NOT_FOUND;
 
-        if (!identityAuthorizer.authorize(user.getIdentity()))
+        if (!identityAuthorizer.authorize(buyer.getIdentity()))
             return new ResponseEntity(HttpStatus.FORBIDDEN);
 
-        basket = basketRepository.findByUserId(userId);
+        basket = basketRepository.findByBuyerId(buyerId);
 
         if (basket == null) {
-            basket = basketRepository.save(new Basket(user));
+            basket = basketRepository.save(new Basket(buyer));
         }
 
         return new ResponseEntity(basket, status);
@@ -73,14 +74,14 @@ public class BasketController
 
 
     @RequestMapping(value = BasketURI.ITEMS_URI, method = RequestMethod.POST)
-    public ResponseEntity addItem(@PathVariable UUID userId, @Valid BasketItemForm basketItemForm, BindingResult bindingResult)
+    public ResponseEntity addItem(@PathVariable UUID buyerId, @Valid BasketItemForm basketItemForm, BindingResult bindingResult)
     {
-        User user = userRepository.findById(userId);
-        if (user == null) {
+        Buyer buyer = buyerRepository.findById(buyerId);
+        if (buyer == null) {
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
         }
 
-        if (!identityAuthorizer.authorize(user.getIdentity())) return new ResponseEntity(HttpStatus.FORBIDDEN);
+        if (!identityAuthorizer.authorize(buyer.getIdentity())) return new ResponseEntity(HttpStatus.FORBIDDEN);
 
         if (bindingResult.hasFieldErrors()) {
             return new ResponseEntity(bindingResult.getFieldErrors(), HttpStatus.BAD_REQUEST);
@@ -95,10 +96,10 @@ public class BasketController
 
         HttpStatus status = HttpStatus.CREATED;
 
-        Basket basket = basketRepository.findByUserId(userId);
+        Basket basket = basketRepository.findByBuyerId(buyerId);
 
         if (basket == null) { // if basket doesn't existed yet, then create new one
-            basket = new Basket(user);
+            basket = new Basket(buyer);
         }
 
         BasketItem item = basketRepository.findItemByBasketIdAndTicketSetId(basket.getId(), basketItemForm.getTicketSetId());
@@ -121,21 +122,21 @@ public class BasketController
     }
 
     @RequestMapping(value = BasketURI.ITEM_URI, method = RequestMethod.DELETE)
-    public ResponseEntity deleteItem(@PathVariable UUID userId, @PathVariable long itemId)
+    public ResponseEntity deleteItem(@PathVariable UUID buyerId, @PathVariable long itemId)
     {
-        User user = userRepository.findById(userId);
+        Buyer buyer = buyerRepository.findById(buyerId);
 
-        if (user == null)
+        if (buyer == null)
             return NOT_FOUND;
 
-        if (!identityAuthorizer.authorize(user.getIdentity()))
+        if (!identityAuthorizer.authorize(buyer.getIdentity()))
             return new ResponseEntity(HttpStatus.FORBIDDEN);
 
-        Basket basket = basketRepository.findByUserId(userId);
+        Basket basket = basketRepository.findByBuyerId(buyerId);
 
         BasketItem item = basketRepository.findItemById(itemId);
 
-        if (item == null || basket == null || !basket.getBasketItems().contains(item))
+        if (item == null || basket == null || !basket.getItems().contains(item))
             return NOT_FOUND;
 
         basketRepository.deleteItem(item);
@@ -144,21 +145,20 @@ public class BasketController
     }
 
     @RequestMapping(value = BasketURI.ITEM_URI, method = RequestMethod.PUT)
-    public ResponseEntity updateItem(@PathVariable UUID userId, @PathVariable Long itemId, BasketItemUpdateForm basketItemUpdateForm, BindingResult bindingResult)
+    public ResponseEntity updateItem(@PathVariable UUID buyerId, @PathVariable Long itemId, BasketItemUpdateForm basketItemUpdateForm, BindingResult bindingResult)
     {
+        Buyer buyer = buyerRepository.findById(buyerId);
 
-        User user = userRepository.findById(userId);
-
-        if (user == null)
+        if (buyer == null)
             return NOT_FOUND;
 
-        if (!identityAuthorizer.authorize(user.getIdentity())) return new ResponseEntity(HttpStatus.FORBIDDEN);
+        if (!identityAuthorizer.authorize(buyer.getIdentity())) return new ResponseEntity(HttpStatus.FORBIDDEN);
 
         if (bindingResult.hasFieldErrors()) {
             return new ResponseEntity(bindingResult.getFieldErrors(), HttpStatus.BAD_REQUEST);
         }
 
-        Basket basket = basketRepository.findByUserId(userId);
+        Basket basket = basketRepository.findByBuyerId(buyerId);
 
         BasketItem basketItem = basketRepository.findItemById(itemId);
 
