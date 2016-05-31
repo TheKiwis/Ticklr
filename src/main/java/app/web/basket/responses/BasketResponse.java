@@ -36,22 +36,6 @@ public class BasketResponse
         }
     }
 
-    public static class BasketItemResponse
-    {
-        public String href;
-        public long id;
-        public int quantity;
-        public TicketSetResponse ticketSet;
-
-        public BasketItemResponse(Basket basket, BasketItem item, ResourceURI resURI)
-        {
-            href = resURI.getBasketURI().basketItemURL(basket.getBuyer().getId(), item.getId());
-            id = item.getId();
-            quantity = item.getQuantity();
-            ticketSet = new TicketSetResponse(item.getTicketSet(), resURI);
-        }
-    }
-
     public static class TicketSetResponse
     {
         public long id;

@@ -359,38 +359,38 @@ traits:
 
       /items:
         is: [authorized, has_resource_not_found]
-        get:
-          description: Returns Basket Items Collection
-          responses:
-            200:
-              body:
-                application/json:
-                  example: |
-                    {
-                      "href": "http://example.com/api/buyers/103d44a8-1240-49e9-935d-7a35e5ea6819/basket/items"
-                      "items": [
-                        {
-                          "id": 1,
-                          "href": "http://example.com/api/buyers/103d44a8-1240-49e9-935d-7a35e5ea6819/basket/items/1",
-                          "quantity": 2,
-                          "unitPrice": 20.5,
-                          "ticketSet" {
-                            "id": 5,
-                            "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14/ticket-sets/5"
-                          }
-                        },
-                        {
-                          "id": 2,
-                          "href": "http://example.com/api/buyers/103d44a8-1240-49e9-935d-7a35e5ea6819/basket/items/2",
-                          "quantity": 1,
-                          "unitPrice": 20.5,
-                          "ticketSet" {
-                            "id": 9,
-                            "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/20/ticket-sets/9"
-                          }
-                        }
-                      ]
-                    }
+        # get:
+        #   description: Returns Basket Items Collection
+        #   responses:
+        #     200:
+        #       body:
+        #         application/json:
+        #           example: |
+        #             {
+        #               "href": "http://example.com/api/buyers/103d44a8-1240-49e9-935d-7a35e5ea6819/basket/items"
+        #               "items": [
+        #                 {
+        #                   "id": 1,
+        #                   "href": "http://example.com/api/buyers/103d44a8-1240-49e9-935d-7a35e5ea6819/basket/items/1",
+        #                   "quantity": 2,
+        #                   "unitPrice": 20.5,
+        #                   "ticketSet" {
+        #                     "id": 5,
+        #                     "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14/ticket-sets/5"
+        #                   }
+        #                 },
+        #                 {
+        #                   "id": 2,
+        #                   "href": "http://example.com/api/buyers/103d44a8-1240-49e9-935d-7a35e5ea6819/basket/items/2",
+        #                   "quantity": 1,
+        #                   "unitPrice": 20.5,
+        #                   "ticketSet" {
+        #                     "id": 9,
+        #                     "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/20/ticket-sets/9"
+        #                   }
+        #                 }
+        #               ]
+        #             }
         post:
           description: Adds a new item to the basket.
           body:

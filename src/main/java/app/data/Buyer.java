@@ -22,7 +22,7 @@ public class Buyer
     @JoinColumn(name = "identity_id")
     protected Identity identity;
 
-    @OneToOne(mappedBy = "buyer", fetch = FetchType.EAGER)
+    @OneToOne(mappedBy = "buyer")
     protected Basket basket;
 
     protected Buyer()
@@ -61,5 +61,15 @@ public class Buyer
     public void setIdentity(Identity identity)
     {
         this.identity = identity;
+    }
+
+    public Basket getBasket()
+    {
+        return basket;
+    }
+
+    public void setBasket(Basket basket)
+    {
+        this.basket = basket;
     }
 }

@@ -10,6 +10,7 @@ import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Matchers;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.UUID;
@@ -59,6 +60,19 @@ public class BasketIT extends CommonIntegrationTest
                 .andExpect(jsonPath("$.items").isMap())
                 .andExpect(jsonPath("$.items.href").isNotEmpty())
                 .andExpect(jsonPath("$.items.items").isArray());
+    }
+
+    @Test
+    public void happy_should_return_a_basket_item() throws Exception
+    {
+        mockMvc.perform(prepareRequest(get(basketURI.basketItemURI(buyerOneId, 1l))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").value(1))
+                .andExpect(jsonPath("$.href").isNotEmpty())
+                .andExpect(jsonPath("$.quantity").value(8))
+                .andExpect(jsonPath("$.unitPrice").isNumber())
+                .andExpect(jsonPath("$.totalPrice").isNumber())
+                .andExpect(jsonPath("$.ticketSet").isMap());
     }
 
     //@Test
@@ -124,6 +138,12 @@ public class BasketIT extends CommonIntegrationTest
                 .andExpect(status().isNotFound());
 
         mockMvc.perform(prepareRequest(delete(basketURI.basketItemURI(buyerOneId, 999l))))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(prepareRequest(get(basketURI.basketItemURI(UUID.randomUUID(), 999l))))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(prepareRequest(get(basketURI.basketItemURI(buyerOneId, 999l))))
                 .andExpect(status().isNotFound());
 
         // TODO put...
@@ -202,25 +222,24 @@ public class BasketIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldReturnForbiddenAccessWhileAccessingBasketOfOtherBuyer() throws Exception
+    public void sad_should_return_HTTP_FORBIDDEN() throws Exception
     {
         UUID anotherBuyerId = buyerTwoId;
         Long anotherBasketItemId = 456l;
 
-        mockMvc.perform(get(basketURI.basketURI(anotherBuyerId))
-                .header("Authorization", authString))
+        mockMvc.perform(prepareRequest(get(basketURI.basketURI(anotherBuyerId))))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(post(basketURI.basketItemURI(anotherBuyerId, null))
-                .header("Authorization", authString))
+        mockMvc.perform(prepareRequest(post(basketURI.basketItemURI(anotherBuyerId, null))))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(put(basketURI.basketItemURI(anotherBuyerId, anotherBasketItemId))
-                .header("Authorization", authString))
+        mockMvc.perform(prepareRequest(put(basketURI.basketItemURI(anotherBuyerId, anotherBasketItemId))))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(delete(basketURI.basketItemURI(anotherBuyerId, anotherBasketItemId))
-                .header("Authorization", authString))
+        mockMvc.perform(prepareRequest(delete(basketURI.basketItemURI(anotherBuyerId, anotherBasketItemId))))
+                .andExpect(status().isForbidden());
+
+        mockMvc.perform(prepareRequest(get(basketURI.basketItemURI(anotherBuyerId, anotherBasketItemId))))
                 .andExpect(status().isForbidden());
     }
 
