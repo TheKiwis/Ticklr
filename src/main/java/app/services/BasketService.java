@@ -31,26 +31,6 @@ public class BasketService
     }
 
     /**
-     * @param buyerId ID of the user who owns the basket
-     * @return null if nothing found
-     */
-    public Basket findByBuyerId(UUID buyerId)
-    {
-        Query query = em.createQuery("SELECT b FROM Basket b WHERE b.buyer.id = :buyer_id");
-
-        query.setParameter("buyer_id", buyerId);
-
-        Basket basket = null;
-
-        try {
-            basket = (Basket) query.getSingleResult();
-        } catch (NoResultException e) {
-        }
-
-        return basket;
-    }
-
-    /**
      * Add a new item corresponding to the given ticket set to the basket
      * If the item is already there, then increment the quantity
      *

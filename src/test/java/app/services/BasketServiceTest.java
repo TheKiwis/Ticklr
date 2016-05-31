@@ -41,32 +41,6 @@ public class BasketServiceTest
     }
 
     @Test
-    public void findByBuyerId_should_return_basket() throws Exception
-    {
-        Basket mockBasket = mock(Basket.class);
-        Query query = mock(Query.class);
-        when(em.createQuery(anyString())).thenReturn(query);
-        when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getSingleResult()).thenReturn(mockBasket);
-
-
-        assertEquals(mockBasket, basketService.findByBuyerId(userId));
-    }
-
-
-    @Test
-    public void findByBuyerId_should_return_null_if_nothing_found()
-    {
-        Query query = mock(Query.class);
-        when(em.createQuery(anyString())).thenReturn(query);
-        when(query.setParameter(anyString(), any())).thenReturn(query);
-        when(query.getSingleResult()).thenThrow(NoResultException.class);
-
-
-        assertNull(basketService.findByBuyerId(userId));
-    }
-
-    @Test
     public void save_should_return_the_same_basket()
     {
 
