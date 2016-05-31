@@ -111,61 +111,6 @@ public class BasketControllerTest
     }
 
     @Test
-    public void deleteItem_shouldDeleteItem() throws Exception
-    {
-        BasketItem mockItem = mock(BasketItem.class);
-        when(buyerRepository.findById(buyerId)).thenReturn(mock(Buyer.class));
-        when(basketService.findItemById(itemId)).thenReturn(mockItem);
-        when(basketService.findByBuyerId(buyerId).getItems().contains(mockItem)).thenReturn(true);
-
-        ResponseEntity response = basketController.deleteItem(buyerId, itemId);
-
-        verify(basketService, times(1)).removeItem(mockItem);
-
-        assertEquals(HttpStatus.OK, response.getStatusCode());
-    }
-
-    @Test
-    public void deleteItem_shouldReturnNotFoundIfNoBasketItemFound() throws Exception
-    {
-        when(basketService.findItemById(itemId)).thenReturn(null);
-
-        ResponseEntity response = basketController.deleteItem(buyerId, itemId);
-
-        verify(basketService, never()).removeItem(any());
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-    }
-
-    @Test
-    public void deleteItem_shouldReturnNotFoundIfItemDoesNotBelongToBasket() throws Exception
-    {
-        BasketItem mockItem = mock(BasketItem.class);
-
-        when(basketService.findItemById(itemId)).thenReturn(mockItem);
-
-        when(basketService.findByBuyerId(buyerId).getItems().contains(mockItem)).thenReturn(false);
-
-        ResponseEntity response = basketController.deleteItem(buyerId, itemId);
-
-        verify(basketService, never()).removeItem(any());
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-    }
-
-    @Test
-    public void deleteItem_shouldReturnNotFoundIfBasketDoesNotExist() throws Exception
-    {
-        when(basketService.findByBuyerId(buyerId)).thenReturn(null);
-
-        ResponseEntity response = basketController.deleteItem(buyerId, itemId);
-
-        verify(basketService, never()).removeItem(any());
-
-        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
-    }
-
-    @Test
     public void updateItem_shouldUpdateItem() throws Exception
     {
 

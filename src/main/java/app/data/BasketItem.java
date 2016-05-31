@@ -25,13 +25,11 @@ public class BasketItem
     private Long id;
 
     @ManyToOne
-    //@JoinColumn(name = "basket_id", nullable = false)
-    @JoinColumn(name = "basket_id")
+    @JoinColumn(name = "basket_id", nullable = false)
     protected Basket basket;
 
     @ManyToOne
-    //@JoinColumn(name = "ticket_set_id", nullable = false)
-    @JoinColumn(name = "ticket_set_id")
+    @JoinColumn(name = "ticket_set_id", nullable = false)
     protected TicketSet ticketSet;
 
     @Column(name = "quantity")
@@ -157,8 +155,8 @@ public class BasketItem
 
         BasketItem that = (BasketItem) o;
 
-        return id != null ? id.equals(that.id) : that.id == null;
-
+        if (id != null ? !id.equals(that.id) : that.id != null) return false;
+        return ticketSet != null ? ticketSet.equals(that.ticketSet) : that.ticketSet == null;
     }
 
     @Override

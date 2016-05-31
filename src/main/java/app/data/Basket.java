@@ -36,6 +36,7 @@ public class Basket
     @Generated(GenerationTime.ALWAYS)
     protected Date updatedTime;
 
+    // TODO: why remove does not work with CascaseType.PERSIST
     //@OneToMany(mappedBy = "basket", fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @OneToMany(mappedBy = "basket", fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
     protected Set<BasketItem> items = new HashSet<>();
@@ -93,7 +94,7 @@ public class Basket
 
     /**
      * @param item
-     * @return if there is a item in this basket
+     * @return if there is a item in this basket (either they are equals or have equals ticketSet)
      */
     public boolean isInBasket(BasketItem item)
     {

@@ -6,6 +6,8 @@ import java.math.BigDecimal;
 
 import static org.junit.Assert.*;
 
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyObject;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.timeout;
 import static org.mockito.Mockito.when;
@@ -45,7 +47,9 @@ public class BasketTest
     public void isInBasket_BasketItem() throws Exception
     {
         TicketSet ticket = mock(TicketSet.class);
+        when(ticket.getId()).thenReturn(1l);
         TicketSet otherTicket = mock(TicketSet.class);
+        when(otherTicket.getId()).thenReturn(2l);
 
         Basket basket = new Basket();
         BasketItem item = new BasketItem(ticket, 10, BigDecimal.ONE);
