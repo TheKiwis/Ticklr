@@ -73,11 +73,11 @@ public class UserController
     /**
      * Creates a user
      *
-     * @param userForm      contains registration information (e.g. email and password)
+     * @param loginForm      contains registration information (e.g. email and password)
      * @param bindingResult validation information
      */
     @RequestMapping(value = UserURI.USERS_URI, method = RequestMethod.POST)
-    public ResponseEntity create(@RequestBody @Valid UserForm userForm, BindingResult bindingResult)
+    public ResponseEntity create(@RequestBody @Valid LoginForm loginForm, BindingResult bindingResult)
     {
         HttpHeaders headers = new HttpHeaders();
         HttpStatus status;
@@ -87,7 +87,7 @@ public class UserController
             status = HttpStatus.CREATED;
 
             try {
-                User user = repo.save(userForm.getUser());
+                User user = repo.save(loginForm.getUser());
                 headers.setLocation(URI.create(userURI.userURL(user.getId())));
             } catch (PersistenceException e) {
                 status = HttpStatus.CONFLICT; // duplicated email found

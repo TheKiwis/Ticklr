@@ -82,15 +82,15 @@ public class UserControllerTest
     public void processRegistration_ShouldRespondWith201HTTPStatus() throws Exception
     {
         // mock objects
-        UserForm userForm = new UserForm();
-        userForm.setEmail("user@email.com").setPassword("123456789");
+        LoginForm loginForm = new LoginForm();
+        loginForm.setEmail("user@email.com").setPassword("123456789");
 
         BindingResult bindingResult = mock(BindingResult.class);
         when(bindingResult.hasFieldErrors()).thenReturn(false);
         when(bindingResult.getFieldErrors()).thenReturn(new ArrayList<FieldError>());
 
         // test object
-        ResponseEntity response = controller.create(userForm, bindingResult);
+        ResponseEntity response = controller.create(loginForm, bindingResult);
 
         assertEquals(HttpStatus.CREATED, response.getStatusCode());
         assertTrue(((List) response.getBody()).isEmpty());
@@ -100,15 +100,15 @@ public class UserControllerTest
     public void processRegistration_ShouldSaveUser() throws Exception
     {
         // mock objects
-        UserForm userForm = new UserForm();
-        userForm.setEmail("email").setPassword("123456789");
+        LoginForm loginForm = new LoginForm();
+        loginForm.setEmail("email").setPassword("123456789");
 
         BindingResult bindingResult = mock(BindingResult.class);
         when(bindingResult.hasFieldErrors()).thenReturn(false);
         when(bindingResult.getFieldErrors()).thenReturn(new ArrayList<FieldError>());
 
         // test object
-        controller.create(userForm, bindingResult);
+        controller.create(loginForm, bindingResult);
 
         verify(userRepository, atLeastOnce()).save(any(User.class));
     }
@@ -117,15 +117,15 @@ public class UserControllerTest
     public void processRegistration_ShouldRespondWith400HTTPStatusOnInvalidInput() throws Exception
     {
         // mock objects
-        UserForm userForm = new UserForm();
-        userForm.setEmail("invalid email").setPassword("123456789");
+        LoginForm loginForm = new LoginForm();
+        loginForm.setEmail("invalid email").setPassword("123456789");
 
         BindingResult bindingResult = mock(BindingResult.class);
         when(bindingResult.hasFieldErrors()).thenReturn(true);
         when(bindingResult.getFieldErrors()).thenReturn(Arrays.asList(new FieldError[]{new FieldError("", "", "")}));
 
         // test object
-        ResponseEntity response = controller.create(userForm, bindingResult);
+        ResponseEntity response = controller.create(loginForm, bindingResult);
 
         assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
         assertFalse(((List) response.getBody()).isEmpty());

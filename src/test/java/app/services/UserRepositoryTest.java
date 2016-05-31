@@ -59,7 +59,7 @@ public class UserRepositoryTest
     }
 
     @Test
-    public void findByEmail_ShouldReturnUser() throws Exception
+    public void findByEmail_should_return_user() throws Exception
     {
         when(em.createQuery(anyString())
                 .setParameter(anyString(), anyString())
@@ -67,11 +67,11 @@ public class UserRepositoryTest
         ).thenReturn(user);
 
         UserRepository repo = new UserRepository(em, identityRepository);
-        assertEquals(user, repo.findByEmail("someEmail@gmail.com"));
+        assertEquals(user, repo.findByIdentity(new Identity("email", "password")));
     }
 
     @Test
-    public void findByEmail_ShouldReturnNullIfNoUserFound() throws Exception
+    public void findByIdentity_should_return_null_if_nothing_found() throws Exception
     {
         when(em.createQuery(anyString())
                 .setParameter(anyString(), anyString())
@@ -79,7 +79,7 @@ public class UserRepositoryTest
         ).thenThrow(NoResultException.class);
 
 
-        assertNull(userRepository.findByEmail("non_existent_email@gmail.com"));
+        assertNull(userRepository.findByIdentity(new Identity("email", "password")));
     }
 
     @Test

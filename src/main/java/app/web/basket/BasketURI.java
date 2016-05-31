@@ -13,7 +13,7 @@ import java.util.UUID;
 @Component
 public class BasketURI
 {
-    public static final String BASKET_URI = "/api/users/{userId}/basket";
+    public static final String BASKET_URI = "/api/buyers/{buyerId}/basket";
     public static final String ITEMS_URI = BASKET_URI + "/items";
     public static final String ITEM_URI = ITEMS_URI + "/{itemId}";
 
@@ -34,12 +34,27 @@ public class BasketURI
     }
 
     /**
-     * @param userId != null
+     * @param buyerId != null
      * @return URL to the basket resource
      */
-    public String basketURL(UUID userId)
+    public String basketURL(UUID buyerId)
     {
-        return hostname + "/api/users/" + userId + "/basket";
+        return hostname + basketURI(buyerId);
+    }
+
+    public String basketItemURL(UUID buyerId, Long basketItemId)
+    {
+        return hostname + basketItemURI(buyerId, basketItemId);
+    }
+
+    public String basketURI(UUID buyerId)
+    {
+        return "/api/buyers/" + buyerId + "/basket";
+    }
+
+    public String basketItemURI(UUID buyerId, Long basketItemId)
+    {
+        return basketURI(buyerId) + "/items" + (basketItemId == null ? "" : "/" + basketItemId);
     }
 }
 

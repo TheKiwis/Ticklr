@@ -1,20 +1,23 @@
 package app.web.basket;
 
 import app.data.*;
-import app.services.BasketRepository;
+import app.services.BasketService;
 import app.services.TicketSetRepository;
 import app.services.BuyerRepository;
+import app.web.ResourceURI;
 import app.web.authorization.IdentityAuthorizer;
+import app.web.basket.responses.BasketResponse;
+import app.web.common.ErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.net.URI;
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -26,7 +29,7 @@ public class BasketController
 {
     public static final ResponseEntity NOT_FOUND = new ResponseEntity(HttpStatus.NOT_FOUND);
 
-    protected BasketRepository basketRepository;
+    protected BasketService basketService;
 
     protected BuyerRepository buyerRepository;
 
@@ -34,18 +37,18 @@ public class BasketController
 
     protected IdentityAuthorizer identityAuthorizer;
 
-    protected BasketURI basketURI;
+    protected ResourceURI resURI;
 
     @Autowired
-    public BasketController(BasketRepository basketRepository, BuyerRepository buyerRepository,
+    public BasketController(BasketService basketService, BuyerRepository buyerRepository,
                             TicketSetRepository ticketSetRepository, IdentityAuthorizer identityAuthorizer,
-                            BasketURI basketURI)
+                            ResourceURI resURI)
     {
-        this.basketRepository = basketRepository;
+        this.basketService = basketService;
         this.buyerRepository = buyerRepository;
         this.ticketSetRepository = ticketSetRepository;
         this.identityAuthorizer = identityAuthorizer;
-        this.basketURI = basketURI;
+        this.resURI = resURI;
     }
 
     @RequestMapping(value = BasketURI.BASKET_URI, method = RequestMethod.GET)
@@ -63,62 +66,49 @@ public class BasketController
         if (!identityAuthorizer.authorize(buyer.getIdentity()))
             return new ResponseEntity(HttpStatus.FORBIDDEN);
 
-        basket = basketRepository.findByBuyerId(buyerId);
+        basket = basketService.findByBuyerId(buyerId);
 
         if (basket == null) {
-            basket = basketRepository.save(new Basket(buyer));
+            basket = basketService.save(new Basket(buyer));
         }
 
-        return new ResponseEntity(basket, status);
+        return new ResponseEntity(new BasketResponse(basket, resURI), status);
     }
 
 
+    /**
+     * Add new a item to the basket
+     */
     @RequestMapping(value = BasketURI.ITEMS_URI, method = RequestMethod.POST)
-    public ResponseEntity addItem(@PathVariable UUID buyerId, @Valid BasketItemForm basketItemForm, BindingResult bindingResult)
+    public ResponseEntity addItem(@PathVariable UUID buyerId, @Valid @RequestBody(required = false) BasketItemForm basketItemForm, BindingResult bindingResult)
     {
         Buyer buyer = buyerRepository.findById(buyerId);
-        if (buyer == null) {
-            return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        }
 
-        if (!identityAuthorizer.authorize(buyer.getIdentity())) return new ResponseEntity(HttpStatus.FORBIDDEN);
+        if (buyer == null)
+            return new ResponseEntity(HttpStatus.NOT_FOUND);
 
-        if (bindingResult.hasFieldErrors()) {
-            return new ResponseEntity(bindingResult.getFieldErrors(), HttpStatus.BAD_REQUEST);
-        }
+        if (!identityAuthorizer.authorize(buyer.getIdentity()))
+            return new ResponseEntity(HttpStatus.FORBIDDEN);
+
+        if (basketItemForm == null || bindingResult.hasFieldErrors())
+            return new ResponseEntity(new ErrorResponse(ErrorResponse.VALIDATION_ERROR), HttpStatus.BAD_REQUEST);
 
         TicketSet ticketSet = ticketSetRepository.findById(basketItemForm.getTicketSetId());
-
-        if (ticketSet == null) {
+        if (ticketSet == null)
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
-        }
 
+        Basket basket = basketService.findByBuyerId(buyerId);
 
-        HttpStatus status = HttpStatus.CREATED;
-
-        Basket basket = basketRepository.findByBuyerId(buyerId);
-
-        if (basket == null) { // if basket doesn't existed yet, then create new one
+        // if basket doesn't existed yet, then create new one
+        if (basket == null)
             basket = new Basket(buyer);
-        }
 
-        BasketItem item = basketRepository.findItemByBasketIdAndTicketSetId(basket.getId(), basketItemForm.getTicketSetId());
+        BasketItem item = basketService.addItemToBasket(basket, ticketSet, basketItemForm.getQuantity());
 
-        if (item != null) {
+        HttpHeaders headers = new HttpHeaders();
+        headers.setLocation(URI.create(resURI.getBasketURI().basketItemURL(buyerId, item.getId())));
 
-            item.setQuantity(item.getQuantity() + basketItemForm.getQuantity());
-
-            basketRepository.updateItem(item);
-        } else {
-
-            item = new BasketItem(basket, ticketSet, basketItemForm.getQuantity(), ticketSet.getPrice());
-
-            basket.addItem(item);
-
-            basketRepository.saveOrUpdate(basket);
-        }
-
-        return new ResponseEntity(status);
+        return new ResponseEntity(headers, HttpStatus.CREATED);
     }
 
     @RequestMapping(value = BasketURI.ITEM_URI, method = RequestMethod.DELETE)
@@ -132,14 +122,21 @@ public class BasketController
         if (!identityAuthorizer.authorize(buyer.getIdentity()))
             return new ResponseEntity(HttpStatus.FORBIDDEN);
 
-        Basket basket = basketRepository.findByBuyerId(buyerId);
+        Basket basket = basketService.findByBuyerId(buyerId);
 
-        BasketItem item = basketRepository.findItemById(itemId);
-
-        if (item == null || basket == null || !basket.getItems().contains(item))
+        if (basket == null)
             return NOT_FOUND;
 
-        basketRepository.deleteItem(item);
+        Optional<BasketItem> opt = basket.getItems().stream()
+                .filter(item -> item.getId().equals(itemId))
+                .findAny();
+
+        if (!opt.isPresent())
+            return NOT_FOUND;
+
+        BasketItem item = opt.get();
+
+        basketService.removeItem(basket, item);
 
         return new ResponseEntity(HttpStatus.OK);
     }
@@ -152,15 +149,16 @@ public class BasketController
         if (buyer == null)
             return NOT_FOUND;
 
-        if (!identityAuthorizer.authorize(buyer.getIdentity())) return new ResponseEntity(HttpStatus.FORBIDDEN);
+        if (!identityAuthorizer.authorize(buyer.getIdentity()))
+            return new ResponseEntity(HttpStatus.FORBIDDEN);
 
         if (bindingResult.hasFieldErrors()) {
             return new ResponseEntity(bindingResult.getFieldErrors(), HttpStatus.BAD_REQUEST);
         }
 
-        Basket basket = basketRepository.findByBuyerId(buyerId);
+        Basket basket = basketService.findByBuyerId(buyerId);
 
-        BasketItem basketItem = basketRepository.findItemById(itemId);
+        BasketItem basketItem = basketService.findItemById(itemId);
 
         if (basket == null || basketItem == null) {
             return NOT_FOUND;
@@ -168,7 +166,7 @@ public class BasketController
 
         basketItem.setQuantity(basketItemUpdateForm.getQuantity());
 
-        basketRepository.updateItem(basketItem);
+        basketService.updateItem(basketItem);
 
         return new ResponseEntity(HttpStatus.OK);
     }

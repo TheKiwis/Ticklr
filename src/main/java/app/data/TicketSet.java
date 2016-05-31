@@ -124,16 +124,13 @@ public class TicketSet
 
         TicketSet ticketSet = (TicketSet) o;
 
-        if (price != null ? !price.equals(ticketSet.price) : ticketSet.price != null) return false;
-        return title != null ? title.equals(ticketSet.title) : ticketSet.title == null;
+        return id != null ? id.equals(ticketSet.id) : ticketSet.id == null;
 
     }
 
     @Override
     public int hashCode()
     {
-        int result = price != null ? price.hashCode() : 0;
-        result = 31 * result + (title != null ? title.hashCode() : 0);
-        return result;
+        return id != null ? id.hashCode() : 0;
     }
 }

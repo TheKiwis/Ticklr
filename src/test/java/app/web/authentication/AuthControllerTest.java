@@ -1,7 +1,10 @@
 package app.web.authentication;
 
+import app.data.Identity;
+import app.data.User;
+import app.services.IdentityRepository;
 import app.services.UserRepository;
-import app.web.user.UserForm;
+import app.web.user.LoginForm;
 import app.web.user.UserURI;
 import org.junit.Before;
 import org.junit.Test;
@@ -12,7 +15,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.token.Token;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.UUID;
@@ -34,6 +36,9 @@ public class AuthControllerTest
     UserRepository userRepository;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    IdentityRepository identityRepository;
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     JwtHelper jwtHelper;
 
     AuthController controller;
@@ -44,7 +49,7 @@ public class AuthControllerTest
     @Before
     public void setup()
     {
-        controller = new AuthController(userRepository, jwtHelper, passwordEncoder, new UserURI("http://localhost"));
+        controller = new AuthController(identityRepository, userRepository, jwtHelper, passwordEncoder, new UserURI("http://localhost"));
     }
 
     @Test
@@ -53,18 +58,22 @@ public class AuthControllerTest
         // mock objects
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
 
+        Identity id = new Identity(UUID.randomUUID(), "user@example.com", "123456789");
+
+        when(identityRepository
+                .findByEmail(id.getEmail())).thenReturn(id);
+
+        User user = new User(id);
         when(userRepository
-                .findByEmail(anyString())
-                .getId()).thenReturn(UUID.randomUUID());
+                .findByIdentity(id)).thenReturn(user);
 
         Token token = mock(Token.class);
         when(jwtHelper.generateToken(any())).thenReturn(token);
 
-        UserForm form = mock(UserForm.class);
-        when(form.getEmail()).thenReturn("user@example.com");
+        LoginForm form = new LoginForm().setEmail(id.getEmail());
 
         // test object
-        ResponseEntity response = controller.requestAuthToken(form);
+        ResponseEntity response = controller.requestOrganiserToken(form);
 
         assertEquals(HttpStatus.OK, response.getStatusCode());
         assertEquals(token, response.getBody());
@@ -76,11 +85,11 @@ public class AuthControllerTest
         // mock objects
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
-        UserForm form = mock(UserForm.class);
+        LoginForm form = mock(LoginForm.class);
         when(form.getEmail()).thenReturn("user@example.com");
 
         // test Object
-        ResponseEntity response = controller.requestAuthToken(form);
+        ResponseEntity response = controller.requestOrganiserToken(form);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
     }
@@ -89,17 +98,16 @@ public class AuthControllerTest
     public void login_shouldReturnHttpStatusUnauthorizedStatusForNonExistentUser()
     {
         // mock objects
-        when(userRepository
+        when(identityRepository
                 .findByEmail(anyString())
         ).thenReturn(null);
 
-        UserForm form = mock(UserForm.class);
+        LoginForm form = mock(LoginForm.class);
         when(form.getEmail()).thenReturn("nonexistentuser@example.com");
 
         // test Object
-        ResponseEntity response = controller.requestAuthToken(form);
+        ResponseEntity response = controller.requestOrganiserToken(form);
 
         assertEquals(HttpStatus.UNAUTHORIZED, response.getStatusCode());
-
     }
 }

@@ -1,13 +1,22 @@
 package integration;
 
+import app.web.basket.BasketURI;
+import app.web.common.ErrorResponse;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
+import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
+import org.mockito.Matchers;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.UUID;
 
+import static org.hamcrest.CoreMatchers.startsWith;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -19,53 +28,83 @@ public class BasketIT extends CommonIntegrationTest
 {
     // authentication token
     private String authString;
+
     private UUID buyerOneId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
     private UUID buyerTwoId = UUID.fromString("20fea260-0f14-11e6-89ca-0002a5d5c51b");
 
-    private String basketUri(UUID buyerId)
-    {
-        return "/api/buyers/" + buyerId + "/basket";
-    }
-
-    private String basketItemUri(UUID buyerId, Long basketItemId)
-    {
-        return basketUri(buyerId) + "/items" + (basketItemId == null ? "" : "/" + basketItemId);
-    }
+    private BasketURI basketURI;
 
     @Before
-    public void login() throws Exception
+    public void setup() throws Exception
     {
+        basketURI = new BasketURI(hostname);
         authString = AuthenticationIT.getAuthTokenFor("buyer_with_basket@example.com", "123456789", mockMvc);
     }
 
-    @Test
-    public void shouldReturnBasket() throws Exception
+    private MockHttpServletRequestBuilder prepareRequest(MockHttpServletRequestBuilder request)
     {
-        mockMvc.perform(get(basketUri(buyerOneId)).header("Authorization", authString))
-                .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").isNotEmpty())
-                .andExpect(jsonPath("$.basketItems").isArray());
+        return request
+                .header("Authorization", authString)
+                .contentType("application/json");
     }
 
     @Test
-    public void shouldAddItemToBasket() throws Exception
+    public void happy_should_return_basket() throws Exception
     {
-        mockMvc.perform(post(basketItemUri(buyerOneId, null))
-                .header("Authorization", authString)
-                .param("quantity", "10")
-                .param("ticketSetId", "1"))
+        mockMvc.perform(prepareRequest(get(basketURI.basketURI(buyerOneId))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.href").isNotEmpty())
+                .andExpect(jsonPath("$.buyer").isMap())
+                .andExpect(jsonPath("$.buyer.href").isNotEmpty())
+                .andExpect(jsonPath("$.items").isMap())
+                .andExpect(jsonPath("$.items.href").isNotEmpty())
+                .andExpect(jsonPath("$.items.items").isArray());
+    }
+
+    //@Test
+    //public void happy_should_return_basket_items_collection() throws Exception
+    //{
+    //    mockMvc.perform(get(basketURI.basketItemURI(buyerOneId, null)).header("Authorization", authString))
+    //            .andExpect(status().isOk())
+    //            .andExpect(jsonPath("$.href").isNotEmpty())
+    //            .andExpect(jsonPath("$.items").isArray());
+    //}
+
+    private String getAddItemForm(Integer quantity, Long ticketSetId) throws JsonProcessingException
+    {
+        class AddItemForm
+        {
+            public Integer quantity;
+            public Long ticketSetId;
+
+            public AddItemForm(Integer quantity, Long ticketSetId)
+            {
+                this.quantity = quantity;
+                this.ticketSetId = ticketSetId;
+            }
+        }
+
+        ObjectMapper om = new ObjectMapper();
+        return om.writeValueAsString(new AddItemForm(quantity, ticketSetId));
+    }
+
+    @Test
+    public void happy_should_add_item_to_basket() throws Exception
+    {
+        mockMvc.perform(prepareRequest(post(basketURI.basketItemURI(buyerOneId, null)))
+                .content(getAddItemForm(10, 1l)))
+                .andExpect(header().string("Location", startsWith(basketURI.basketItemURL(buyerOneId, null))))
                 .andExpect(status().isCreated());
     }
 
     @Test
-    public void shouldIncrementBasketItemIfBasketItemWithTheSameTicketSetID() throws Exception
+    public void happy_should_increment_quantity_if_ticketSet_already_added() throws Exception
     {
         int quantity = (Integer) em.createQuery("SELECT i.quantity FROM BasketItem i WHERE i.id= :id").setParameter("id", 1l).getSingleResult();
         long count = (Long) em.createQuery("SELECT count(i) FROM BasketItem i").getSingleResult();
-        mockMvc.perform(post(basketItemUri(buyerOneId, null))
-                .header("Authorization", authString)
-                .param("quantity", "2")
-                .param("ticketSetId", "2"))
+
+        mockMvc.perform(prepareRequest(post(basketURI.basketItemURI(buyerOneId, null)))
+                .content(getAddItemForm(2, 2l)))
                 .andExpect(status().isCreated());
 
         assertEquals(quantity + 2, em.createQuery("SELECT i.quantity FROM BasketItem i WHERE i.id= :id").setParameter("id", 1l).getSingleResult());
@@ -73,31 +112,62 @@ public class BasketIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldValidateBasketItemForm() throws Exception
+    public void sad_should_return_HTTP_NOT_FOUND() throws Exception
     {
+        mockMvc.perform(prepareRequest(get(basketURI.basketURI(UUID.randomUUID()))))
+                .andExpect(status().isNotFound());
 
-        mockMvc.perform(post(basketItemUri(buyerOneId, null))
-                .header("Authorization", authString)
-                .param("quantity", "-2"))
+        mockMvc.perform(prepareRequest(post(basketURI.basketItemURI(UUID.randomUUID(), null))))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(prepareRequest(delete(basketURI.basketItemURI(UUID.randomUUID(), 999l))))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(prepareRequest(delete(basketURI.basketItemURI(buyerOneId, 999l))))
+                .andExpect(status().isNotFound());
+
+        // TODO put...
+    }
+
+    @Test
+    public void sad_should_not_delete_item_from_other_basket() throws Exception
+    {
+        assertEquals(1, (long) em.createQuery("SELECT COUNT(i) FROM BasketItem i WHERE i.id = :id").setParameter("id", 3l).getSingleResult());
+
+        mockMvc.perform(prepareRequest(delete(basketURI.basketItemURI(buyerOneId, 3l))))
+                .andExpect(status().isNotFound());
+
+        assertEquals(1, (long) em.createQuery("SELECT COUNT(i) FROM BasketItem i WHERE i.id = :id").setParameter("id", 3l).getSingleResult());
+    }
+
+    @Test
+    public void sad_should_validate_input_when_add_new_item() throws Exception
+    {
+        mockMvc.perform(prepareRequest(post(basketURI.basketItemURI(buyerOneId, null))))
+                .andExpect(jsonPath("$.errorCode").value(ErrorResponse.VALIDATION_ERROR))
                 .andExpect(status().isBadRequest());
-        mockMvc.perform(post(basketItemUri(buyerOneId, null))
-                .header("Authorization", authString)
-                .param("quantity", "-2")
-                .param("ticketSetId", "13"))
+
+        mockMvc.perform(prepareRequest(post(basketURI.basketItemURI(buyerOneId, null)))
+                .content(getAddItemForm(3, null)))
+                .andExpect(jsonPath("$.errorCode").value(ErrorResponse.VALIDATION_ERROR))
                 .andExpect(status().isBadRequest());
-        mockMvc.perform(post(basketItemUri(buyerOneId, null))
-                .header("Authorization", authString)
-                .param("ticketSetId", "12"))
+
+        mockMvc.perform(prepareRequest(post(basketURI.basketItemURI(buyerOneId, null)))
+                .content(getAddItemForm(-2, 13l)))
+                .andExpect(status().isBadRequest());
+
+        mockMvc.perform(prepareRequest(post(basketURI.basketItemURI(buyerOneId, null)))
+                .content(getAddItemForm(null, 12l)))
                 .andExpect(status().isBadRequest());
 
     }
 
     @Test
-    public void shouldDeleteItem() throws Exception
+    public void happy_should_delete_item() throws Exception
     {
         assertEquals(1, (long) em.createQuery("SELECT COUNT(i) FROM BasketItem i WHERE i.id = :id").setParameter("id", 1l).getSingleResult());
 
-        mockMvc.perform(delete(basketItemUri(buyerOneId, 1l))
+        mockMvc.perform(delete(basketURI.basketItemURI(buyerOneId, 1l))
                 .header("Authorization", authString))
                 .andExpect(status().isOk());
 
@@ -110,7 +180,7 @@ public class BasketIT extends CommonIntegrationTest
         assertEquals(1, (long) em.createQuery("SELECT COUNT(i) FROM BasketItem i WHERE i.id = :id").setParameter("id", 1l).getSingleResult());
 
 
-        mockMvc.perform(put(basketItemUri(buyerOneId, 1l))
+        mockMvc.perform(put(basketURI.basketItemURI(buyerOneId, 1l))
                 .header("Authorization", authString)
                 .param("quantity", "15"))
                 .andExpect(status().isOk());
@@ -120,15 +190,14 @@ public class BasketIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldValidateBasketItUpdateForm() throws Exception
+    public void shouldValidateBasketItemUpdateForm() throws Exception
     {
-
-        mockMvc.perform(post(basketItemUri(buyerOneId, null))
-                .header("Authorization", authString))
+        // TODO: this is not update... put
+        mockMvc.perform(prepareRequest(post(basketURI.basketItemURI(buyerOneId, null))))
                 .andExpect(status().isBadRequest());
-        mockMvc.perform(post(basketItemUri(buyerOneId, null))
-                .header("Authorization", authString)
-                .param("ticketSetId", "13"))
+
+        mockMvc.perform(prepareRequest(post(basketURI.basketItemURI(buyerOneId, null)))
+                .content(getAddItemForm(13, null)))
                 .andExpect(status().isBadRequest());
     }
 
@@ -138,19 +207,19 @@ public class BasketIT extends CommonIntegrationTest
         UUID anotherBuyerId = buyerTwoId;
         Long anotherBasketItemId = 456l;
 
-        mockMvc.perform(get(basketUri(anotherBuyerId))
+        mockMvc.perform(get(basketURI.basketURI(anotherBuyerId))
                 .header("Authorization", authString))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(post(basketItemUri(anotherBuyerId, null))
+        mockMvc.perform(post(basketURI.basketItemURI(anotherBuyerId, null))
                 .header("Authorization", authString))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(put(basketItemUri(anotherBuyerId, anotherBasketItemId))
+        mockMvc.perform(put(basketURI.basketItemURI(anotherBuyerId, anotherBasketItemId))
                 .header("Authorization", authString))
                 .andExpect(status().isForbidden());
 
-        mockMvc.perform(delete(basketItemUri(anotherBuyerId, anotherBasketItemId))
+        mockMvc.perform(delete(basketURI.basketItemURI(anotherBuyerId, anotherBasketItemId))
                 .header("Authorization", authString))
                 .andExpect(status().isForbidden());
     }
@@ -162,8 +231,8 @@ public class BasketIT extends CommonIntegrationTest
     @Test
     public void shouldLoadTestFixture() throws Exception
     {
-        //assertNotNull(em.createQuery("SELECT u FROM Buyer u WHERE u.id = :uuid").setParameter("uuid", buyerOneId).getSingleResult());
-        //assertNotNull(em.createQuery("SELECT u FROM Buyer u WHERE u.id = :uuid").setParameter("uuid", buyerOneId).getSingleResult());
+        assertNotNull(em.createQuery("SELECT u FROM Buyer u WHERE u.id = :uuid").setParameter("uuid", buyerOneId).getSingleResult());
+        assertNotNull(em.createQuery("SELECT u FROM Buyer u WHERE u.id = :uuid").setParameter("uuid", buyerOneId).getSingleResult());
         assertNotNull(em.createQuery("SELECT b FROM Basket b WHERE b.id = 456").getSingleResult());
     }
 

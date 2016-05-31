@@ -1,15 +1,13 @@
 package app.data;
 
 import org.hibernate.annotations.*;
+import org.springframework.util.Assert;
 
 import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Date;
+import java.util.*;
 
 /**
  * @author DucNguyenMinh
@@ -38,8 +36,9 @@ public class Basket
     @Generated(GenerationTime.ALWAYS)
     protected Date updatedTime;
 
-    @OneToMany(mappedBy = "basket", fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    protected Collection<BasketItem> items = new ArrayList<>();
+    //@OneToMany(mappedBy = "basket", fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
+    @OneToMany(mappedBy = "basket", fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
+    protected Set<BasketItem> items = new HashSet<>();
 
     protected Basket()
     {
@@ -75,6 +74,7 @@ public class Basket
 
     /**
      * @param item BasketItem to be added to this Basket
+     * @ensure true == #isInBasket(item)
      */
     public void addItem(BasketItem item)
     {
@@ -83,8 +83,40 @@ public class Basket
     }
 
     /**
+     * @param ticketSet
+     * @return if there is a basket item corresponding to the given ticket set
+     */
+    public boolean isInBasket(TicketSet ticketSet)
+    {
+        return items.stream().anyMatch(item -> item.getTicketSet().equals(ticketSet));
+    }
+
+    /**
+     * @param item
+     * @return if there is a item in this basket
+     */
+    public boolean isInBasket(BasketItem item)
+    {
+        return items.stream().anyMatch(i -> i.equals(item));
+    }
+
+    /**
+     * @param ticketSet
+     * @return the BasketItem object corresponding to the given ticket set, null if nothing found
+     * @require ticketSet != null
+     */
+    public BasketItem getItemFor(TicketSet ticketSet)
+    {
+        Assert.notNull(ticketSet);
+        Optional<BasketItem> optional = items.stream().filter(item -> item.getTicketSet().equals(ticketSet)).findFirst();
+
+        return optional.isPresent() ? optional.get() : null;
+    }
+
+    /**
      * @param item BasketItem to be removed from the Basket
      *             the first
+     * @ensure false == #isInBasket(item)
      */
     public void removeItem(BasketItem item)
     {

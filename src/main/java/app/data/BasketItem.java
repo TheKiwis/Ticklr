@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.GenerationTime;
+import org.springframework.util.Assert;
 
 import javax.persistence.*;
 import java.math.BigDecimal;
@@ -24,10 +25,12 @@ public class BasketItem
     private Long id;
 
     @ManyToOne
-    @JoinColumn(name = "basket_id", nullable = false)
+    //@JoinColumn(name = "basket_id", nullable = false)
+    @JoinColumn(name = "basket_id")
     protected Basket basket;
 
     @ManyToOne
+    //@JoinColumn(name = "ticket_set_id", nullable = false)
     @JoinColumn(name = "ticket_set_id")
     protected TicketSet ticketSet;
 
@@ -53,9 +56,19 @@ public class BasketItem
     {
     }
 
-    public BasketItem(Basket basket, TicketSet ticketSet, Integer quantity, BigDecimal unitPrice)
+    /**
+     * @param ticketSet
+     * @param quantity
+     * @param unitPrice
+     * @throws IllegalArgumentException if ticketSet == null || quantity < 0|| unitPrice == null || unitPrice.compareTo(BigDecimal.ZERO) < 0
+     */
+    public BasketItem(TicketSet ticketSet, int quantity, BigDecimal unitPrice)
     {
-        this.basket = basket;
+        Assert.notNull(ticketSet);
+        Assert.isTrue(quantity > 0);
+        Assert.notNull(unitPrice);
+        Assert.isTrue(unitPrice.compareTo(BigDecimal.ZERO) >= 0);
+
         this.ticketSet = ticketSet;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
@@ -134,16 +147,6 @@ public class BasketItem
     public BigDecimal getTotalPrice()
     {
         return unitPrice.multiply(new BigDecimal(quantity));
-    }
-
-    public Date getCreatedTime()
-    {
-        return createdTime;
-    }
-
-    public Date getUpdatedTime()
-    {
-        return updatedTime;
     }
 
     @Override

@@ -288,7 +288,8 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(status().isNoContent());
 
         TicketSet ticketSet = (TicketSet) em.createQuery("SELECT ts FROM TicketSet ts WHERE ts.id = " + sampleTicketSetId).getSingleResult();
-        assertEquals(new TicketSet("Updated title", new BigDecimal(30)), ticketSet);
+        assertEquals("Updated title", ticketSet.getTitle());
+        assertEquals(new BigDecimal(30), ticketSet.getPrice());
     }
 
     private String getTicketSetForm(String title, String price) throws JsonProcessingException

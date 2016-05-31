@@ -1,5 +1,6 @@
 package config.web;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.*;
@@ -31,7 +32,8 @@ public abstract class BaseWebConfig extends WebMvcConfigurerAdapter
                 .filter(converter -> converter instanceof MappingJackson2HttpMessageConverter)
                 .forEach(converter -> {
                     MappingJackson2HttpMessageConverter jacksonMapper = ((MappingJackson2HttpMessageConverter) converter);
-                    jacksonMapper.getObjectMapper().disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
+                    ObjectMapper om = jacksonMapper.getObjectMapper();
+                    om.disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS);
                 });
     }
 

@@ -11,6 +11,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.EntityManager;
+import javax.persistence.NoResultException;
 
 import java.util.UUID;
 
@@ -56,7 +57,7 @@ public class IdentityRepositoryTest
     }
 
     @Test
-    public void save_shouldMergeExistedIdentityUsingEntityManager()
+    public void save_should_merge_existed_Identity_using_EntityManager()
     {
         Identity id = new Identity(UUID.randomUUID(), "user@example.com", "password");
         when(em.merge(id)).thenReturn(id);
@@ -74,4 +75,29 @@ public class IdentityRepositoryTest
 
         assertEquals(mockIdentity, repo.findById(uuid));
     }
+
+    @Test
+    public void findByEmail_should_return_an_identity() throws Exception
+    {
+        Identity mockIdentity = mock(Identity.class);
+
+        when(em.createQuery(anyString())
+                .setParameter(anyString(), anyString())
+                .getSingleResult()
+        ).thenReturn(mockIdentity);
+
+        assertEquals(mockIdentity, repo.findByEmail("user@example.com"));
+    }
+
+    @Test
+    public void findByEmail_should_return_null_if_nothing_found() throws Exception
+    {
+        when(em.createQuery(anyString())
+                .setParameter(anyString(), anyString())
+                .getSingleResult()
+        ).thenThrow(NoResultException.class);
+
+        assertEquals(null, repo.findByEmail("user@example.com"));
+    }
+
 }

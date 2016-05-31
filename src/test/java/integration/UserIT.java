@@ -54,7 +54,7 @@ public class UserIT extends CommonIntegrationTest
 
     private String getUserURL(UUID id)
     {
-        return "/api/users" + (id == null ? "" : "/" + id);
+        return userURI.userURI(id);
     }
 
     @Test

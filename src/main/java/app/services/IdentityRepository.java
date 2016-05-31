@@ -8,9 +8,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import javax.persistence.PersistenceException;
+import javax.persistence.*;
 import java.util.UUID;
 
 /**
@@ -61,10 +59,27 @@ public class IdentityRepository
     /**
      * @param uuid
      * @return the identity that whose id matches the given uuid
-     *         null if no identity is found
+     * null if no identity is found
      */
     public Identity findById(UUID uuid)
     {
         return em.find(Identity.class, uuid);
+    }
+
+    /**
+     * @param email email corresponds to the identity
+     * @return Identity of the user with the given email
+     */
+    public Identity findByEmail(String email)
+    {
+        Query query = em.createQuery("SELECT i FROM Identity i WHERE i.email=:email").setParameter("email", email);
+
+        Identity identity = null;
+        try {
+            identity = (Identity) query.getSingleResult();
+        } catch (NoResultException e) {
+        }
+
+        return identity;
     }
 }

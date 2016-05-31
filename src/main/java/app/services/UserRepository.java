@@ -51,14 +51,14 @@ public class UserRepository
 
 
     /**
-     * Finds an user by the given email
+     * Finds an user by the given identity
      *
-     * @param email search for by given email
-     * @return null if no user with the given email found
+     * @param id
+     * @return
      */
-    public User findByEmail(String email)
+    public User findByIdentity(Identity id)
     {
-        Query query = em.createQuery("SELECT u FROM User u WHERE u.identity.email=:email").setParameter("email", email);
+        Query query = em.createQuery("SELECT u FROM User u WHERE u.identity = :identity").setParameter("identity", id);
 
         User user = null;
         try {

@@ -1,11 +1,12 @@
 package app.web.authentication;
 
+import app.data.Identity;
 import app.data.User;
+import app.services.IdentityRepository;
 import app.services.UserRepository;
-import app.web.user.UserForm;
+import app.web.user.LoginForm;
 import app.web.user.UserURI;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,7 +18,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
-import java.util.UUID;
 
 /**
  * @author ngnmhieu
@@ -26,23 +26,28 @@ import java.util.UUID;
 @RestController
 public class AuthController
 {
+    public static final ResponseEntity UNAUTHORIZED = new ResponseEntity(HttpStatus.UNAUTHORIZED);
     private PasswordEncoder passwordEncoder;
 
-    private UserRepository repo;
+    private UserRepository userRepo;
+
+    private IdentityRepository identityRepo;
 
     private UserURI userURI;
 
     private JwtHelper jwtHelper;
 
     /**
-     * @param repo      fetches and saves User object
-     * @param jwtHelper Jwt Authentication helper object
+     * @param identityRepo
+     * @param userRepo     fetches and saves User object
+     * @param jwtHelper    Jwt Authentication helper object
      * @param userURI
      */
     @Autowired
-    public AuthController(UserRepository repo, JwtHelper jwtHelper, PasswordEncoder passwordEncoder, UserURI userURI)
+    public AuthController(IdentityRepository identityRepo, UserRepository userRepo, JwtHelper jwtHelper, PasswordEncoder passwordEncoder, UserURI userURI)
     {
-        this.repo = repo;
+        this.userRepo = userRepo;
+        this.identityRepo = identityRepo;
         this.jwtHelper = jwtHelper;
         this.userURI = userURI;
         this.passwordEncoder = passwordEncoder;
@@ -56,17 +61,25 @@ public class AuthController
      * @return
      */
     @RequestMapping(value = AuthURI.AUTH_URI, method = RequestMethod.POST)
-    public ResponseEntity requestAuthToken(@RequestBody UserForm form)
+    public ResponseEntity requestOrganiserToken(@RequestBody LoginForm form)
     {
-        User user = repo.findByEmail(form.getEmail());
+        Identity id = identityRepo.findByEmail(form.getEmail());
 
-        if (user != null && passwordEncoder.matches(form.getPassword(), user.getIdentity().getPassword())) {
-            Token token = jwtHelper.generateToken(user.getIdentity());
-            HttpHeaders headers = new HttpHeaders();
-            headers.setLocation(URI.create(userURI.userURL(user.getId())));
-            return new ResponseEntity(token, headers, HttpStatus.OK);
-        }
+        if (id == null)
+            return UNAUTHORIZED;
 
-        return new ResponseEntity(HttpStatus.UNAUTHORIZED);
+        if (!passwordEncoder.matches(form.getPassword(), id.getPassword()))
+            return UNAUTHORIZED;
+
+        Token token = jwtHelper.generateToken(id);
+
+        HttpHeaders headers = new HttpHeaders();
+
+        // we assume that there always exists a user corresponding to an identity,
+        // ensure that a user is created when an identity is created
+        User user = userRepo.findByIdentity(id);
+        headers.setLocation(URI.create(userURI.userURL(user.getId())));
+
+        return new ResponseEntity(token, headers, HttpStatus.OK);
     }
 }

@@ -33,9 +33,9 @@ traits:
             application/json:
               example: |
                 {
-                  "key": "eyJ0eXQiLCJhbGcAiO1IUzI1iJKViOiJNiJ9.eyJlldUBnbWFpbC5zdWIiOiJuZ25taGjb20iLCJleHAiOjE0NjE4ODA4MDB9.ZmddFiD4vB9p0cWL6ahbaqLbLLGTXTjbJwH5QmbS2YL",
-                  "keyCreationTime": 1461311670,
-                  "extendedInformation": ""
+                  "token": "eyJ0eXQiLCJhbGcAiO1IUzI1iJKViOiJNiJ9.eyJlldUBnbWFpbC5zdWIiOiJuZ25taGjb20iLCJleHAiOjE0NjE4ODA4MDB9.ZmddFiD4vB9p0cWL6ahbaqLbLLGTXTjbJwH5QmbS2YL",
+                  "organiser": "http://localhost/api/users/27a4563a45ab4a7aacd15af9",
+                  "buyer": "http://localhost/api/buyers/4935a156cd427a4aa75afaab"
                 }
         401:
           description: User cannot be authenticated due to incorrect credentials, please try again.
@@ -321,7 +321,7 @@ traits:
     /basket:
       is: [authorized, has_resource_not_found]
       get:   
-        description: Returns the basket belonging to a buyer.
+        description: Returns the basket belonging to a buyer. [FINISHED]
         responses:
           200:
             body:
@@ -329,7 +329,7 @@ traits:
                 example: |
                   {
                     "href": "http://example.com/api/buyers/103d44a8-1240-49e9-935d-7a35e5ea6819/basket",
-                    "user": {
+                    "buyer": {
                       "href": "http://example.com/api/buyers/103d44a8-1240-49e9-935d-7a35e5ea6819"
                     },
                     "items": {
@@ -398,7 +398,7 @@ traits:
               example: |
                 {
                   "quantity": 20,
-                  "ticketSetId": 25
+                  "ticketSetId": "25"
                 }
           responses:
             201:
@@ -412,7 +412,7 @@ traits:
                   - Validation errors
                   - Ticket set is not available for purchase (out of stock)
 
-                Error codes: [VALIDATION_ERROR, TICKET_SET_OUT_OF_STOCK]
+                Error codes: [VALIDATION_ERROR, TICKET_SET_OUT_OF_STOCK] # TODO TICKET_SET_OUT_OF_STOCK
                 
               body:
                 application/json:
@@ -468,6 +468,10 @@ traits:
             responses:
               204:
                 description: Basket item has been successfully deleted.
+
+          /refresh:
+            put:
+              description: Refresh the basket item to be consistent with the ticket set (same unit price). This request should be executed with empty body.
 
 /auth:
   /request-token:
