@@ -17,7 +17,7 @@ import java.util.UUID;
  */
 @Repository
 @Transactional
-public class IdentityRepository
+public class IdentityService
 {
     @PersistenceContext
     private EntityManager em;
@@ -25,13 +25,13 @@ public class IdentityRepository
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    public IdentityRepository(EntityManager em, PasswordEncoder passwordEncoder)
+    public IdentityService(EntityManager em, PasswordEncoder passwordEncoder)
     {
         this.em = em;
         this.passwordEncoder = passwordEncoder;
     }
 
-    private IdentityRepository()
+    private IdentityService()
     {
     }
 

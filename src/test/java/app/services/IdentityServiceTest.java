@@ -7,7 +7,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.persistence.EntityManager;
@@ -23,12 +22,12 @@ import static org.mockito.Mockito.*;
  * @since 21.05.16
  */
 @RunWith(MockitoJUnitRunner.class)
-public class IdentityRepositoryTest
+public class IdentityServiceTest
 {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private EntityManager em;
 
-    private IdentityRepository repo;
+    private IdentityService repo;
 
     @Mock
     private PasswordEncoder passwordEncoder;
@@ -36,7 +35,7 @@ public class IdentityRepositoryTest
     @Before
     public void setUp() throws Exception
     {
-        repo = new IdentityRepository(em, passwordEncoder);
+        repo = new IdentityService(em, passwordEncoder);
     }
 
     @Test

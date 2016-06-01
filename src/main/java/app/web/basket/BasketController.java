@@ -3,7 +3,7 @@ package app.web.basket;
 import app.data.*;
 import app.services.BasketService;
 import app.services.TicketSetRepository;
-import app.services.BuyerRepository;
+import app.services.BuyerService;
 import app.web.ResourceURI;
 import app.web.authorization.IdentityAuthorizer;
 import app.web.basket.responses.BasketItemResponse;
@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import java.net.URI;
-import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -34,7 +33,7 @@ public class BasketController
 
     protected BasketService basketService;
 
-    protected BuyerRepository buyerRepository;
+    protected BuyerService buyerService;
 
     protected TicketSetRepository ticketSetRepository;
 
@@ -43,25 +42,25 @@ public class BasketController
     protected ResourceURI resURI;
 
     @Autowired
-    public BasketController(BasketService basketService, BuyerRepository buyerRepository,
+    public BasketController(BasketService basketService, BuyerService buyerService,
                             TicketSetRepository ticketSetRepository, IdentityAuthorizer identityAuthorizer,
                             ResourceURI resURI)
     {
         this.basketService = basketService;
-        this.buyerRepository = buyerRepository;
+        this.buyerService = buyerService;
         this.ticketSetRepository = ticketSetRepository;
         this.identityAuthorizer = identityAuthorizer;
         this.resURI = resURI;
     }
 
     @RequestMapping(value = BasketURI.BASKET_URI, method = RequestMethod.GET)
-    public ResponseEntity show(@PathVariable UUID buyerId)
+    public ResponseEntity showBasket(@PathVariable UUID buyerId)
     {
         Basket basket = null;
 
         HttpStatus status = HttpStatus.OK;
 
-        Buyer buyer = buyerRepository.findById(buyerId);
+        Buyer buyer = buyerService.findById(buyerId);
 
         if (buyer == null)
             return NOT_FOUND;
@@ -72,7 +71,7 @@ public class BasketController
         basket = buyer.getBasket();
 
         if (basket == null) {
-            basket = basketService.save(new Basket(buyer));
+            basket = basketService.saveBasket(new Basket(buyer));
         }
 
         return new ResponseEntity(new BasketResponse(basket, resURI), status);
@@ -85,7 +84,7 @@ public class BasketController
     @RequestMapping(value = BasketURI.ITEMS_URI, method = RequestMethod.POST)
     public ResponseEntity addItem(@PathVariable UUID buyerId, @Valid @RequestBody(required = false) BasketItemForm basketItemForm, BindingResult bindingResult)
     {
-        Buyer buyer = buyerRepository.findById(buyerId);
+        Buyer buyer = buyerService.findById(buyerId);
 
         if (buyer == null)
             return new ResponseEntity(HttpStatus.NOT_FOUND);
@@ -117,7 +116,7 @@ public class BasketController
     @RequestMapping(value = BasketURI.ITEM_URI, method = RequestMethod.GET)
     public ResponseEntity showItem(@PathVariable UUID buyerId, @PathVariable Long itemId)
     {
-        Buyer buyer = buyerRepository.findById(buyerId);
+        Buyer buyer = buyerService.findById(buyerId);
 
         if (buyer == null)
             return NOT_FOUND;
@@ -144,7 +143,7 @@ public class BasketController
     @RequestMapping(value = BasketURI.ITEM_URI, method = RequestMethod.DELETE)
     public ResponseEntity deleteItem(@PathVariable UUID buyerId, @PathVariable Long itemId)
     {
-        Buyer buyer = buyerRepository.findById(buyerId);
+        Buyer buyer = buyerService.findById(buyerId);
 
         if (buyer == null)
             return NOT_FOUND;
@@ -174,7 +173,7 @@ public class BasketController
                                      @Valid @RequestBody(required = false) BasketItemUpdateForm basketItemUpdateForm,
                                      BindingResult bindingResult)
     {
-        Buyer buyer = buyerRepository.findById(buyerId);
+        Buyer buyer = buyerService.findById(buyerId);
 
         if (buyer == null)
             return NOT_FOUND;

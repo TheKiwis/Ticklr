@@ -152,7 +152,7 @@ public class BasketIT extends CommonIntegrationTest
     }
 
     @Test
-    public void sad_should_return_HTTP_NOT_FOUND() throws Exception
+    public void sad_should_return_HTTP_NotFound() throws Exception
     {
         mockMvc.perform(prepareRequest(get(basketURI.basketURI(UUID.randomUUID()))))
                 .andExpect(status().isNotFound());
@@ -227,7 +227,7 @@ public class BasketIT extends CommonIntegrationTest
     }
 
     @Test
-    public void sad_should_return_HTTP_FORBIDDEN() throws Exception
+    public void sad_should_return_HTTP_Forbidden() throws Exception
     {
         UUID anotherBuyerId = buyerTwoId;
         Long anotherBasketItemId = 1l;

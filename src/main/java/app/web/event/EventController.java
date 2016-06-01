@@ -4,7 +4,7 @@ import app.data.*;
 import app.data.validation.EventValidator;
 import app.services.EventRepository;
 import app.services.TicketSetRepository;
-import app.services.UserRepository;
+import app.services.UserService;
 import app.web.authorization.IdentityAuthorizer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -31,7 +31,7 @@ public class EventController
 
     private EventRepository eventRepository;
 
-    private UserRepository userRepository;
+    private UserService userService;
 
     private EventValidator validator;
 
@@ -41,19 +41,19 @@ public class EventController
 
     /**
      * @param eventRepository     manages event entities
-     * @param userRepository      manages user entities
+     * @param userService      manages user entities
      * @param ticketSetRepository manages ticketset entities
      * @param validator           validates event input
      * @param identityAuthorizer
      * @param eventURI
      */
     @Autowired
-    public EventController(EventRepository eventRepository, UserRepository userRepository,
+    public EventController(EventRepository eventRepository, UserService userService,
                            TicketSetRepository ticketSetRepository, EventValidator validator,
                            IdentityAuthorizer identityAuthorizer, EventURI eventURI)
     {
         this.eventRepository = eventRepository;
-        this.userRepository = userRepository;
+        this.userService = userService;
         this.ticketSetRepository = ticketSetRepository;
         this.validator = validator;
         this.identityAuthorizer = identityAuthorizer;
@@ -66,7 +66,7 @@ public class EventController
     @RequestMapping(value = EventURI.EVENTS_URI, method = RequestMethod.GET)
     public ResponseEntity getEvents(@PathVariable UUID userId)
     {
-        User user = userRepository.findById(userId);
+        User user = userService.findById(userId);
 
         if (user == null)
             return NOT_FOUND;
@@ -90,7 +90,7 @@ public class EventController
     @RequestMapping(value = EventURI.EVENTS_URI, method = RequestMethod.POST)
     public ResponseEntity createEvent(@PathVariable UUID userId, @Valid @RequestBody(required = false) Event requestEvent, BindingResult bindingResult)
     {
-        User user = userRepository.findById(userId);
+        User user = userService.findById(userId);
 
         if (user == null)
             return NOT_FOUND;
@@ -169,7 +169,7 @@ public class EventController
     @RequestMapping(value = EventURI.EVENT_URI, method = RequestMethod.GET)
     public ResponseEntity showEvent(@PathVariable UUID userId, @PathVariable Long eventId)
     {
-        User user = userRepository.findById(userId);
+        User user = userService.findById(userId);
 
         if (user == null)
             return NOT_FOUND;
@@ -188,7 +188,7 @@ public class EventController
     @RequestMapping(value = EventURI.EVENT_URI, method = RequestMethod.DELETE)
     public ResponseEntity cancelEvent(@PathVariable UUID userId, @PathVariable Long eventId)
     {
-        User user = userRepository.findById(userId);
+        User user = userService.findById(userId);
 
         if (user == null)
             return NOT_FOUND;
@@ -212,7 +212,7 @@ public class EventController
     @RequestMapping(value = EventURI.TICKET_SETS_URI, method = RequestMethod.POST)
     public ResponseEntity addTicketSet(@PathVariable UUID userId, @PathVariable Long eventId, @RequestBody(required = false) @Valid TicketSet ticketSet, BindingResult bindingResult)
     {
-        User user = userRepository.findById(userId);
+        User user = userService.findById(userId);
 
         if (user == null)
             return NOT_FOUND;

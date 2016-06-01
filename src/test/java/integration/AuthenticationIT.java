@@ -2,6 +2,9 @@ package integration;
 
 import app.data.User;
 import app.web.authentication.JwtHelper;
+import app.web.buyer.BuyerURI;
+import app.web.common.HrefResponse;
+import app.web.user.UserResponse;
 import app.web.user.UserURI;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -41,6 +44,7 @@ public class AuthenticationIT extends CommonIntegrationTest
     private static final String AUTH_URI = "/api/auth/request-token";
 
     private UUID userId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
+    private UUID buyerId = UUID.fromString("49fa7f2a-2799-11e6-b67b-9e71128cae77");
 
     private User user;
 
@@ -48,21 +52,25 @@ public class AuthenticationIT extends CommonIntegrationTest
 
     private UserURI userURI;
 
+    private BuyerURI buyerURI;
+
     @Before
     @Override
     public void setUp() throws Exception
     {
         super.setUp();
         userURI = new UserURI(hostname);
+        buyerURI = new BuyerURI(hostname);
         jwt = new JwtHelper(authSecret);
         user = (User) em.createQuery("SELECT u FROM User u WHERE u.identity.email = 'user@example.com'").getSingleResult();
     }
 
     // For the purpose of mapping json response to object - see getAuthTokenFor()
-    private static class AuthToken {
-        public String key;
-        public Integer keyCreationTime;
-        public String extendedInformation;
+    private static class AuthToken
+    {
+        public String token;
+        public HrefResponse user;
+        public HrefResponse buyer;
     }
 
     public static String getAuthTokenFor(String email, String password, MockMvc mockMvc) throws Exception
@@ -87,7 +95,7 @@ public class AuthenticationIT extends CommonIntegrationTest
 
         AuthToken token = new ObjectMapper().readValue(result.getResponse().getContentAsString(), AuthToken.class);
 
-        return "Bearer " + token.key;
+        return "Bearer " + token.token;
     }
 
     @Test
@@ -97,14 +105,13 @@ public class AuthenticationIT extends CommonIntegrationTest
 
         String jwtToken = jwt.generateToken(user.getIdentity()).getKey();
 
-        String userURL = userURI.userURL(UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b"));
-
         mockMvc.perform(post(AUTH_URI)
                 .contentType("application/json")
                 .content(getAuthBody(email, "123456789")))
-                .andExpect(header().string("Location", containsString(userURL)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.key").value(jwtToken));
+                .andExpect(jsonPath("$.token").value(jwtToken))
+                .andExpect(jsonPath("$.user.href").value(containsString(userURI.userURI(userId))))
+                .andExpect(jsonPath("$.buyer.href").value(containsString(buyerURI.buyerURI(buyerId))));
     }
 
     @Test

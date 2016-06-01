@@ -4,7 +4,7 @@ import app.data.*;
 import app.data.validation.EventValidator;
 import app.services.EventRepository;
 import app.services.TicketSetRepository;
-import app.services.UserRepository;
+import app.services.UserService;
 import app.web.authorization.IdentityAuthorizer;
 import org.junit.Before;
 import org.junit.Test;
@@ -39,7 +39,7 @@ public class EventControllerTest
     TicketSetRepository ticketSetRepository;
 
     @Mock
-    UserRepository userRepository;
+    UserService userService;
 
     @Mock
     BindingResult bindingResult;
@@ -65,7 +65,7 @@ public class EventControllerTest
     {
         // always authorized
         when(identityAuthorizer.authorize(any())).thenReturn(true);
-        controller = new EventController(eventRepository, userRepository, ticketSetRepository, validator, identityAuthorizer, new EventURI("http://localhost"));
+        controller = new EventController(eventRepository, userService, ticketSetRepository, validator, identityAuthorizer, new EventURI("http://localhost"));
 
         // mockEvent belongs to User with userId
         when(mockEvent.getUser().getId()).thenReturn(userId);
@@ -77,7 +77,7 @@ public class EventControllerTest
     public void createEvent_shouldReturnHttpStatusCreated() throws Exception
     {
         // mocks
-        when(userRepository.findById(userId)).thenReturn(mockUser);
+        when(userService.findById(userId)).thenReturn(mockUser);
         when(eventRepository.saveOrUpdate(any())).thenReturn(mockEvent);
 
         List fieldErrors = mock(ArrayList.class);
@@ -94,7 +94,7 @@ public class EventControllerTest
     public void createEvent_shouldCreateEventViaEventRepository() throws Exception
     {
         // mocks
-        when(userRepository.findById(userId)).thenReturn(mockUser);
+        when(userService.findById(userId)).thenReturn(mockUser);
         when(eventRepository.saveOrUpdate(any())).thenReturn(mockEvent);
 
         // test object
@@ -108,7 +108,7 @@ public class EventControllerTest
         // mocks
         when(bindingResult.hasErrors()).thenReturn(true);
         when(bindingResult.hasFieldErrors()).thenReturn(true);
-        when(userRepository.findById(userId)).thenReturn(mockUser);
+        when(userService.findById(userId)).thenReturn(mockUser);
 
         // test object
         ResponseEntity response = controller.createEvent(userId, mockEvent, bindingResult);
@@ -118,7 +118,7 @@ public class EventControllerTest
     @Test
     public void createEvent_shouldReturnHttpStatusNotFoundIfUserNotFound() throws Exception
     {
-        when(userRepository.findById(userId)).thenReturn(null);
+        when(userService.findById(userId)).thenReturn(null);
 
         ResponseEntity response = controller.createEvent(userId, mockEvent, bindingResult);
 
@@ -128,7 +128,7 @@ public class EventControllerTest
     @Test
     public void showEvent_shouldReturnHttpStatusNotFoundIfUserNotFound() throws Exception
     {
-        when(userRepository.findById(userId)).thenReturn(null);
+        when(userService.findById(userId)).thenReturn(null);
 
         ResponseEntity response = controller.showEvent(userId, eventId);
 
@@ -138,7 +138,7 @@ public class EventControllerTest
     @Test
     public void showEvent_shouldReturnHttpStatusOkWithEventInfo() throws Exception
     {
-        when(userRepository.findById(userId)).thenReturn(mockUser);
+        when(userService.findById(userId)).thenReturn(mockUser);
         when(eventRepository.findById(eventId)).thenReturn(mockEvent);
         when(mockEvent.getId()).thenReturn(1l);
 
@@ -151,7 +151,7 @@ public class EventControllerTest
     @Test
     public void showEvent_shouldReturnHttpStatusNotFound() throws Exception
     {
-        when(userRepository.findById(userId)).thenReturn(mockUser);
+        when(userService.findById(userId)).thenReturn(mockUser);
         when(eventRepository.findById(eventId)).thenReturn(null);
 
         ResponseEntity response = controller.showEvent(userId, eventId);
@@ -164,7 +164,7 @@ public class EventControllerTest
     {
         TicketSet ticketSet = new TicketSet("Sample Ticket-set", new BigDecimal(25.00));
 
-        when(userRepository.findById(userId)).thenReturn(mockUser);
+        when(userService.findById(userId)).thenReturn(mockUser);
         when(eventRepository.findById(eventId)).thenReturn(mockEvent);
 
         ResponseEntity response = controller.addTicketSet(userId, eventId, ticketSet, bindingResult);
@@ -179,7 +179,7 @@ public class EventControllerTest
     {
         TicketSet ticketSet = new TicketSet("Sample Ticket-set", new BigDecimal(25.00));
 
-        when(userRepository.findById(userId)).thenReturn(mockUser);
+        when(userService.findById(userId)).thenReturn(mockUser);
         when(eventRepository.findById(eventId)).thenReturn(null);
 
         ResponseEntity response = controller.addTicketSet(userId, eventId, ticketSet, bindingResult);

@@ -1,6 +1,6 @@
 <dataset>
     <identities id="uuid'6b7690a0-1f81-11e6-b6ba-3e1d05defe78'" email="event_organiser@example.com" password="$2a$10$7DiTrG0atup/drERomar.eg4N0yVhRDvd7VHmAGKpxZP.XTzwCq16"/>
-    <buyers id="uuid'6eab0882-0f0e-11e6-749f-000c2a5d551b'" identity_id="uuid'8dd43440-1f81-11e6-b6ba-3e1d05defe78'"/>
+    <buyers id="uuid'6eab0882-0f0e-11e6-749f-000c2a5d551b'" identity_id="uuid'6b7690a0-1f81-11e6-b6ba-3e1d05defe78'"/>
     <users id="uuid'9207df40-0f18-11e6-874c-0002a5d5c51b'" identity_id="uuid'6b7690a0-1f81-11e6-b6ba-3e1d05defe78'"/>
         <events id="1" title="Sample Event" description="Pool Party" start_time="2015-09-15 00:00:00" end_time="2015-09-15 00:00:00" canceled="1" public="1" user_id="uuid'9207df40-0f18-11e6-874c-0002a5d5c51b'"/>
             <ticket_sets id="2" price="30.00" title="Couple ticket" event_id="1"/>

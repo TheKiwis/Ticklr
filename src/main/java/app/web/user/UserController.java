@@ -1,7 +1,12 @@
 package app.web.user;
 
+import app.data.Buyer;
+import app.data.Identity;
 import app.data.User;
-import app.services.UserRepository;
+import app.services.BuyerService;
+import app.services.IdentityService;
+import app.services.UserService;
+import app.web.ResourceURI;
 import app.web.authorization.IdentityAuthorizer;
 import app.web.basket.BasketURI;
 import app.web.event.EventURI;
@@ -9,7 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,20 +40,29 @@ public class UserController
 
     private UserURI userURI;
 
-    private UserRepository repo;
+    private UserService userService;
+
+    private BuyerService buyerService;
+
+    private IdentityService identityService;
+
+    private ResourceURI resURI;
 
     /**
-     * @param repo fetches and saves User object
+     * @param userService fetches and saves User object
      */
     @Autowired
-    public UserController(UserRepository repo, UserURI userURI, EventURI eventURI,
-                          BasketURI basketURI, IdentityAuthorizer identityAuthorizer)
+    public UserController(UserService userService, BuyerService buyerService, IdentityService identityService,
+                          ResourceURI resURI, IdentityAuthorizer identityAuthorizer)
     {
-        this.repo = repo;
-        this.userURI = userURI;
-        this.eventURI = eventURI;
-        this.basketURI = basketURI;
+        this.userService = userService;
+        this.resURI = resURI;
+        this.userURI = resURI.getUserURI();
+        this.eventURI = resURI.getEventURI();
+        this.basketURI = resURI.getBasketURI();
         this.identityAuthorizer = identityAuthorizer;
+        this.buyerService = buyerService;
+        this.identityService = identityService;
     }
 
     /**
@@ -59,7 +72,7 @@ public class UserController
     @RequestMapping(value = UserURI.USER_URI, method = RequestMethod.GET)
     public ResponseEntity show(@PathVariable UUID userId)
     {
-        User user = repo.findById(userId);
+        User user = userService.findById(userId);
 
         if (user == null)
             return new ResponseEntity(HttpStatus.NOT_FOUND);
@@ -73,37 +86,22 @@ public class UserController
     /**
      * Creates a user
      *
-     * @param loginForm      contains registration information (e.g. email and password)
+     * @param loginForm     contains registration information (e.g. email and password)
      * @param bindingResult validation information
      */
     @RequestMapping(value = UserURI.USERS_URI, method = RequestMethod.POST)
     public ResponseEntity create(@RequestBody @Valid LoginForm loginForm, BindingResult bindingResult)
     {
-        HttpHeaders headers = new HttpHeaders();
-        HttpStatus status;
+        if (bindingResult.hasFieldErrors())
+            return new ResponseEntity(bindingResult.getFieldErrors(), HttpStatus.BAD_REQUEST);
 
-        if (!bindingResult.hasFieldErrors()) {
+        if (identityService.findByEmail(loginForm.getEmail()) != null)
+            return new ResponseEntity(HttpStatus.CONFLICT);
 
-            status = HttpStatus.CREATED;
+        Identity id = identityService.save(loginForm.getIdentity());
+        userService.createWithIdentity(id);
+        buyerService.createWithIdentity(id);
 
-            try {
-                User user = repo.save(loginForm.getUser());
-                headers.setLocation(URI.create(userURI.userURL(user.getId())));
-            } catch (PersistenceException e) {
-                status = HttpStatus.CONFLICT; // duplicated email found
-            }
-
-        } else {
-            status = HttpStatus.BAD_REQUEST;
-        }
-
-        return new ResponseEntity(bindingResult.getFieldErrors(), headers, status);
-    }
-
-    @ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity handleHttpMessageNotReadableException(HttpMessageNotReadableException ex)
-    {
-        // todo use logger to log ex.getMessage()
-        return new ResponseEntity("{\"message\": \"The request sent by the client was syntactically incorrect.\"}", HttpStatus.BAD_REQUEST);
+        return new ResponseEntity(new RegistrationResponse(resURI), HttpStatus.CREATED);
     }
 }

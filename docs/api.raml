@@ -34,8 +34,12 @@ traits:
               example: |
                 {
                   "token": "eyJ0eXQiLCJhbGcAiO1IUzI1iJKViOiJNiJ9.eyJlldUBnbWFpbC5zdWIiOiJuZ25taGjb20iLCJleHAiOjE0NjE4ODA4MDB9.ZmddFiD4vB9p0cWL6ahbaqLbLLGTXTjbJwH5QmbS2YL",
-                  "organiser": "http://localhost/api/users/27a4563a45ab4a7aacd15af9",
-                  "buyer": "http://localhost/api/buyers/4935a156cd427a4aa75afaab"
+                  "user": {
+                    "href": "http://localhost/api/users/27a4563a45ab4a7aacd15af9"
+                  },
+                  "buyer": {
+                    "href": "http://localhost/api/buyers/4935a156cd427a4aa75afaab"
+                  }
                 }
         401:
           description: User cannot be authenticated due to incorrect credentials, please try again.
@@ -74,6 +78,15 @@ traits:
           Location:
             description: Location of the newly created user
             example: "Location: http://localhost/api/users/27a4563a45ab4a7aacd15af9"
+        body:
+          application/json:
+            example: |
+              {
+                "auth": {
+                  "href": "http://localhost/api/auth/request-token"
+                }
+              }
+
       409:
         description: There is a conflict due to duplicated email.
 
@@ -470,8 +483,9 @@ traits:
                 description: Basket item has been successfully deleted.
 
           /refresh:
+            # TODO
             put:
-              description: Refresh the basket item to be consistent with the ticket set (same unit price). This request should be executed with empty body.
+              description: Refresh the basket item to be consistent with the ticket set (same unit price). This request should be executed with empty body. 
 
 /auth:
   /request-token:

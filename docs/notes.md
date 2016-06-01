@@ -35,7 +35,9 @@
   + Claims-based identity
   + OWASP
 
+- Basket:
 
+  + Implementing checks for number of available tickets
 
 REST API
 --------

@@ -4,6 +4,7 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
+import app.data.Buyer;
 import app.data.Identity;
 import app.data.User;
 import org.junit.Before;
@@ -21,57 +22,56 @@ import java.util.UUID;
  * @author ngnmhieu
  */
 @RunWith(MockitoJUnitRunner.class)
-public class UserRepositoryTest
+public class UserServiceTest
 {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     EntityManager em;
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    IdentityRepository identityRepository;
+    IdentityService identityService;
 
     @Mock
     User user;
 
     UUID userId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
 
-    protected UserRepository userRepository;
+    protected UserService userService;
 
     @Before
     public void setUp()
     {
-        userRepository = new UserRepository(em, identityRepository);
+        userService = new UserService(em, identityService);
     }
 
     @Test
-    public void findById_shouldReturnTheCorrectUser() throws Exception
+    public void findById_found() throws Exception
     {
         when(em.find(User.class, userId)).thenReturn(user);
 
-        assertEquals(user, userRepository.findById(userId));
+        assertEquals(user, userService.findById(userId));
     }
 
     @Test
-    public void findById_shouldReturnNullIfNoUserFound() throws Exception
+    public void findById_not_found() throws Exception
     {
         when(em.find(User.class, userId)).thenReturn(null);
 
-        assertNull(userRepository.findById(userId));
+        assertNull(userService.findById(userId));
     }
 
     @Test
-    public void findByEmail_should_return_user() throws Exception
+    public void findByIdentity_found() throws Exception
     {
+        Identity mockIdentity = mock(Identity.class);
+        User user = new User(mockIdentity);
         when(em.createQuery(anyString())
                 .setParameter(anyString(), anyString())
-                .getSingleResult()
-        ).thenReturn(user);
+                .getSingleResult()).thenReturn(user);
 
-        UserRepository repo = new UserRepository(em, identityRepository);
-        assertEquals(user, repo.findByIdentity(new Identity("email", "password")));
+        assertEquals(user, userService.findByIdentity(mockIdentity));
     }
-
     @Test
-    public void findByIdentity_should_return_null_if_nothing_found() throws Exception
+    public void findByIdentity_not_found() throws Exception
     {
         when(em.createQuery(anyString())
                 .setParameter(anyString(), anyString())
@@ -79,18 +79,17 @@ public class UserRepositoryTest
         ).thenThrow(NoResultException.class);
 
 
-        assertNull(userRepository.findByIdentity(new Identity("email", "password")));
+        assertNull(userService.findByIdentity(new Identity("email", "password")));
     }
 
     @Test
-    public void save_ShouldPersistNewUserAndCreateNewIdentity() throws Exception
+    public void createWithIdentity() throws Exception
     {
-        User mockUser = mock(User.class);
-        Identity id = mock(Identity.class);
-        when(mockUser.getIdentity()).thenReturn(id);
+        Identity mockIdentity = mock(Identity.class);
+        User user = userService.createWithIdentity(mockIdentity);
 
-        assertEquals(mockUser, userRepository.save(mockUser));
-        verify(em, times(1)).persist(mockUser);
-        verify(identityRepository, times(1)).save(id);
+        assertEquals(mockIdentity, user.getIdentity());
+        verify(em, times(1)).persist(any(User.class));
     }
+
 }

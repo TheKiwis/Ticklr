@@ -2,7 +2,6 @@ package app.services;
 
 import app.data.Buyer;
 import app.data.Identity;
-import app.data.Buyer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
@@ -17,25 +16,20 @@ import java.util.UUID;
  */
 @Repository
 @Transactional
-public class BuyerRepository
+public class BuyerService
 {
     @PersistenceContext
     private EntityManager em;
 
-    @Autowired
-    private IdentityRepository identityRepository;
-
     /**
      * @param em
-     * @param identityRepository manages persistent Identity objects
      */
-    public BuyerRepository(EntityManager em, IdentityRepository identityRepository)
+    public BuyerService(EntityManager em)
     {
         this.em = em;
-        this.identityRepository = identityRepository;
     }
 
-    private BuyerRepository()
+    private BuyerService()
     {
     }
 
@@ -52,14 +46,15 @@ public class BuyerRepository
 
 
     /**
-     * Finds an buyer by the given email
+     * Finds an user by the given identity
+     * TODO Test
      *
-     * @param email search for by given email
-     * @return null if no buyer with the given email found
+     * @param id
+     * @return
      */
-    public Buyer findByEmail(String email)
+    public Buyer findByIdentity(Identity id)
     {
-        Query query = em.createQuery("SELECT u FROM Buyer u WHERE u.identity.email=:email").setParameter("email", email);
+        Query query = em.createQuery("SELECT b FROM Buyer b WHERE b.identity = :identity").setParameter("identity", id);
 
         Buyer buyer = null;
         try {
@@ -71,22 +66,16 @@ public class BuyerRepository
     }
 
     /**
-     * Saves buyer to the database
+     * @param id
+     * @return a newly created buyer, who has the given identity
      *
-     * @param buyer
-     * @return
-     * @throws PersistenceException if buyer already existed (email should be unique)
+     * @ensure buyer.getIdentity().equals(id)
      */
-    public Buyer save(Buyer buyer) throws PersistenceException
+    public Buyer createWithIdentity(Identity id)
     {
-        // first save buyer's identity
-        Identity id = identityRepository.save(buyer.getIdentity());
-
-        buyer.setIdentity(id);
+        Buyer buyer = new Buyer(id);
 
         em.persist(buyer);
-
-        em.flush();
 
         return buyer;
     }

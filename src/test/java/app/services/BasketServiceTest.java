@@ -11,8 +11,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.Query;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -41,43 +39,17 @@ public class BasketServiceTest
     }
 
     @Test
-    public void save_should_return_the_same_basket()
+    public void saveBasket()
     {
+        Basket mockBasket1 = mock(Basket.class);
+        when(mockBasket1.getId()).thenReturn(null);
+        basketService.saveBasket(mockBasket1);
+        verify(em, times(1)).persist(mockBasket1);
 
-        Basket mockBasket = mock(Basket.class);
-
-        basketService.save(mockBasket);
-
-        verify(em, atLeastOnce()).persist(mockBasket);
-    }
-
-    @Test
-    public void saveOrUpdate_shouldReturnTheSameBasket()
-    {
-        Basket mockBasket = mock(Basket.class);
-
-        basketService.saveOrUpdate(mockBasket);
-
-        verify(em, atLeastOnce()).merge(mockBasket);
-
-        mockBasket = mock(Basket.class);
-
-        when(mockBasket.getId()).thenReturn(null);
-
-        basketService.saveOrUpdate(mockBasket);
-
-        verify(em, atLeastOnce()).persist(mockBasket);
-    }
-
-    @Test
-    public void updateItem_shouldUpdateItemIfExist() throws Exception
-    {
-        BasketItem item = mock(BasketItem.class);
-        when(item.getId()).thenReturn(123l);
-
-        basketService.updateItem(item);
-
-        verify(em, times(1)).merge(item);
+        Basket mockBasket2 = mock(Basket.class);
+        when(mockBasket1.getId()).thenReturn(1l);
+        basketService.saveBasket(mockBasket1);
+        verify(em, times(1)).merge(mockBasket1);
     }
 
     @Test

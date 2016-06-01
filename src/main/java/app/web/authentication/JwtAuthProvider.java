@@ -1,7 +1,7 @@
 package app.web.authentication;
 
 import app.data.Identity;
-import app.services.IdentityRepository;
+import app.services.IdentityService;
 import io.jsonwebtoken.Claims;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -15,14 +15,14 @@ import java.util.UUID;
  */
 public class JwtAuthProvider implements AuthenticationProvider
 {
-    private IdentityRepository identityRepository;
+    private IdentityService identityService;
 
     // performs JWT Token verification
     private JwtHelper authenticator;
 
-    public JwtAuthProvider(IdentityRepository identityRepository, JwtHelper authenticator)
+    public JwtAuthProvider(IdentityService identityService, JwtHelper authenticator)
     {
-        this.identityRepository = identityRepository;
+        this.identityService = identityService;
         this.authenticator = authenticator;
     }
 
@@ -40,7 +40,7 @@ public class JwtAuthProvider implements AuthenticationProvider
 
         Identity id = null;
         try {
-            id = identityRepository.findById(UUID.fromString(subject));
+            id = identityService.findById(UUID.fromString(subject));
         } catch (IllegalArgumentException e) {
             throw new BadCredentialsException("Invalid UUID", e);
         }

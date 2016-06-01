@@ -11,6 +11,8 @@ import javax.persistence.*;
 import java.util.UUID;
 
 /**
+ * TODO:
+ *
  * @author DucNguyenMinh
  * @since 08.03.16
  */
@@ -64,39 +66,22 @@ public class BasketService
     }
 
     /**
+     * Save the basket to the database
      * @param basket
-     * @return
+     * @return updated basket
+     * @throws IllegalArgumentException if basket == null
      */
-    public Basket save(Basket basket)
+    public Basket saveBasket(Basket basket)
     {
-        em.persist(basket);
-        em.flush();
-        return basket;
-    }
+        Assert.notNull(basket);
 
-    /**
-     * @param basket
-     * @return
-     */
-    public Basket saveOrUpdate(Basket basket)
-    {
         if (basket.getId() == null) {
             em.persist(basket);
         } else {
             basket = em.merge(basket);
         }
 
-        em.flush();
-
         return basket;
-    }
-
-    /**
-     * @param item != null
-     */
-    public BasketItem updateItem(BasketItem item)
-    {
-        return em.merge(item);
     }
 
     /**

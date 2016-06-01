@@ -16,25 +16,25 @@ import java.util.UUID;
  */
 @Repository
 @Transactional
-public class UserRepository
+public class UserService
 {
     @PersistenceContext
     private EntityManager em;
 
     @Autowired
-    private IdentityRepository identityRepository;
+    private IdentityService identityService;
 
     /**
      * @param em
-     * @param identityRepository manages persistent Identity objects
+     * @param identityService manages persistent Identity objects
      */
-    public UserRepository(EntityManager em, IdentityRepository identityRepository)
+    public UserService(EntityManager em, IdentityService identityService)
     {
         this.em = em;
-        this.identityRepository = identityRepository;
+        this.identityService = identityService;
     }
 
-    private UserRepository()
+    private UserService()
     {
     }
 
@@ -70,22 +70,16 @@ public class UserRepository
     }
 
     /**
-     * Saves user to the database
+     * @param id
+     * @return a newly created user, who has the given identity
      *
-     * @param user
-     * @return
-     * @throws PersistenceException if user already existed (email should be unique)
+     * @ensure user.getIdentity().equals(id)
      */
-    public User save(User user) throws PersistenceException
+    public User createWithIdentity(Identity id)
     {
-        // first save user's identity
-        Identity id = identityRepository.save(user.getIdentity());
-
-        user.setIdentity(id);
+        User user = new User(id);
 
         em.persist(user);
-
-        em.flush();
 
         return user;
     }

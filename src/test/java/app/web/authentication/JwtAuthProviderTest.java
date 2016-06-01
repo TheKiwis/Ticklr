@@ -1,9 +1,8 @@
 package app.web.authentication;
 
 import app.data.Identity;
-import app.data.User;
-import app.services.IdentityRepository;
-import app.services.UserRepository;
+import app.services.IdentityService;
+import app.services.UserService;
 import io.jsonwebtoken.Claims;
 import org.junit.Before;
 import org.junit.Test;
@@ -30,20 +29,20 @@ import static org.mockito.Mockito.when;
 public class JwtAuthProviderTest
 {
     @Mock
-    UserRepository userRepository;
+    UserService userService;
 
     @Mock
     JwtHelper authenticator;
 
     @Mock
-    private IdentityRepository identityRepository;
+    private IdentityService identityService;
 
     private AuthenticationProvider authenticationProvider;
 
     @Before
     public void setUp() throws Exception
     {
-        authenticationProvider = new JwtAuthProvider(identityRepository, authenticator);
+        authenticationProvider = new JwtAuthProvider(identityService, authenticator);
     }
 
     @Test
@@ -59,7 +58,7 @@ public class JwtAuthProviderTest
         UUID identityId = UUID.randomUUID();
 
         Identity mockIdentity = mock(Identity.class);
-        when(identityRepository.findById(identityId)).thenReturn(mockIdentity);
+        when(identityService.findById(identityId)).thenReturn(mockIdentity);
 
         Authentication mockAuth = mock(JwtAuthToken.class);
 
@@ -114,7 +113,7 @@ public class JwtAuthProviderTest
         Claims claims = mock(Claims.class);
         when(authenticator.authenticate(any())).thenReturn(claims);
         when(claims.getSubject()).thenReturn(UUID.randomUUID().toString());
-        when(identityRepository.findById(any())).thenReturn(null);
+        when(identityService.findById(any())).thenReturn(null);
 
         // create test object
         authenticationProvider.authenticate(mockAuth);

@@ -53,4 +53,9 @@ public class LoginForm
     {
         return new Buyer(new Identity(email, password));
     }
+
+    public Identity getIdentity()
+    {
+        return new Identity(email, password);
+    }
 }
