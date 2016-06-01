@@ -81,7 +81,7 @@ public class JwtHelper
      * @param expiredInDays
      * @return JWT Token
      */
-    public Token generateToken(Identity id, int expiredInDays)
+    public String generateToken(Identity id, int expiredInDays)
     {
         Date expiredDate = getExpiredDate(expiredInDays);
 
@@ -90,8 +90,8 @@ public class JwtHelper
                 .setSubject(id.getId().toString())
                 .setExpiration(expiredDate)
                 .signWith(SignatureAlgorithm.HS256, authSecretBytes).compact();
-        DefaultToken token = new DefaultToken(jwtToken, LocalDateTime.now().toEpochSecond(ZoneOffset.UTC), "");
-        return token;
+
+        return jwtToken;
     }
 
     /**
@@ -100,7 +100,7 @@ public class JwtHelper
      * @param id the identity, for which of the token is generated
      * @return
      */
-    public Token generateToken(Identity id)
+    public String generateToken(Identity id)
     {
         return this.generateToken(id, DEFAULT_EXPIRED_DAYS);
     }

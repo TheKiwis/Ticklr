@@ -79,15 +79,13 @@ public class AuthController
         if (!passwordEncoder.matches(form.getPassword(), id.getPassword()))
             return UNAUTHORIZED;
 
-        Token token = jwtHelper.generateToken(id);
-
-        HttpHeaders headers = new HttpHeaders();
+        String token = jwtHelper.generateToken(id);
 
         // we assume that there always exists a user corresponding to an identity,
         // ensure that a user is created when an identity is created
         User user = userService.findByIdentity(id);
         Buyer buyer = buyerService.findByIdentity(id);
 
-        return new ResponseEntity(new AuthResponse(token.getKey(), user, buyer, resURI), headers, HttpStatus.OK);
+        return new ResponseEntity(new AuthResponse(token, user, buyer, resURI), HttpStatus.OK);
     }
 }

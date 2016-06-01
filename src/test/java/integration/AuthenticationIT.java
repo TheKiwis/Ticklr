@@ -103,7 +103,7 @@ public class AuthenticationIT extends CommonIntegrationTest
     {
         String email = "user@example.com";
 
-        String jwtToken = jwt.generateToken(user.getIdentity()).getKey();
+        String jwtToken = jwt.generateToken(user.getIdentity());
 
         mockMvc.perform(post(AUTH_URI)
                 .contentType("application/json")
@@ -117,10 +117,10 @@ public class AuthenticationIT extends CommonIntegrationTest
     @Test
     public void happy_should_Return_Resource_When_Provided_With_Valid_Jwt_Token() throws Exception
     {
-        Token jwtToken = jwt.generateToken(user.getIdentity());
+        String jwtToken = jwt.generateToken(user.getIdentity());
 
         mockMvc.perform(get("/api/users/" + userId)
-                .header("Authorization", "Bearer " + jwtToken.getKey()))
+                .header("Authorization", "Bearer " + jwtToken))
                 .andExpect(status().isOk());
     }
 

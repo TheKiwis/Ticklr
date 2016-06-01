@@ -198,7 +198,7 @@ traits:
         /ticket-sets:
           is: [authorized, has_resource_not_found]
           get:
-            description: Ticket-sets collection of an event.
+            description: Ticket-sets collection of an event. # TODO
             responses:
               200:
                 body:
@@ -247,7 +247,7 @@ traits:
                 description: Ticket set has been successfully created.
                 headers:
                   Location:
-                    example: "Location: http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14/ticket-sets/2"
+                    example: "Location: http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14/ticket-sets/2" # TODO
 
           /{ticketSetId}:
             is: [authorized, has_resource_not_found]

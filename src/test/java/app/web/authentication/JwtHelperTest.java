@@ -57,9 +57,9 @@ public class JwtHelperTest
     {
         Date expiredDate = getExpiredDate(10);
 
-        Token jwtToken = jwtHelper.generateToken(user.getIdentity(), 10);
+        String jwtToken = jwtHelper.generateToken(user.getIdentity(), 10);
 
-        Jws<Claims> token = Jwts.parser().setSigningKey(AUTH_SECRET_BYTE).parseClaimsJws(jwtToken.getKey());
+        Jws<Claims> token = Jwts.parser().setSigningKey(AUTH_SECRET_BYTE).parseClaimsJws(jwtToken);
         Date exp = token.getBody().getExpiration();
         assertEquals(expiredDate, exp);
     }
@@ -69,8 +69,8 @@ public class JwtHelperTest
     {
         Date expectedExpiredDate = getExpiredDate(7);
 
-        Token jwtToken = jwtHelper.generateToken(user.getIdentity());
-        Jws<Claims> token = Jwts.parser().setSigningKey(AUTH_SECRET_BYTE).parseClaimsJws(jwtToken.getKey());
+        String jwtToken = jwtHelper.generateToken(user.getIdentity());
+        Jws<Claims> token = Jwts.parser().setSigningKey(AUTH_SECRET_BYTE).parseClaimsJws(jwtToken);
         Date exp = token.getBody().getExpiration();
 
         assertEquals(expectedExpiredDate, exp);
