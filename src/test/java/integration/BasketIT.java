@@ -126,6 +126,32 @@ public class BasketIT extends CommonIntegrationTest
     }
 
     @Test
+    public void happy_should_update_item() throws Exception
+    {
+        assertEquals(1, (long) em.createQuery("SELECT COUNT(i) FROM BasketItem i WHERE i.id = :id").setParameter("id", 1l).getSingleResult());
+
+        mockMvc.perform(prepareRequest(put(basketURI.basketItemURI(buyerOneId, 1l)))
+                .content("{\"quantity\": 15}"))
+                .andExpect(status().isOk());
+
+        assertEquals(1, (long) em.createQuery("select count(i) from BasketItem i where i.id = :id").setParameter("id", 1l).getSingleResult());
+        assertEquals(15, (int) em.createQuery("select i.quantity from BasketItem i where i.id = :id").setParameter("id", 1l).getSingleResult());
+    }
+
+
+    @Test
+    public void happy_should_delete_item() throws Exception
+    {
+        assertEquals(1, (long) em.createQuery("SELECT COUNT(i) FROM BasketItem i WHERE i.id = :id").setParameter("id", 1l).getSingleResult());
+
+        mockMvc.perform(delete(basketURI.basketItemURI(buyerOneId, 1l))
+                .header("Authorization", authString))
+                .andExpect(status().isOk());
+
+        assertEquals(0, (long) em.createQuery("select count(i) from BasketItem i where i.id = :id").setParameter("id", 1l).getSingleResult());
+    }
+
+    @Test
     public void sad_should_return_HTTP_NOT_FOUND() throws Exception
     {
         mockMvc.perform(prepareRequest(get(basketURI.basketURI(UUID.randomUUID()))))
@@ -183,49 +209,28 @@ public class BasketIT extends CommonIntegrationTest
     }
 
     @Test
-    public void happy_should_delete_item() throws Exception
+    public void sad_should_validate_input_when_update_item() throws Exception
     {
-        assertEquals(1, (long) em.createQuery("SELECT COUNT(i) FROM BasketItem i WHERE i.id = :id").setParameter("id", 1l).getSingleResult());
+        mockMvc.perform(prepareRequest(put(basketURI.basketItemURI(buyerOneId, 1l))))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value(ErrorResponse.VALIDATION_ERROR));
 
-        mockMvc.perform(delete(basketURI.basketItemURI(buyerOneId, 1l))
-                .header("Authorization", authString))
-                .andExpect(status().isOk());
+        mockMvc.perform(prepareRequest(put(basketURI.basketItemURI(buyerOneId, 1l)))
+                .content("{\"quantity\": -1}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value(ErrorResponse.VALIDATION_ERROR));
 
-        assertEquals(0, (long) em.createQuery("select count(i) from BasketItem i where i.id = :id").setParameter("id", 1l).getSingleResult());
-    }
-
-    @Test
-    public void shouldUpdateItem() throws Exception
-    {
-        assertEquals(1, (long) em.createQuery("SELECT COUNT(i) FROM BasketItem i WHERE i.id = :id").setParameter("id", 1l).getSingleResult());
-
-
-        mockMvc.perform(put(basketURI.basketItemURI(buyerOneId, 1l))
-                .header("Authorization", authString)
-                .param("quantity", "15"))
-                .andExpect(status().isOk());
-
-        assertEquals(1, (long) em.createQuery("select count(i) from BasketItem i where i.id = :id").setParameter("id", 1l).getSingleResult());
-        assertEquals(15, (int) em.createQuery("select i.quantity from BasketItem i where i.id = :id").setParameter("id", 1l).getSingleResult());
-    }
-
-    @Test
-    public void shouldValidateBasketItemUpdateForm() throws Exception
-    {
-        // TODO: this is not update... put
-        mockMvc.perform(prepareRequest(post(basketURI.basketItemURI(buyerOneId, null))))
-                .andExpect(status().isBadRequest());
-
-        mockMvc.perform(prepareRequest(post(basketURI.basketItemURI(buyerOneId, null)))
-                .content(getAddItemForm(13, null)))
-                .andExpect(status().isBadRequest());
+        mockMvc.perform(prepareRequest(put(basketURI.basketItemURI(buyerOneId, 1l)))
+                .content("{\"quantity\": 0}"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value(ErrorResponse.VALIDATION_ERROR));
     }
 
     @Test
     public void sad_should_return_HTTP_FORBIDDEN() throws Exception
     {
         UUID anotherBuyerId = buyerTwoId;
-        Long anotherBasketItemId = 456l;
+        Long anotherBasketItemId = 1l;
 
         mockMvc.perform(prepareRequest(get(basketURI.basketURI(anotherBuyerId))))
                 .andExpect(status().isForbidden());

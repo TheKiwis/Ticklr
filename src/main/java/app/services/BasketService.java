@@ -100,6 +100,24 @@ public class BasketService
     }
 
     /**
+     * Update quantity of a BasketItem
+     *
+     * @param item
+     * @param quantity
+     * @throws IllegalArgumentException if quantity > 0
+     * @throws IllegalArgumentException if item == null
+     */
+    public void updateItemQuantity(BasketItem item, int quantity)
+    {
+        Assert.notNull(item);
+        Assert.isTrue(quantity > 0);
+
+        item.setQuantity(quantity);
+
+        em.merge(item);
+    }
+
+    /**
      * @param basket
      * @param item
      * @throws IllegalArgumentException !basket.isInBasket(item)
@@ -115,21 +133,5 @@ public class BasketService
         basket.removeItem(item);
 
         em.remove(item);
-    }
-
-    /**
-     * @param itemId
-     * @return the basket item with the given itemId
-     */
-    public BasketItem findItemById(long itemId)
-    {
-        Query query = em.createQuery("SELECT i FROM BasketItem i WHERE i.id = :itemId")
-                .setParameter("itemId", itemId);
-
-        try {
-            return (BasketItem) query.getSingleResult();
-        } catch (NoResultException e) {
-            return null;
-        }
     }
 }

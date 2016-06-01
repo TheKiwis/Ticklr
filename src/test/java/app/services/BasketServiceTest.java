@@ -123,4 +123,15 @@ public class BasketServiceTest
         assertEquals(oldItem.getUnitPrice(), item.getUnitPrice());
         assertTrue(20 == item.getQuantity());
     }
+
+    @Test
+    public void updateItemQuantity() throws Exception
+    {
+        BasketItem item = new BasketItem(mock(TicketSet.class), 10, BigDecimal.TEN);
+
+        basketService.updateItemQuantity(item, 20);
+
+        assertTrue(20 == item.getQuantity());
+        verify(em, times(1)).merge(item);
+    }
 }

@@ -11,7 +11,7 @@ public class BasketItemUpdateForm
 {
     @NotNull
     @Min(1)
-    private Integer quantity;
+    public Integer quantity;
 
     public BasketItemUpdateForm(Integer quantity)
     {
@@ -20,16 +20,6 @@ public class BasketItemUpdateForm
 
     protected BasketItemUpdateForm()
     {
-    }
-
-    public Integer getQuantity()
-    {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity)
-    {
-        this.quantity = quantity;
     }
 
 }

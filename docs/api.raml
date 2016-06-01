@@ -392,7 +392,7 @@ traits:
         #               ]
         #             }
         post:
-          description: Adds a new item to the basket.
+          description: Adds a new item to the basket. [FINISHED]
           body:
             application/json:
               example: |
@@ -424,7 +424,7 @@ traits:
         /{itemId}:
           is: [authorized, has_resource_not_found]
           get:
-            description: Returns a Basket Item.
+            description: Returns a Basket Item. [FINISHED]
             body:
               application/json:
                 example: |
@@ -439,7 +439,7 @@ traits:
                     }
                   }
           put:
-            description: Updates a basket item.
+            description: Updates a basket item. [FINISHED]
             body:
               application/json:
                 example: |
@@ -464,7 +464,7 @@ traits:
                         "errorCode": "TICKET_SET_OUT_OF_STOCK"
                       }
           delete:
-            description: Deletes a Basket Item.
+            description: Deletes a Basket Item. [FINISHED]
             responses:
               204:
                 description: Basket item has been successfully deleted.

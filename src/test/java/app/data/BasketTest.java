@@ -61,7 +61,7 @@ public class BasketTest
     }
 
     @Test
-    public void getItemFor() throws Exception
+    public void getItemFor_TicketSet() throws Exception
     {
         TicketSet ticket = mock(TicketSet.class);
         TicketSet otherTicket = mock(TicketSet.class);
@@ -72,5 +72,17 @@ public class BasketTest
 
         assertEquals(item, basket.getItemFor(ticket));
         assertNull(basket.getItemFor(otherTicket));
+    }
+
+    @Test
+    public void getItemFor_ItemId() throws Exception
+    {
+        Basket basket = new Basket();
+        BasketItem mockItem = mock(BasketItem.class);
+        when(mockItem.getId()).thenReturn(1l);
+        basket.addItem(mockItem);
+
+        assertEquals(mockItem, basket.getItemFor(1l));
+        assertNull(basket.getItemFor(2l));
     }
 }

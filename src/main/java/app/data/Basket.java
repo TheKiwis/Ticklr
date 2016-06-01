@@ -36,7 +36,7 @@ public class Basket
     @Generated(GenerationTime.ALWAYS)
     protected Date updatedTime;
 
-    // TODO: why remove does not work with CascaseType.PERSIST
+    // TODO: why remove does not work with CascadeType.PERSIST
     //@OneToMany(mappedBy = "basket", fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
     @OneToMany(mappedBy = "basket", fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
     protected Set<BasketItem> items = new HashSet<>();
@@ -110,6 +110,19 @@ public class Basket
     {
         Assert.notNull(ticketSet);
         Optional<BasketItem> optional = items.stream().filter(item -> item.getTicketSet().equals(ticketSet)).findFirst();
+
+        return optional.isPresent() ? optional.get() : null;
+    }
+
+    /**
+     * @param itemId
+     * @return the BasketItem object that has Id == itemId
+     * @require itemId != null
+     */
+    public BasketItem getItemFor(Long itemId)
+    {
+        Assert.notNull(itemId);
+        Optional<BasketItem> optional = items.stream().filter(item -> item.getId().equals(itemId)).findFirst();
 
         return optional.isPresent() ? optional.get() : null;
     }

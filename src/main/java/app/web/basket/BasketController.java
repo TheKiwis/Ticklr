@@ -30,6 +30,8 @@ public class BasketController
 {
     public static final ResponseEntity NOT_FOUND = new ResponseEntity(HttpStatus.NOT_FOUND);
 
+    public static final ResponseEntity FORBIDDEN = new ResponseEntity(HttpStatus.FORBIDDEN);
+
     protected BasketService basketService;
 
     protected BuyerRepository buyerRepository;
@@ -65,7 +67,7 @@ public class BasketController
             return NOT_FOUND;
 
         if (!identityAuthorizer.authorize(buyer.getIdentity()))
-            return new ResponseEntity(HttpStatus.FORBIDDEN);
+            return FORBIDDEN;
 
         basket = buyer.getBasket();
 
@@ -89,7 +91,7 @@ public class BasketController
             return new ResponseEntity(HttpStatus.NOT_FOUND);
 
         if (!identityAuthorizer.authorize(buyer.getIdentity()))
-            return new ResponseEntity(HttpStatus.FORBIDDEN);
+            return FORBIDDEN;
 
         if (basketItemForm == null || bindingResult.hasFieldErrors())
             return new ResponseEntity(new ErrorResponse(ErrorResponse.VALIDATION_ERROR), HttpStatus.BAD_REQUEST);
@@ -121,14 +123,14 @@ public class BasketController
             return NOT_FOUND;
 
         if (!identityAuthorizer.authorize(buyer.getIdentity()))
-            return new ResponseEntity(HttpStatus.FORBIDDEN);
+            return FORBIDDEN;
 
         Basket basket = buyer.getBasket();
 
         if (basket == null)
             return NOT_FOUND;
 
-        BasketItem item = getBasketItem(basket, itemId);
+        BasketItem item = basket.getItemFor(itemId);
 
         if (item == null)
             return NOT_FOUND;
@@ -136,6 +138,9 @@ public class BasketController
         return new ResponseEntity(new BasketItemResponse(basket, item, resURI), HttpStatus.OK);
     }
 
+    /**
+     * Remove an item from the basket
+     */
     @RequestMapping(value = BasketURI.ITEM_URI, method = RequestMethod.DELETE)
     public ResponseEntity deleteItem(@PathVariable UUID buyerId, @PathVariable Long itemId)
     {
@@ -145,14 +150,14 @@ public class BasketController
             return NOT_FOUND;
 
         if (!identityAuthorizer.authorize(buyer.getIdentity()))
-            return new ResponseEntity(HttpStatus.FORBIDDEN);
+            return FORBIDDEN;
 
         Basket basket = buyer.getBasket();
 
         if (basket == null)
             return NOT_FOUND;
 
-        BasketItem item = getBasketItem(basket, itemId);
+        BasketItem item = basket.getItemFor(itemId);
         if (item == null)
             return NOT_FOUND;
 
@@ -161,8 +166,13 @@ public class BasketController
         return new ResponseEntity(HttpStatus.OK);
     }
 
+    /**
+     * Update basket item's quantity
+     */
     @RequestMapping(value = BasketURI.ITEM_URI, method = RequestMethod.PUT)
-    public ResponseEntity updateItem(@PathVariable UUID buyerId, @PathVariable Long itemId, BasketItemUpdateForm basketItemUpdateForm, BindingResult bindingResult)
+    public ResponseEntity updateItem(@PathVariable UUID buyerId, @PathVariable Long itemId,
+                                     @Valid @RequestBody(required = false) BasketItemUpdateForm basketItemUpdateForm,
+                                     BindingResult bindingResult)
     {
         Buyer buyer = buyerRepository.findById(buyerId);
 
@@ -170,32 +180,20 @@ public class BasketController
             return NOT_FOUND;
 
         if (!identityAuthorizer.authorize(buyer.getIdentity()))
-            return new ResponseEntity(HttpStatus.FORBIDDEN);
+            return FORBIDDEN;
 
-        if (bindingResult.hasFieldErrors()) {
-            return new ResponseEntity(bindingResult.getFieldErrors(), HttpStatus.BAD_REQUEST);
-        }
+        if (basketItemUpdateForm == null || bindingResult.hasFieldErrors())
+            return new ResponseEntity(new ErrorResponse(ErrorResponse.VALIDATION_ERROR), HttpStatus.BAD_REQUEST);
 
         Basket basket = buyer.getBasket();
 
-        BasketItem basketItem = basketService.findItemById(itemId);
+        BasketItem basketItem = basket.getItemFor(itemId);
 
-        if (basket == null || basketItem == null) {
+        if (basket == null || basketItem == null)
             return NOT_FOUND;
-        }
 
-        basketItem.setQuantity(basketItemUpdateForm.getQuantity());
-
-        basketService.updateItem(basketItem);
+        basketService.updateItemQuantity(basketItem, basketItemUpdateForm.quantity);
 
         return new ResponseEntity(HttpStatus.OK);
-    }
-
-    private BasketItem getBasketItem(Basket basket, Long itemId)
-    {
-        Optional<BasketItem> opt = basket.getItems().stream()
-                .filter(item -> item.getId().equals(itemId))
-                .findAny();
-        return opt.isPresent() ? opt.get() : null;
     }
 }
