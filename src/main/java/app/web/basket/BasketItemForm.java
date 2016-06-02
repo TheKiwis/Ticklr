@@ -11,10 +11,10 @@ public class BasketItemForm
 {
     @NotNull
     @Min(1)
-    private Integer quantity;
+    public Integer quantity;
 
     @NotNull
-    private Long ticketSetId;
+    public Long ticketSetId;
 
     public BasketItemForm(Integer quantity, Long ticketSetId)
     {
@@ -24,25 +24,5 @@ public class BasketItemForm
 
     protected BasketItemForm()
     {
-    }
-
-    public Integer getQuantity()
-    {
-        return quantity;
-    }
-
-    public void setQuantity(Integer quantity)
-    {
-        this.quantity = quantity;
-    }
-
-    public Long getTicketSetId()
-    {
-        return ticketSetId;
-    }
-
-    public void setTicketSetId(Long ticketSetId)
-    {
-        this.ticketSetId = ticketSetId;
     }
 }

@@ -5,7 +5,6 @@ import static org.hamcrest.CoreMatchers.*;
 import app.data.Event;
 import app.data.TicketSet;
 import app.data.User;
-import app.web.event.EventController;
 import app.web.event.EventURI;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -115,7 +114,7 @@ public class EventIT extends CommonIntegrationTest
      *************************************************/
 
     @Test
-    public void shouldReturnAllEventsBelongingToAnUser() throws Exception
+    public void happy_should_return_events_collection() throws Exception
     {
         String url = eventURL(sampleUserId, null);
         mockMvc.perform(addAuthHeader(get(url)))
@@ -129,21 +128,25 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldReturnAnEvent() throws Exception
+    public void happy_should_return_an_event() throws Exception
     {
         mockMvc.perform(addAuthHeader(get(eventURL(sampleUser.getId(), sampleEventId))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(sampleEvent.getId().intValue()))
+                .andExpect(jsonPath("$.href").isNotEmpty())
                 .andExpect(jsonPath("$.title").value(sampleTitle))
                 .andExpect(jsonPath("$.description").value(sampleDesc))
                 .andExpect(jsonPath("$.canceled").value(sampleCanceled))
                 .andExpect(jsonPath("$.isPublic").value(samplePublic))
+                .andExpect(jsonPath("$.expired").isNotEmpty())
+                .andExpect(jsonPath("$.happening").isNotEmpty())
+                .andExpect(jsonPath("$.ticketSets").isMap())
                 .andExpect(jsonPath("$.startTime").value(startsWith(sampleStartTime)))
                 .andExpect(jsonPath("$.endTime").value(startsWith(sampleEndTime)));
     }
 
     @Test
-    public void shouldReturnWithHttpStatusCreatedAndALocationHeader() throws Exception
+    public void happy_should_return_with_HTTP_Created_and_Location_Header() throws Exception
     {
         mockMvc.perform(addAuthHeader(post(eventURL(sampleUserId, null))))
                 .andExpect(status().isCreated())
@@ -151,7 +154,7 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldCreateEmptyEventWithDefaultValues() throws Exception
+    public void happy_should_create_empty_event_with_default_values() throws Exception
     {
         MvcResult response = mockMvc.perform(addAuthHeader(post(eventURL(sampleUserId, null))))
                 .andExpect(status().isCreated()).andReturn();
@@ -174,7 +177,7 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldCreateAnEventWithProvidedValue() throws Exception
+    public void happy_should_create_an_event_with_provided_value() throws Exception
     {
         MvcResult response = mockMvc.perform(addAuthHeader(post(eventURL(sampleUserId, null)))
                 .contentType("application/json")
@@ -224,7 +227,7 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldUpdateAnExistingEvent() throws Exception
+    public void happy_should_update_an_existing_event() throws Exception
     {
         MvcResult response = mockMvc.perform(addAuthHeader(put(eventURL(sampleUserId, sampleEventId))
                 .contentType("application/json")
@@ -244,7 +247,7 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldCancelEvent() throws Exception
+    public void happy_should_cancel_event() throws Exception
     {
         mockMvc.perform(addAuthHeader(delete(eventURL(sampleUserId, sampleEventId))))
                 .andExpect(status().isNoContent());
@@ -255,14 +258,14 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldNotCancelEventAndReturnNotFound() throws Exception
+    public void happy_should_not_cancel_event_and_return_HTTP_NotFound() throws Exception
     {
         mockMvc.perform(addAuthHeader(delete(eventURL(sampleUserId, 234l))))
                 .andExpect(status().isNotFound());
     }
 
     @Test
-    public void shouldCreateNewTicketSet() throws Exception
+    public void happy_should_create_new_ticket_set() throws Exception
     {
         String query = "SELECT count(ts) FROM TicketSet ts WHERE ts.event.id = :event_id";
 
@@ -271,7 +274,7 @@ public class EventIT extends CommonIntegrationTest
         mockMvc.perform(post(ticketSetURL(sampleUserId, sampleEventId, null))
                 .header("Authorization", authString)
                 .contentType("application/json")
-                .content(getTicketSetForm("Early Bird", "20.00")))
+                .content(getTicketSetForm("Early Bird", 20.00, 20)))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", startsWith(ticketSetURL(sampleUserId, sampleEventId, null))));
 
@@ -279,38 +282,41 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldUpdateTicketSet() throws Exception
+    public void happy_should_update_ticket_set() throws Exception
     {
         mockMvc.perform(put(ticketSetURL(sampleUserId, sampleEventId, sampleTicketSetId))
                 .header("Authorization", authString)
                 .contentType("application/json")
-                .content(getTicketSetForm("Updated title", "30.00")))
+                .content(getTicketSetForm("Updated title", 30.00, 10)))
                 .andExpect(status().isNoContent());
 
         TicketSet ticketSet = (TicketSet) em.createQuery("SELECT ts FROM TicketSet ts WHERE ts.id = " + sampleTicketSetId).getSingleResult();
         assertEquals("Updated title", ticketSet.getTitle());
         assertEquals(new BigDecimal(30), ticketSet.getPrice());
+        assertEquals(10, ticketSet.getStock());
     }
 
-    private String getTicketSetForm(String title, String price) throws JsonProcessingException
+    private String getTicketSetForm(String title, double price, int stock) throws JsonProcessingException
     {
         class TicketSetForm
         {
             public String title;
-            public String price;
+            public double price;
+            public int stock;
 
-            public TicketSetForm(String title, String price)
+            public TicketSetForm(String title, double price, int stock)
             {
                 this.title = title;
                 this.price = price;
+                this.stock = stock;
             }
         }
         ObjectMapper om = new ObjectMapper();
-        return om.writeValueAsString(new TicketSetForm(title, price));
+        return om.writeValueAsString(new TicketSetForm(title, price, stock));
     }
 
     @Test
-    public void shouldDeleteTicketSet() throws Exception
+    public void happy_should_delete_ticket_set() throws Exception
     {
         long count = (long) em.createQuery("SELECT count(ts) FROM TicketSet ts").getSingleResult();
 
@@ -326,7 +332,7 @@ public class EventIT extends CommonIntegrationTest
      *************************************************/
 
     @Test
-    public void shouldReturnHttpStatusNotFoundIfUpdateCannotFindResource() throws Exception
+    public void sad_should_return_HTTP_NotFound_when_update_event() throws Exception
     {
         // Event with ID 345 doesn't exist
         assertNull(em.find(Event.class, 345l));
@@ -341,7 +347,7 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldReturnHttpNotFoundIfNoUserFound() throws Exception
+    public void sad_should_return_HTTP_NotFound_if_no_user_found() throws Exception
     {
         // User with ID 234 doesn't exist
         assertNull(em.find(User.class, invalidUserId));
@@ -357,7 +363,7 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldNotUpdateEventOnInvalidRequest() throws Exception
+    public void sad_should_not_update_event_on_invalid_request() throws Exception
     {
         // the event should not be updated
         Event beforePut = em.find(Event.class, sampleEventId);
@@ -381,7 +387,6 @@ public class EventIT extends CommonIntegrationTest
         assertTrue(afterPut.equals(beforePut));
 
 
-
         // should not create new event
         long countBefore = em.createQuery("SELECT COUNT(e) FROM Event e").getFirstResult();
         mockMvc.perform(post(eventURL(sampleUserId, null))
@@ -394,7 +399,7 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldReturnHttpStatusNotFoundForNonExistentEvent() throws Exception
+    public void sad_should_return_HTTP_NotFound_for_non_existent_event() throws Exception
     {
         mockMvc.perform(get(eventURL(sampleUserId, 555l))
                 .header("Authorization", authString))
@@ -402,16 +407,12 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldReturnHttpStatusBadRequestForNonNumericEventId() throws Exception
+    public void sad_should_return_HTTP_BadRequest_for_non_numeric_eventId() throws Exception
     {
         mockMvc.perform(get(eventURL(sampleUserId, null) + "/nonnumeric")
                 .header("Authorization", authString))
                 .andExpect(status().isBadRequest());
-    }
 
-    @Test
-    public void shouldReturnBadRequestForMalformedTime() throws Exception
-    {
         mockMvc.perform(post(eventURL(sampleUserId, null))
                 .header("Authorization", authString)
                 .contentType("application/json")
@@ -434,7 +435,7 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldReturnBadRequestWhenEndTimeBeforeStartTime() throws Exception
+    public void sad_hould_return_HTTP_BadRequest_when_endTime_before_startTime() throws Exception
     {
         String invalidStartTime = ZonedDateTime.of(2015, 3, 12, 20, 00, 00, 00, ZoneId.of("Z")).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         String invalidEndTime = ZonedDateTime.of(2015, 3, 12, 19, 00, 00, 00, ZoneId.of("Z")).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
@@ -447,7 +448,7 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldNotCreateOrUpdateOrDeleteTicketSetIfNoEventFound() throws Exception
+    public void sad_should_not_create_or_update_or_delete_ticket_set_if_no_event_found() throws Exception
     {
         assertNull(em.find(Event.class, 345l));
 
@@ -473,25 +474,25 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldNotCreateOrUpdateTicketSetAndReturnBadRequestIfInputIsInvalid() throws Exception
+    public void sad_should_not_create_or_update_ticket_set_and_return_HTTP_BadRequest_on_invalid_input() throws Exception
     {
         mockMvc.perform(post(ticketSetURL(sampleUserId, sampleEventId, null))
                 .header("Authorization", authString)
                 .contentType("application/json")
-                .content(getTicketSetForm("Updated title", "-30.00")))
+                .content(getTicketSetForm("Updated title", -30.00, 20)))
                 .andExpect(status().isBadRequest());
 
         mockMvc.perform(post(ticketSetURL(sampleUserId, sampleEventId, null))
                 .header("Authorization", authString)
                 .contentType("application/json")
-                .content(getTicketSetForm("", "30.00")))
+                .content(getTicketSetForm("New Event", 30.00, -1)))
                 .andExpect(status().isBadRequest());
 
         // negative price
         mockMvc.perform(put(ticketSetURL(sampleUserId, sampleEventId, sampleTicketSetId))
                 .header("Authorization", authString)
                 .contentType("application/json")
-                .content(getTicketSetForm("", "-30.00")))
+                .content(getTicketSetForm("", -30.00, 20)))
                 .andExpect(status().isBadRequest());
 
         // no title
@@ -510,7 +511,7 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void shouldReturnForbiddenAccessWhileAccessingEventsOfOtherUser() throws Exception
+    public void sad_should_return_HTTP_ForbiddenAccess_while_accessing_events_of_other_user() throws Exception
     {
         UUID anotherUserId = UUID.fromString("63b8e800-0f0e-11e6-bec3-0002a5d5c51b");
         Long anotherEventId = 456l;

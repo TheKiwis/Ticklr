@@ -95,7 +95,7 @@ public class BasketController
         if (basketItemForm == null || bindingResult.hasFieldErrors())
             return new ResponseEntity(new ErrorResponse(ErrorResponse.VALIDATION_ERROR), HttpStatus.BAD_REQUEST);
 
-        TicketSet ticketSet = ticketSetRepository.findById(basketItemForm.getTicketSetId());
+        TicketSet ticketSet = ticketSetRepository.findById(basketItemForm.ticketSetId);
         if (ticketSet == null)
             return new ResponseEntity(HttpStatus.BAD_REQUEST);
 
@@ -105,7 +105,7 @@ public class BasketController
         if (basket == null)
             basket = new Basket(buyer);
 
-        BasketItem item = basketService.addItemToBasket(basket, ticketSet, basketItemForm.getQuantity());
+        BasketItem item = basketService.addItemToBasket(basket, ticketSet, basketItemForm.quantity);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(URI.create(resURI.getBasketURI().basketItemURL(buyerId, item.getId())));

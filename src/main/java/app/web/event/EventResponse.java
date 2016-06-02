@@ -1,8 +1,14 @@
 package app.web.event;
 
 import app.data.Event;
+import app.web.ResourceURI;
+import app.web.basket.responses.BasketResponse;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.ZonedDateTime;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * @author ngnmhieu
@@ -30,17 +36,20 @@ public class EventResponse
 
     public boolean expired;
 
-    public EventResponse(Event event, EventURI eventUri)
+    public TicketSetsResponse ticketSets;
+
+    public EventResponse(Event event, ResourceURI resURI)
     {
-        this.href = eventUri.eventURL(event.getUser().getId(), event.getId());
-        this.id = event.getId();
-        this.title = event.getTitle();
-        this.description = event.getDescription();
-        this.startTime = event.getStartTime();
-        this.endTime = event.getEndTime();
-        this.canceled = event.isCanceled();
-        this.isPublic = event.isPublic();
-        this.happening = event.isHappening();
-        this.expired = event.isExpired();
+        href = resURI.getEventURI().eventURL(event.getUser().getId(), event.getId());
+        id = event.getId();
+        title = event.getTitle();
+        description = event.getDescription();
+        startTime = event.getStartTime();
+        endTime = event.getEndTime();
+        canceled = event.isCanceled();
+        isPublic = event.isPublic();
+        happening = event.isHappening();
+        expired = event.isExpired();
+        ticketSets = new TicketSetsResponse(event, resURI);
     }
 }

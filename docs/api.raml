@@ -166,9 +166,35 @@ traits:
                       "description": "",
                       "startTime": "2016-05-14T00:00:00+02:00",
                       "endTime": "2016-05-14T01:00:00+02:00",
-                      "visibility": "PRIVATE",
+                      "isPublic": true,
                       "canceled": false,
-                      "ticketSets": [],
+                      "ticketSets": {
+                        "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14/ticket-sets"
+                        "items": [
+                          {
+                            "id": 2,
+                            "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14/ticket-sets/2"
+                            "title": "5er group ticket for a team",
+                            "price": 25.00,
+                            "stock": 20,
+                            "event": {
+                              "id": 14,
+                              "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14"
+                            }
+                          },
+                          {
+                            "id": 3,
+                            "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14/ticket-sets/3"
+                            "title": "1er ticket",
+                            "price": 5.00,
+                            "stock": 20,
+                            "event": {
+                              "id": 14,
+                              "href": "http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14"
+                            }
+                          }
+                        ]
+                      },
                       "expired": false,
                       "happening": false
                     }

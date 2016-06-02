@@ -59,7 +59,7 @@ public class EventRepository
      * @param eventId
      * @return null if no event is found
      */
-    public Event findById(long eventId)
+    public Event findById(Long eventId)
     {
         try {
             return em.find(Event.class, eventId);

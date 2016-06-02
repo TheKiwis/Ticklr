@@ -1,6 +1,6 @@
 CREATE TABLE `ticket_sets` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `price` INT NULL,
+  `price` DECIMAL(10,0) NULL DEFAULT 0,
   `title` VARCHAR(60) NOT NULL,
   `event_id` INT NOT NULL,
   PRIMARY KEY (`id`));

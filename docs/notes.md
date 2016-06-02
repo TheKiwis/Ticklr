@@ -39,6 +39,10 @@
 
   + Implementing checks for number of available tickets
 
+  + Payment Card Industry
+
+  + PCI Compliance
+
 REST API
 --------
 

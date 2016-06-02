@@ -1,0 +1,2 @@
+ALTER TABLE `ticket_sets` 
+ADD COLUMN `stock` INT NULL DEFAULT 0;

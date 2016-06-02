@@ -5,7 +5,9 @@ import app.data.validation.EventValidator;
 import app.services.EventRepository;
 import app.services.TicketSetRepository;
 import app.services.UserService;
+import app.web.ResourceURI;
 import app.web.authorization.IdentityAuthorizer;
+import app.web.event.forms.TicketSetForm;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -27,6 +29,8 @@ public class EventController
 
     private static final ResponseEntity FORBIDDEN = new ResponseEntity(HttpStatus.FORBIDDEN);
 
+    private ResourceURI resURI;
+
     private EventURI eventURI;
 
     private EventRepository eventRepository;
@@ -41,23 +45,24 @@ public class EventController
 
     /**
      * @param eventRepository     manages event entities
-     * @param userService      manages user entities
+     * @param userService         manages user entities
      * @param ticketSetRepository manages ticketset entities
      * @param validator           validates event input
      * @param identityAuthorizer
-     * @param eventURI
+     * @param resURI
      */
     @Autowired
     public EventController(EventRepository eventRepository, UserService userService,
                            TicketSetRepository ticketSetRepository, EventValidator validator,
-                           IdentityAuthorizer identityAuthorizer, EventURI eventURI)
+                           IdentityAuthorizer identityAuthorizer, ResourceURI resURI)
     {
         this.eventRepository = eventRepository;
         this.userService = userService;
         this.ticketSetRepository = ticketSetRepository;
         this.validator = validator;
         this.identityAuthorizer = identityAuthorizer;
-        this.eventURI = eventURI;
+        this.resURI = resURI;
+        this.eventURI = resURI.getEventURI();
     }
 
     /**
@@ -75,7 +80,7 @@ public class EventController
             return FORBIDDEN;
 
         List<EventResponse> eventResponses = eventRepository.findByUserId(userId)
-                .stream().map(event -> new EventResponse(event, eventURI)).collect(Collectors.toList());
+                .stream().map(event -> new EventResponse(event, resURI)).collect(Collectors.toList());
 
         EventsResponse response = new EventsResponse(eventURI.eventURL(user.getId(), null), eventResponses);
 
@@ -182,7 +187,7 @@ public class EventController
         if (!identityAuthorizer.authorize(user.getIdentity()))
             return FORBIDDEN;
 
-        return new ResponseEntity(new EventResponse(event, eventURI), HttpStatus.OK);
+        return new ResponseEntity(new EventResponse(event, resURI), HttpStatus.OK);
     }
 
     @RequestMapping(value = EventURI.EVENT_URI, method = RequestMethod.DELETE)
@@ -210,7 +215,9 @@ public class EventController
     }
 
     @RequestMapping(value = EventURI.TICKET_SETS_URI, method = RequestMethod.POST)
-    public ResponseEntity addTicketSet(@PathVariable UUID userId, @PathVariable Long eventId, @RequestBody(required = false) @Valid TicketSet ticketSet, BindingResult bindingResult)
+    public ResponseEntity addTicketSet(@PathVariable UUID userId, @PathVariable Long eventId,
+                                       @RequestBody(required = false) @Valid TicketSetForm ticketSetForm,
+                                       BindingResult bindingResult)
     {
         User user = userService.findById(userId);
 
@@ -226,12 +233,13 @@ public class EventController
         if (!identityAuthorizer.authorize(user.getIdentity()))
             return FORBIDDEN;
 
-        if (ticketSet == null)
+        if (ticketSetForm == null)
             throw new HttpMessageNotReadableException("Request body must be provided");
 
         if (bindingResult.hasFieldErrors())
             return new ResponseEntity(bindingResult.getFieldErrors(), HttpStatus.BAD_REQUEST);
 
+        TicketSet ticketSet = ticketSetForm.getTicketSet();
         event.addTicketSet(ticketSet);
 
         eventRepository.saveOrUpdate(event);
@@ -245,7 +253,7 @@ public class EventController
     // TODO: we have to create some kind of notification resource if the price changes and there are basket items that references it.
     @RequestMapping(value = EventURI.TICKET_SET_URI, method = RequestMethod.PUT)
     public ResponseEntity updateTicketSet(@PathVariable UUID userId, @PathVariable long eventId,
-                                          @PathVariable long ticketSetId, @RequestBody(required = false) @Valid TicketSet updatedTicketSet,
+                                          @PathVariable long ticketSetId, @RequestBody(required = false) @Valid TicketSetForm ticketSetForm,
                                           BindingResult bindingResult)
     {
         TicketSet ticketSet = ticketSetRepository.findById(ticketSetId);
@@ -266,13 +274,15 @@ public class EventController
         if (!identityAuthorizer.authorize(user.getIdentity()))
             return FORBIDDEN;
 
-        if (updatedTicketSet == null)
+        if (ticketSetForm == null)
             throw new HttpMessageNotReadableException("Request body must be provided");
 
         if (bindingResult.hasFieldErrors())
             return new ResponseEntity(bindingResult.getFieldErrors(), HttpStatus.BAD_REQUEST);
 
-        ticketSetRepository.saveOrUpdate(ticketSet.merge(updatedTicketSet));
+        //ticketSetRepository.saveOrUpdate(ticketSet.merge(ticketSetForm));
+
+        ticketSetRepository.saveOrUpdate(ticketSetForm.getTicketSet(ticketSet));
 
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }

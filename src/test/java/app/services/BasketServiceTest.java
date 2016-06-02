@@ -71,7 +71,7 @@ public class BasketServiceTest
     {
         Basket basket = new Basket(mock(Buyer.class));
 
-        TicketSet ticketSet = new TicketSet("To the moon", BigDecimal.TEN);
+        TicketSet ticketSet = new TicketSet("To the moon", BigDecimal.TEN, 50);
 
         BasketItem item = basketService.addItemToBasket(basket, ticketSet, 10);
 
@@ -85,7 +85,7 @@ public class BasketServiceTest
     @Test
     public void addItemToBasket_should_increment_quantity()
     {
-        TicketSet ticketSet = new TicketSet("To the moon", BigDecimal.TEN);
+        TicketSet ticketSet = new TicketSet("To the moon", BigDecimal.TEN, 50);
 
         Basket basket = new Basket(mock(Buyer.class));
 

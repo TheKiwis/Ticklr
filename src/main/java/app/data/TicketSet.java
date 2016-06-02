@@ -1,7 +1,6 @@
 package app.data;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import org.hibernate.validator.constraints.Length;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
@@ -10,7 +9,8 @@ import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 
 /**
- * Created by DucNguyenMinh on 07.03.16.
+ * @author DucNguyenMinh
+ * @since 07.03.16.
  */
 @Entity
 @Table(name = "ticket_sets")
@@ -22,12 +22,17 @@ public class TicketSet
     protected Long id;
 
     @Column(name = "price")
-    @NotNull @Min(0)
+    @NotNull
+    @Min(0)
     protected BigDecimal price;
 
     @Column(name = "title")
-    @NotNull @NotEmpty
+    @NotNull
+    @NotEmpty
     protected String title;
+
+    @Column(name = "stock")
+    protected int stock;
 
     @ManyToOne
     @JoinColumn(name = "event_id", nullable = false)
@@ -36,11 +41,13 @@ public class TicketSet
     /**
      * @param title
      * @param price
+     * @param stock
      */
-    public TicketSet(String title, BigDecimal price)
+    public TicketSet(String title, BigDecimal price, int stock)
     {
         this.price = price;
         this.title = title;
+        this.stock = stock;
     }
 
     protected TicketSet()
@@ -53,6 +60,16 @@ public class TicketSet
     public Long getId()
     {
         return id;
+    }
+
+    public int getStock()
+    {
+        return stock;
+    }
+
+    public void setStock(int stock)
+    {
+        this.stock = stock;
     }
 
     /**
@@ -102,18 +119,6 @@ public class TicketSet
     public void setEvent(Event event)
     {
         this.event = event;
-    }
-
-    /**
-     * @param other
-     * @return new TicketSet with attributes of the given TicketSet
-     */
-    public TicketSet merge(TicketSet other)
-    {
-        TicketSet ticketSet = new TicketSet(other.getTitle(), other.getPrice());
-        ticketSet.id = this.id;
-        ticketSet.event = this.event;
-        return ticketSet;
     }
 
     @Override
