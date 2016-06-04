@@ -1,4 +1,4 @@
-package app.web.event;
+package app.web.event.responses;
 
 import app.data.Event;
 import app.data.User;
@@ -24,9 +24,6 @@ public class EventsResponse
     public EventsResponse(User user, List<Event> events, ResourceURI resURI)
     {
         this.href = resURI.getEventURI().eventURL(user.getId(), null);
-
-        this.items = events.stream().map(event -> {
-            return new EventResponse(event, resURI);
-        }).collect(Collectors.toList());
+        this.items = events.stream().map(event -> new EventResponse(event, resURI)).collect(Collectors.toList());
     }
 }

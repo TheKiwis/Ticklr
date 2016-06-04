@@ -1,4 +1,4 @@
-package app.web.event;
+package app.web.event.responses;
 
 import app.data.Event;
 import app.web.ResourceURI;
@@ -20,23 +20,11 @@ public class TicketSetsResponse
 
     public Set<TicketSetResponse> items;
 
-    // reference back to EventResponse, do not create
-    // new instance in constructor, use setter instead
-    private EventResponse eventResponse;
-
     public TicketSetsResponse(Event event, ResourceURI resURI)
     {
         href = resURI.getEventURI().ticketSetURL(event.getUser().getId(), event.getId(), null);
         items = event.getTicketSets().stream()
                 .map(ticketSet -> new TicketSetResponse(ticketSet, resURI))
                 .collect(Collectors.toSet());
-    }
-
-    public void setEventResponse(EventResponse eventResponse)
-    {
-        this.eventResponse = eventResponse;
-        items.stream().forEach(item -> {
-            item.setEventResponse(eventResponse);
-        });
     }
 }

@@ -1,16 +1,11 @@
-package app.web.event;
+package app.web.event.responses;
 
 import app.data.Event;
 import app.web.ResourceURI;
-import app.web.basket.responses.BasketResponse;
 import app.web.common.response.expansion.Compact;
 import app.web.common.response.expansion.Expandable;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.ZonedDateTime;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 /**
  * @author ngnmhieu
@@ -55,7 +50,17 @@ public class EventResponse
         isPublic = event.isPublic();
         happening = event.isHappening();
         expired = event.isExpired();
-        ticketSets = new TicketSetsResponse(event, resURI);
-        ticketSets.setEventResponse(this);
+    }
+
+    public EventResponse(Event event, ResourceURI resURI, TicketSetsResponse ticketSets)
+    {
+        this(event, resURI);
+        this.ticketSets = ticketSets;
+    }
+
+
+    public void setTicketSetsResponse(TicketSetsResponse ticketSets)
+    {
+        this.ticketSets = ticketSets;
     }
 }

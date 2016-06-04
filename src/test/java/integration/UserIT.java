@@ -5,6 +5,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 import app.data.User;
+import app.web.ResourceURI;
 import app.web.basket.BasketURI;
 import app.web.event.EventURI;
 import app.web.user.UserURI;
@@ -29,8 +30,6 @@ public class UserIT extends CommonIntegrationTest
 
     UUID userId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
 
-    private BasketURI basketURI;
-
     private UserURI userURI;
 
     private EventURI eventURI;
@@ -40,7 +39,6 @@ public class UserIT extends CommonIntegrationTest
     {
         userURI = new UserURI(hostname);
         eventURI = new EventURI(hostname);
-        basketURI = new BasketURI(hostname);
         authString = AuthenticationIT.getAuthTokenFor("user@example.com", "123456789", mockMvc);
     }
 
@@ -59,8 +57,7 @@ public class UserIT extends CommonIntegrationTest
                 .andExpect(jsonPath("$.email").value("user@example.com"))
                 .andExpect(jsonPath("$.password").doesNotExist())
                 .andExpect(jsonPath("$.href").value(userURI.userURL(userId)))
-                .andExpect(jsonPath("$.events.href").value(eventURI.eventURL(userId, null)))
-                .andExpect(jsonPath("$.basket.href").value(basketURI.basketURL(userId)));
+                .andExpect(jsonPath("$.events.href").value(eventURI.eventURL(userId, null)));
     }
 
     @Test

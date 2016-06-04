@@ -1,4 +1,4 @@
-package app.web.event;
+package app.web.event.responses;
 
 import app.data.Event;
 import app.data.TicketSet;
@@ -6,6 +6,7 @@ import app.data.User;
 import app.web.ResourceURI;
 import app.web.common.response.expansion.Compact;
 import app.web.common.response.expansion.Expandable;
+import app.web.event.EventURI;
 
 import java.math.BigDecimal;
 
@@ -44,8 +45,14 @@ public class TicketSetResponse
         href = eventURI.ticketSetURL(user.getId(), eventObj.getId(), ticketSet.getId());
     }
 
-    public void setEventResponse(EventResponse event)
+    public TicketSetResponse(TicketSet ticketSet, ResourceURI resURI, EventResponse event)
     {
+        this(ticketSet, resURI);
         this.event = event;
+    }
+
+    public void setEventResponse(EventResponse eventResponse)
+    {
+        this.event = eventResponse;
     }
 }

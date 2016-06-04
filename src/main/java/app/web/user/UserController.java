@@ -1,25 +1,20 @@
 package app.web.user;
 
-import app.data.Buyer;
 import app.data.Identity;
 import app.data.User;
 import app.services.BuyerService;
+import app.services.EventRepository;
 import app.services.IdentityService;
 import app.services.UserService;
 import app.web.ResourceURI;
 import app.web.authorization.IdentityAuthorizer;
-import app.web.basket.BasketURI;
-import app.web.event.EventURI;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
-import javax.persistence.PersistenceException;
 import javax.validation.Valid;
-import java.net.URI;
 import java.util.UUID;
 
 /**
@@ -32,13 +27,7 @@ import java.util.UUID;
 @RestController
 public class UserController
 {
-    private BasketURI basketURI;
-
-    private EventURI eventURI;
-
     private IdentityAuthorizer identityAuthorizer;
-
-    private UserURI userURI;
 
     private UserService userService;
 
@@ -48,21 +37,21 @@ public class UserController
 
     private ResourceURI resURI;
 
+    private EventRepository eventService;
+
     /**
      * @param userService fetches and saves User object
      */
     @Autowired
     public UserController(UserService userService, BuyerService buyerService, IdentityService identityService,
-                          ResourceURI resURI, IdentityAuthorizer identityAuthorizer)
+                          ResourceURI resURI, EventRepository eventService, IdentityAuthorizer identityAuthorizer)
     {
         this.userService = userService;
         this.resURI = resURI;
-        this.userURI = resURI.getUserURI();
-        this.eventURI = resURI.getEventURI();
-        this.basketURI = resURI.getBasketURI();
         this.identityAuthorizer = identityAuthorizer;
         this.buyerService = buyerService;
         this.identityService = identityService;
+        this.eventService = eventService;
     }
 
     /**
@@ -80,7 +69,7 @@ public class UserController
         if (!identityAuthorizer.authorize(user.getIdentity()))
             return new ResponseEntity(user, HttpStatus.FORBIDDEN);
 
-        return new ResponseEntity(new UserResponse(user, userURI, eventURI, basketURI), HttpStatus.OK);
+        return new ResponseEntity(new UserResponse(user, resURI), HttpStatus.OK);
     }
 
     /**

@@ -9,8 +9,10 @@ import app.web.ResourceURI;
 import app.web.authorization.IdentityAuthorizer;
 import app.web.common.response.expansion.ResponseExpansion;
 import app.web.event.forms.TicketSetForm;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import app.web.event.responses.EventResponse;
+import app.web.event.responses.EventsResponse;
+import app.web.event.responses.TicketSetResponse;
+import app.web.event.responses.TicketSetsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -23,7 +25,6 @@ import javax.validation.Valid;
 import java.net.URI;
 import java.util.List;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
 @RestController
 public class EventController
@@ -84,11 +85,7 @@ public class EventController
 
         List<Event> events = eventRepository.findByUserId(userId);
 
-        String[] expansionRules = null;
-        if (expand != null && !expand.isEmpty())
-            expansionRules = expand.split(",");
-
-        Object res = ResponseExpansion.expand(new EventsResponse(user, events, resURI), expansionRules);
+        Object res = ResponseExpansion.expand(new EventsResponse(user, events, resURI), getExpansionRules(expand));
 
         return new ResponseEntity(res, HttpStatus.OK);
     }
@@ -193,11 +190,9 @@ public class EventController
         if (!identityAuthorizer.authorize(user.getIdentity()))
             return FORBIDDEN;
 
-        String[] expansionRules = null;
-        if (expand != null && !expand.isEmpty())
-            expansionRules = expand.split(",");
+        EventResponse eventResponse = new EventResponse(event, resURI, new TicketSetsResponse(event, resURI));
 
-        Object response = ResponseExpansion.expand(new EventResponse(event, resURI), expansionRules);
+        Object response = ResponseExpansion.expand(eventResponse, getExpansionRules(expand));
 
         return new ResponseEntity(response, HttpStatus.OK);
     }
@@ -224,6 +219,61 @@ public class EventController
         eventRepository.saveOrUpdate(event);
 
         return new ResponseEntity(HttpStatus.NO_CONTENT);
+    }
+
+    @RequestMapping(value = EventURI.TICKET_SETS_URI, method = RequestMethod.GET)
+    public ResponseEntity getTicketSets(@PathVariable UUID userId, @PathVariable Long eventId,
+                                        @RequestParam(name = "expand", required = false) String expand)
+    {
+        User user = userService.findById(userId);
+
+        if (user == null)
+            return NOT_FOUND;
+
+        Event event = eventRepository.findById(eventId);
+
+        // no event with the given eventId belongs to user with userId found
+        if (event == null || !event.getUser().getId().equals(userId))
+            return NOT_FOUND;
+
+        if (!identityAuthorizer.authorize(user.getIdentity()))
+            return FORBIDDEN;
+
+        TicketSetsResponse ticketSetsResponse = new TicketSetsResponse(event, resURI);
+
+        Object res = ResponseExpansion.expand(ticketSetsResponse, getExpansionRules(expand));
+
+        return new ResponseEntity(res, HttpStatus.OK);
+    }
+
+
+    @RequestMapping(value = EventURI.TICKET_SET_URI, method = RequestMethod.GET)
+    public ResponseEntity getTicketSet(@PathVariable UUID userId, @PathVariable long eventId,
+                                       @PathVariable long ticketSetId, @RequestParam(name = "expand", required = false) String expand)
+    {
+        TicketSet ticketSet = ticketSetRepository.findById(ticketSetId);
+
+        if (ticketSet == null)
+            return NOT_FOUND;
+
+        Event event = ticketSet.getEvent();
+        // ticketSet doesn't belong to event
+        if (!event.getId().equals(eventId))
+            return NOT_FOUND;
+
+        User user = event.getUser();
+        // event doesn't belong to user
+        if (!user.getId().equals(userId))
+            return NOT_FOUND;
+
+        if (!identityAuthorizer.authorize(user.getIdentity()))
+            return FORBIDDEN;
+
+        TicketSetResponse ticketSetResponse = new TicketSetResponse(ticketSet, resURI, new EventResponse(event, resURI));
+
+        Object res = ResponseExpansion.expand(ticketSetResponse, getExpansionRules(expand));
+
+        return new ResponseEntity(res, HttpStatus.OK);
     }
 
     @RequestMapping(value = EventURI.TICKET_SETS_URI, method = RequestMethod.POST)
@@ -327,4 +377,17 @@ public class EventController
 
         return new ResponseEntity(HttpStatus.OK);
     }
+
+
+    /**
+     * Parse comma separated list of expansion rules coming from request parameter
+     *
+     * @param rule
+     * @return expansion rules in a String array
+     */
+    private String[] getExpansionRules(String rule)
+    {
+        return rule != null && !rule.isEmpty() ? rule.split(",") : new String[0];
+    }
+
 }

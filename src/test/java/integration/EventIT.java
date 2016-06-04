@@ -15,7 +15,6 @@ import org.junit.Test;
 
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.math.BigDecimal;
 import java.time.*;
@@ -105,9 +104,11 @@ public class EventIT extends CommonIntegrationTest
         invalidUserId = UUID.fromString("f3958500-0f0e-11e6-b1d4-0002a5d5c51b");
     }
 
-    private MockHttpServletRequestBuilder addAuthHeader(MockHttpServletRequestBuilder requestBuilder)
+    private MockHttpServletRequestBuilder prepareRequest(MockHttpServletRequestBuilder requestBuilder)
     {
-        return requestBuilder.header("Authorization", authString);
+        return requestBuilder
+                .header("Authorization", authString)
+                .contentType("application/json");
     }
 
     /*************************************************
@@ -118,7 +119,7 @@ public class EventIT extends CommonIntegrationTest
     public void happy_should_return_events_collection() throws Exception
     {
         String url = eventURL(sampleUserId, null);
-        mockMvc.perform(addAuthHeader(get(url)))
+        mockMvc.perform(prepareRequest(get(url)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.href").value(url))
                 .andExpect(jsonPath("$.items").isArray())
@@ -130,7 +131,7 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void happy_should_return_an_event() throws Exception
     {
-        mockMvc.perform(addAuthHeader(get(eventURL(sampleUser.getId(), sampleEventId))))
+        mockMvc.perform(prepareRequest(get(eventURL(sampleUser.getId(), sampleEventId))))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").value(sampleEvent.getId().intValue()))
                 .andExpect(jsonPath("$.href").isNotEmpty())
@@ -145,7 +146,7 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(jsonPath("$.endTime").value(startsWith(sampleEndTime)));
 
         // expanding ticketSets
-        mockMvc.perform(addAuthHeader(get(eventURL(sampleUser.getId(), sampleEventId)))
+        mockMvc.perform(prepareRequest(get(eventURL(sampleUser.getId(), sampleEventId)))
                 .param("expand", "ticketSets.items"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.ticketSets.items").isArray())
@@ -153,24 +154,18 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void happy_should_return_with_HTTP_Created_and_Location_Header() throws Exception
-    {
-        mockMvc.perform(addAuthHeader(post(eventURL(sampleUserId, null))))
-                .andExpect(status().isCreated())
-                .andExpect(header().string("Location", startsWith(eventURL(sampleUserId, null))));
-    }
-
-    @Test
     public void happy_should_create_empty_event_with_default_values() throws Exception
     {
-        MvcResult response = mockMvc.perform(addAuthHeader(post(eventURL(sampleUserId, null))))
-                .andExpect(status().isCreated()).andReturn();
+        MvcResult response = mockMvc.perform(prepareRequest(post(eventURL(sampleUserId, null))))
+                .andExpect(status().isCreated())
+                .andExpect(header().string("Location", startsWith(eventURL(sampleUserId, null))))
+                .andReturn();
 
         String expectedStartTime = ZonedDateTime.now().plusDays(7).withHour(0).withMinute(0).withSecond(0).withNano(0).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
         String expectedEndTime = ZonedDateTime.now().plusDays(7).withHour(0).withMinute(0).withSecond(0).withNano(0).plusHours(1).format(DateTimeFormatter.ISO_LOCAL_DATE_TIME);
 
         String location = response.getResponse().getHeader("Location");
-        mockMvc.perform(addAuthHeader(get(location)))
+        mockMvc.perform(prepareRequest(get(location)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.title").value("New Event"))
@@ -186,13 +181,12 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void happy_should_create_an_event_with_provided_value() throws Exception
     {
-        MvcResult response = mockMvc.perform(addAuthHeader(post(eventURL(sampleUserId, null)))
-                .contentType("application/json")
+        MvcResult response = mockMvc.perform(prepareRequest(post(eventURL(sampleUserId, null)))
                 .content(getEventForm())
         ).andExpect(status().isCreated()).andReturn();
 
         String location = response.getResponse().getHeader("Location");
-        mockMvc.perform(addAuthHeader(get(location)))
+        mockMvc.perform(prepareRequest(get(location)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.href").value(location))
@@ -236,13 +230,12 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void happy_should_update_an_existing_event() throws Exception
     {
-        MvcResult response = mockMvc.perform(addAuthHeader(put(eventURL(sampleUserId, sampleEventId))
-                .contentType("application/json")
+        MvcResult response = mockMvc.perform(prepareRequest(put(eventURL(sampleUserId, sampleEventId))
                 .content(getEventForm()))
         ).andExpect(status().isNoContent()).andReturn();
 
         String location = response.getResponse().getHeader("Location");
-        mockMvc.perform(addAuthHeader(get(location)))
+        mockMvc.perform(prepareRequest(get(location)))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.id").isNotEmpty())
                 .andExpect(jsonPath("$.title").value(sampleTitle))
@@ -256,7 +249,7 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void happy_should_cancel_event() throws Exception
     {
-        mockMvc.perform(addAuthHeader(delete(eventURL(sampleUserId, sampleEventId))))
+        mockMvc.perform(prepareRequest(delete(eventURL(sampleUserId, sampleEventId))))
                 .andExpect(status().isNoContent());
 
         boolean canceled = (Boolean) em.createQuery("SELECT e.canceled FROM Event e WHERE e.id = :event_id").setParameter("event_id", sampleEventId).getSingleResult();
@@ -267,8 +260,42 @@ public class EventIT extends CommonIntegrationTest
     @Test
     public void happy_should_not_cancel_event_and_return_HTTP_NotFound() throws Exception
     {
-        mockMvc.perform(addAuthHeader(delete(eventURL(sampleUserId, 234l))))
+        mockMvc.perform(prepareRequest(delete(eventURL(sampleUserId, 234l))))
                 .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void happy_should_return_ticket_sets() throws Exception
+    {
+        mockMvc.perform(prepareRequest(get(ticketSetURL(sampleUserId, sampleEvent.getId(), null))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.href").isNotEmpty())
+                .andExpect(jsonPath("$.items").isArray());
+
+        // expand
+        mockMvc.perform(prepareRequest(get(ticketSetURL(sampleUserId, sampleEvent.getId(), null)))
+                .param("expand", "items"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.items").isArray())
+                .andExpect(jsonPath("$.items[0].title").isNotEmpty())
+                .andExpect(jsonPath("$.items[0].event").isEmpty());
+    }
+
+    @Test
+    public void happy_should_return_a_ticket_set() throws Exception
+    {
+        mockMvc.perform(prepareRequest(get(ticketSetURL(sampleUserId, sampleEvent.getId(), sampleTicketSetId))))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.id").isNotEmpty())
+                .andExpect(jsonPath("$.href").isNotEmpty())
+                .andExpect(jsonPath("$.title").isNotEmpty())
+                .andExpect(jsonPath("$.event").isMap())
+                .andExpect(jsonPath("$.event.title").doesNotExist());
+
+        // expand
+        mockMvc.perform(prepareRequest(get(ticketSetURL(sampleUserId, sampleEvent.getId(), sampleTicketSetId)))
+                .param("expand", "event"))
+                .andExpect(jsonPath("$.event.title").isNotEmpty());
     }
 
     @Test
@@ -278,9 +305,7 @@ public class EventIT extends CommonIntegrationTest
 
         long count = (long) em.createQuery(query).setParameter("event_id", sampleEventId).getSingleResult();
 
-        mockMvc.perform(post(ticketSetURL(sampleUserId, sampleEventId, null))
-                .header("Authorization", authString)
-                .contentType("application/json")
+        mockMvc.perform(prepareRequest(post(ticketSetURL(sampleUserId, sampleEventId, null)))
                 .content(getTicketSetForm("Early Bird", 20.00, 20)))
                 .andExpect(status().isCreated())
                 .andExpect(header().string("Location", startsWith(ticketSetURL(sampleUserId, sampleEventId, null))));
@@ -442,7 +467,7 @@ public class EventIT extends CommonIntegrationTest
     }
 
     @Test
-    public void sad_hould_return_HTTP_BadRequest_when_endTime_before_startTime() throws Exception
+    public void sad_should_return_HTTP_BadRequest_when_endTime_before_startTime() throws Exception
     {
         String invalidStartTime = ZonedDateTime.of(2015, 3, 12, 20, 00, 00, 00, ZoneId.of("Z")).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
         String invalidEndTime = ZonedDateTime.of(2015, 3, 12, 19, 00, 00, 00, ZoneId.of("Z")).format(DateTimeFormatter.ISO_OFFSET_DATE_TIME);
@@ -453,6 +478,24 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(status().isBadRequest())
                 .andExpect(jsonPath("$").isNotEmpty());
     }
+
+    @Test
+    public void sad_should_return_HTTP_NotFound_on_ticket_sets() throws Exception
+    {
+        mockMvc.perform(prepareRequest(get(ticketSetURL(sampleUserId, 456l, null))))
+                .andExpect(status().isNotFound());
+
+        mockMvc.perform(prepareRequest(get(ticketSetURL(UUID.randomUUID(), 123l, null))))
+                .andExpect(status().isNotFound());
+    }
+
+    @Test
+    public void sad_should_return_HTTP_Forbidden_on_ticket_sets() throws Exception
+    {
+        mockMvc.perform(prepareRequest(get(ticketSetURL(UUID.fromString("63b8e800-0f0e-11e6-bec3-0002a5d5c51b"), 456l, null))))
+                .andExpect(status().isForbidden());
+    }
+
 
     @Test
     public void sad_should_not_create_or_update_or_delete_ticket_set_if_no_event_found() throws Exception

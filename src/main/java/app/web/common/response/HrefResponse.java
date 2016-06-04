@@ -8,9 +8,7 @@ public class HrefResponse
 {
     public String href;
 
-    public HrefResponse()
-    {
-    }
+    public HrefResponse() {}
 
     public HrefResponse(String href)
     {

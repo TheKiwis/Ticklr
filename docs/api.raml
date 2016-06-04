@@ -61,9 +61,11 @@ traits:
   - expandable   :
       queryParameters:
         expand:
-          description: |
-            This specifies which nested resource to be expanded in the response.
-            For example if resource B is nested in resource A under attribute `attrB`.
+          description: This specifies which nested resource to be expanded in the response.
+          required: false
+          type: string
+          example: |
+            If resource B is nested in resource A under attribute `attrB`.
             When `expand` is not specified when GETing a resource A, the response will look like this:
               {
                 "id": "id of resource A",
@@ -87,9 +89,6 @@ traits:
                   "attribute3": "...."
                 }
               }
-          required: false
-          type: string
-          example: "expand=event.ticketSets.items"
 
 
 /users:
@@ -136,12 +135,17 @@ traits:
             application/json:
               example: |
                 {
-                  "id": "http://example.com/api/users/103d34a8-1420-74e9-153d-7a35e1ea8619",
-                  "email": "user@example.com"
+                  "id": "103d34a8-1420-74e9-153d-7a35e1ea8619",
+                  "href": "http://example.com/api/users/103d34a8-1420-74e9-153d-7a35e1ea8619",
+                  "email": "user@example.com",
+                  "events": {
+                    "href": "http://localhost:8080/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events"
+                  }
                 }
     /events:
       is: [authorized, has_resource_not_found]
       get:
+        is: [expandable]
         description: Returns all events belonging to the user.
         responses:
           200:
@@ -185,6 +189,7 @@ traits:
       /{eventId}:
         is: [authorized, has_resource_not_found]
         get:
+          is: [expandable]
           description: Returns an event.
           responses:
             200:
@@ -256,7 +261,8 @@ traits:
         /ticket-sets:
           is: [authorized, has_resource_not_found]
           get:
-            description: Ticket-sets collection of an event. # TODO
+            is: [expandable]
+            description: Ticket-sets collection of an event.
             responses:
               200:
                 body:
@@ -305,11 +311,12 @@ traits:
                 description: Ticket set has been successfully created.
                 headers:
                   Location:
-                    example: "Location: http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14/ticket-sets/2" # TODO
+                    example: "Location: http://example.com/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/14/ticket-sets/2"
 
           /{ticketSetId}:
             is: [authorized, has_resource_not_found]
             get:
+              is: [expandable]
               description: Returns a Ticket Set
               body:
                 application/json:
