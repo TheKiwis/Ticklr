@@ -58,7 +58,39 @@ traits:
       responses:
         404:
           description: Resource not found.
-    
+  - expandable   :
+      queryParameters:
+        expand:
+          description: |
+            This specifies which nested resource to be expanded in the response.
+            For example if resource B is nested in resource A under attribute `attrB`.
+            When `expand` is not specified when GETing a resource A, the response will look like this:
+              {
+                "id": "id of resource A",
+                "href": "location of resource A"
+                "someMoreAttribute": "...."
+                "attrB": { // details of resource B is not expanded, only the location is returned
+                  "id": "id of resource B",
+                  "href": "location of resource B"
+                }
+              }
+            When the query parameter is "expand=attrB", then the response will look like this:
+              {
+                "id": "id of resource A",
+                "href": "location of resource A"
+                "someMoreAttribute": "...."
+                "attrB": { // details of resource B is not expanded, only the location is returned
+                  "id": "id of resource B",
+                  "href": "location of resource B",
+                  "attribute1": "....",
+                  "attribute2": "....",
+                  "attribute3": "...."
+                }
+              }
+          required: false
+          type: string
+          example: "expand=event.ticketSets.items"
+
 
 /users:
   post:
@@ -120,12 +152,12 @@ traits:
                     "href": "http://localhost:8080/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events",
                     "items": [
                       {
-                        "id": "http://localhost:8080/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/1",
-                        "title": "New Event"
+                        "id": 1,
+                        "href": "http://localhost:8080/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/1",
                       },
                       {
-                        "id": "http://localhost:8080/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/2",
-                        "title": "New Event"
+                        "id": 2,
+                        "href": "http://localhost:8080/api/users/103d44a8-1240-49e9-935d-7a35e5ea6819/events/2",
                       }
                     ]
                   }

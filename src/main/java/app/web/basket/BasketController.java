@@ -8,7 +8,7 @@ import app.web.ResourceURI;
 import app.web.authorization.IdentityAuthorizer;
 import app.web.basket.responses.BasketItemResponse;
 import app.web.basket.responses.BasketResponse;
-import app.web.common.ErrorResponse;
+import app.web.common.response.ErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;

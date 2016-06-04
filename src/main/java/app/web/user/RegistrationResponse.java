@@ -1,9 +1,7 @@
 package app.web.user;
 
-import app.data.Buyer;
-import app.data.User;
 import app.web.ResourceURI;
-import app.web.common.HrefResponse;
+import app.web.common.response.HrefResponse;
 
 /**
  * @author ngnmhieu

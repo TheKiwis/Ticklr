@@ -1,16 +1,13 @@
 package integration;
 
 import app.web.basket.BasketURI;
-import app.web.common.ErrorResponse;
+import app.web.common.response.ErrorResponse;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dbunit.dataset.IDataSet;
 import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
-import org.hamcrest.CoreMatchers;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.Matchers;
-import org.springframework.http.HttpStatus;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.UUID;

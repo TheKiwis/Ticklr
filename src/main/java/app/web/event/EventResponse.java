@@ -3,6 +3,8 @@ package app.web.event;
 import app.data.Event;
 import app.web.ResourceURI;
 import app.web.basket.responses.BasketResponse;
+import app.web.common.response.expansion.Compact;
+import app.web.common.response.expansion.Expandable;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.time.ZonedDateTime;
@@ -14,10 +16,13 @@ import java.util.stream.Collectors;
  * @author ngnmhieu
  * @since 16.05.16
  */
+@Expandable
 public class EventResponse
 {
+    @Compact
     public Long id;
 
+    @Compact
     public String href;
 
     public String title;
@@ -51,5 +56,6 @@ public class EventResponse
         happening = event.isHappening();
         expired = event.isExpired();
         ticketSets = new TicketSetsResponse(event, resURI);
+        ticketSets.setEventResponse(this);
     }
 }

@@ -3,8 +3,7 @@ package integration;
 import app.data.User;
 import app.web.authentication.JwtHelper;
 import app.web.buyer.BuyerURI;
-import app.web.common.HrefResponse;
-import app.web.user.UserResponse;
+import app.web.common.response.HrefResponse;
 import app.web.user.UserURI;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -15,7 +14,6 @@ import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.core.token.Token;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
@@ -26,7 +24,6 @@ import java.util.UUID;
 import static org.hamcrest.CoreMatchers.containsString;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.header;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 

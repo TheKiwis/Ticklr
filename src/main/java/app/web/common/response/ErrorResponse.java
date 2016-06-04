@@ -1,4 +1,4 @@
-package app.web.common;
+package app.web.common.response;
 
 /**
  * @author ngnmhieu

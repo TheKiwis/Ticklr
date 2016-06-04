@@ -15,6 +15,7 @@ import org.junit.Test;
 
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.math.BigDecimal;
 import java.time.*;
@@ -123,7 +124,6 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(jsonPath("$.items").isArray())
                 .andExpect(jsonPath("$.items").isNotEmpty())
                 .andExpect(jsonPath("$.items[0].id").isNotEmpty())
-                .andExpect(jsonPath("$.items[0].title").isNotEmpty())
                 .andExpect(jsonPath("$.items[0].href").isNotEmpty());
     }
 
@@ -143,6 +143,13 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(jsonPath("$.ticketSets").isMap())
                 .andExpect(jsonPath("$.startTime").value(startsWith(sampleStartTime)))
                 .andExpect(jsonPath("$.endTime").value(startsWith(sampleEndTime)));
+
+        // expanding ticketSets
+        mockMvc.perform(addAuthHeader(get(eventURL(sampleUser.getId(), sampleEventId)))
+                .param("expand", "ticketSets.items"))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.ticketSets.items").isArray())
+                .andExpect(jsonPath("$.ticketSets.items[0].title").isNotEmpty());
     }
 
     @Test

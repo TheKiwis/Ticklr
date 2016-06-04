@@ -7,7 +7,10 @@ import app.services.TicketSetRepository;
 import app.services.UserService;
 import app.web.ResourceURI;
 import app.web.authorization.IdentityAuthorizer;
+import app.web.common.response.expansion.ResponseExpansion;
 import app.web.event.forms.TicketSetForm;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -69,7 +72,7 @@ public class EventController
      * @return List of events belonging to a particular user
      */
     @RequestMapping(value = EventURI.EVENTS_URI, method = RequestMethod.GET)
-    public ResponseEntity getEvents(@PathVariable UUID userId)
+    public ResponseEntity getEvents(@PathVariable UUID userId, @RequestParam(name = "expand", required = false) String expand)
     {
         User user = userService.findById(userId);
 
@@ -79,12 +82,15 @@ public class EventController
         if (!identityAuthorizer.authorize(user.getIdentity()))
             return FORBIDDEN;
 
-        List<EventResponse> eventResponses = eventRepository.findByUserId(userId)
-                .stream().map(event -> new EventResponse(event, resURI)).collect(Collectors.toList());
+        List<Event> events = eventRepository.findByUserId(userId);
 
-        EventsResponse response = new EventsResponse(eventURI.eventURL(user.getId(), null), eventResponses);
+        String[] expansionRules = null;
+        if (expand != null && !expand.isEmpty())
+            expansionRules = expand.split(",");
 
-        return new ResponseEntity(response, HttpStatus.OK);
+        Object res = ResponseExpansion.expand(new EventsResponse(user, events, resURI), expansionRules);
+
+        return new ResponseEntity(res, HttpStatus.OK);
     }
 
     /**
@@ -172,7 +178,7 @@ public class EventController
     }
 
     @RequestMapping(value = EventURI.EVENT_URI, method = RequestMethod.GET)
-    public ResponseEntity showEvent(@PathVariable UUID userId, @PathVariable Long eventId)
+    public ResponseEntity showEvent(@PathVariable UUID userId, @PathVariable Long eventId, @RequestParam(name = "expand", required = false) String expand)
     {
         User user = userService.findById(userId);
 
@@ -187,7 +193,13 @@ public class EventController
         if (!identityAuthorizer.authorize(user.getIdentity()))
             return FORBIDDEN;
 
-        return new ResponseEntity(new EventResponse(event, resURI), HttpStatus.OK);
+        String[] expansionRules = null;
+        if (expand != null && !expand.isEmpty())
+            expansionRules = expand.split(",");
+
+        Object response = ResponseExpansion.expand(new EventResponse(event, resURI), expansionRules);
+
+        return new ResponseEntity(response, HttpStatus.OK);
     }
 
     @RequestMapping(value = EventURI.EVENT_URI, method = RequestMethod.DELETE)
