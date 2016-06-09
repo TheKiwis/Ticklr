@@ -1,5 +1,6 @@
-package app.data;
+package app.data.event;
 
+import app.data.user.User;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.*;
 import org.hibernate.validator.constraints.NotEmpty;

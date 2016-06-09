@@ -1,7 +1,6 @@
 package app.services;
 
-import app.data.Event;
-import org.springframework.http.ResponseEntity;
+import app.data.event.Event;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 

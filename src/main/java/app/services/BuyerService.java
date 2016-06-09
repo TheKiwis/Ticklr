@@ -1,8 +1,7 @@
 package app.services;
 
-import app.data.Buyer;
-import app.data.Identity;
-import org.springframework.beans.factory.annotation.Autowired;
+import app.data.user.Buyer;
+import app.data.user.Identity;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 

@@ -1,12 +1,11 @@
 package app.web.authentication;
 
-import app.data.Identity;
-import app.data.User;
+import app.data.user.Identity;
+import app.data.user.User;
 import io.jsonwebtoken.*;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.token.Token;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Calendar;

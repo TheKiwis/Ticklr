@@ -1,6 +1,9 @@
 package app.web.basket;
 
-import app.data.*;
+import app.data.basket.Basket;
+import app.data.basket.BasketItem;
+import app.data.event.TicketSet;
+import app.data.user.Buyer;
 import app.services.BasketService;
 import app.services.TicketSetRepository;
 import app.services.BuyerService;

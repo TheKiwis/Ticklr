@@ -4,9 +4,8 @@ import static org.junit.Assert.*;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.*;
 
-import app.data.Buyer;
-import app.data.Identity;
-import app.data.User;
+import app.data.user.Identity;
+import app.data.user.User;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

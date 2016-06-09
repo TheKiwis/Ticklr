@@ -1,16 +1,19 @@
-package app.data;
+package app.data.user;
 
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.OneToOne;
+import javax.persistence.Table;
 import java.util.UUID;
 
 /**
  * @author ngnmhieu
  */
 @Entity
-@Table(name = "buyers")
-public class Buyer
+@Table(name = "users")
+public class User
 {
     @Id
     @Column(name = "id")
@@ -22,20 +25,17 @@ public class Buyer
     @JoinColumn(name = "identity_id")
     protected Identity identity;
 
-    @OneToOne(mappedBy = "buyer")
-    protected Basket basket;
-
-    protected Buyer()
+    protected User()
     {
     }
 
-    public Buyer(UUID id, Identity identity)
+    public User(UUID id, Identity identity)
     {
         this(identity);
         setId(id);
     }
 
-    public Buyer(Identity identity)
+    public User(Identity identity)
     {
         setIdentity(identity);
     }
@@ -61,15 +61,5 @@ public class Buyer
     public void setIdentity(Identity identity)
     {
         this.identity = identity;
-    }
-
-    public Basket getBasket()
-    {
-        return basket;
-    }
-
-    public void setBasket(Basket basket)
-    {
-        this.basket = basket;
     }
 }

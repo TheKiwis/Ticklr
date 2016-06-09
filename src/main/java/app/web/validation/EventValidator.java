@@ -1,7 +1,7 @@
-package app.data.validation;
+package app.web.validation;
 
 
-import app.data.Event;
+import app.data.event.Event;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.Errors;
 import org.springframework.validation.Validator;

@@ -1,7 +1,9 @@
 package app.web.event;
 
-import app.data.*;
-import app.data.validation.EventValidator;
+import app.data.event.Event;
+import app.data.event.TicketSet;
+import app.data.user.User;
+import app.web.validation.EventValidator;
 import app.services.EventRepository;
 import app.services.TicketSetRepository;
 import app.services.UserService;

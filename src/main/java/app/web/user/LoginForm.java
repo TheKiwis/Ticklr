@@ -1,8 +1,8 @@
 package app.web.user;
 
-import app.data.Buyer;
-import app.data.Identity;
-import app.data.User;
+import app.data.user.Buyer;
+import app.data.user.Identity;
+import app.data.user.User;
 import org.hibernate.validator.constraints.Email;
 import org.hibernate.validator.constraints.Length;
 

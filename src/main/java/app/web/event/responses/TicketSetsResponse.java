@@ -1,6 +1,6 @@
 package app.web.event.responses;
 
-import app.data.Event;
+import app.data.event.Event;
 import app.web.ResourceURI;
 import app.web.common.response.expansion.Compact;
 import app.web.common.response.expansion.Expandable;

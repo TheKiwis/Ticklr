@@ -1,7 +1,7 @@
 package app.services;
 
-import app.data.Buyer;
-import app.data.Identity;
+import app.data.user.Buyer;
+import app.data.user.Identity;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

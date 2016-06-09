@@ -1,6 +1,6 @@
 package app.web.authentication;
 
-import app.data.Identity;
+import app.data.user.Identity;
 import app.services.IdentityService;
 import io.jsonwebtoken.Claims;
 import org.springframework.security.authentication.AuthenticationProvider;

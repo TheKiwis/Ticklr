@@ -1,11 +1,8 @@
 package app.web.authentication;
 
-import app.data.Identity;
-import app.data.User;
+import app.data.user.Identity;
+import app.data.user.User;
 import org.junit.Test;
-import org.springframework.security.core.GrantedAuthority;
-
-import java.util.ArrayList;
 
 import static org.junit.Assert.*;
 

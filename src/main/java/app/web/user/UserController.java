@@ -1,7 +1,7 @@
 package app.web.user;
 
-import app.data.Identity;
-import app.data.User;
+import app.data.user.Identity;
+import app.data.user.User;
 import app.services.BuyerService;
 import app.services.EventRepository;
 import app.services.IdentityService;

@@ -1,8 +1,7 @@
 package app.services;
 
-import app.data.Event;
-import app.data.TicketSet;
-import app.services.TicketSetRepository;
+import app.data.event.Event;
+import app.data.event.TicketSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

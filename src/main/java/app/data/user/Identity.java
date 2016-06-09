@@ -1,4 +1,4 @@
-package app.data;
+package app.data.user;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.GenericGenerator;

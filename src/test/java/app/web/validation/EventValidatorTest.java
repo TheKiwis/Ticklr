@@ -1,12 +1,11 @@
-package app.data.validation;
+package app.web.validation;
 
-import app.data.Event;
-import app.data.User;
+import app.data.event.Event;
+import app.data.user.User;
 import org.junit.Test;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.Errors;
 
-import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
 

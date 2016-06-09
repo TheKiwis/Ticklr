@@ -1,13 +1,11 @@
 package app.services;
 
-import app.data.TicketSet;
+import app.data.event.TicketSet;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
 import javax.persistence.PersistenceContext;
-import javax.persistence.Query;
 
 /**
  * @author ngnmhieu

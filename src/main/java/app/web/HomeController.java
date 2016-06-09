@@ -1,9 +1,7 @@
 package app.web;
 
-import app.data.Identity;
-import app.data.User;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import app.data.user.Identity;
+import app.data.user.User;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 

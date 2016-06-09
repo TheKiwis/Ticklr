@@ -1,9 +1,9 @@
 package app.services;
 
-import app.data.Basket;
-import app.data.BasketItem;
-import app.data.Buyer;
-import app.data.TicketSet;
+import app.data.basket.Basket;
+import app.data.basket.BasketItem;
+import app.data.user.Buyer;
+import app.data.event.TicketSet;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

@@ -1,7 +1,7 @@
 package app.web.basket.responses;
 
-import app.data.Basket;
-import app.data.BasketItem;
+import app.data.basket.Basket;
+import app.data.basket.BasketItem;
 import app.web.ResourceURI;
 
 import java.math.BigDecimal;

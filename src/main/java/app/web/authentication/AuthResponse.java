@@ -1,7 +1,7 @@
 package app.web.authentication;
 
-import app.data.Buyer;
-import app.data.User;
+import app.data.user.Buyer;
+import app.data.user.User;
 import app.web.ResourceURI;
 import app.web.common.response.HrefResponse;
 

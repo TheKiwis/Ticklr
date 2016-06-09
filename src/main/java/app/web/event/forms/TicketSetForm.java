@@ -1,9 +1,8 @@
 package app.web.event.forms;
 
-import app.data.TicketSet;
+import app.data.event.TicketSet;
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.persistence.Column;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;

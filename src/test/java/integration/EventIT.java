@@ -2,9 +2,9 @@ package integration;
 
 import static org.hamcrest.CoreMatchers.*;
 
-import app.data.Event;
-import app.data.TicketSet;
-import app.data.User;
+import app.data.event.Event;
+import app.data.event.TicketSet;
+import app.data.user.User;
 import app.web.event.EventURI;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;

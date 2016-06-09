@@ -1,6 +1,9 @@
 package app.web.basket.responses;
 
-import app.data.*;
+import app.data.basket.Basket;
+import app.data.event.Event;
+import app.data.event.TicketSet;
+import app.data.user.Buyer;
 import app.web.ResourceURI;
 
 import java.util.List;

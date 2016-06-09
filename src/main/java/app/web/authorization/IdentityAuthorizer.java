@@ -1,6 +1,6 @@
 package app.web.authorization;
 
-import app.data.Identity;
+import app.data.user.Identity;
 import org.springframework.security.core.Authentication;
 
 /**

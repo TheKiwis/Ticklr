@@ -4,9 +4,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
-import app.data.User;
-import app.web.ResourceURI;
-import app.web.basket.BasketURI;
+import app.data.user.User;
 import app.web.event.EventURI;
 import app.web.user.UserURI;
 import com.fasterxml.jackson.core.JsonProcessingException;

@@ -1,5 +1,7 @@
-package app.data;
+package app.data.basket;
 
+import app.data.user.Buyer;
+import app.data.event.TicketSet;
 import org.hibernate.annotations.*;
 import org.springframework.util.Assert;
 
@@ -41,7 +43,7 @@ public class Basket
     @OneToMany(mappedBy = "basket", fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
     protected Set<BasketItem> items = new HashSet<>();
 
-    protected Basket()
+    public Basket()
     {
     }
 

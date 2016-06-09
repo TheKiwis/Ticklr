@@ -1,7 +1,7 @@
 package app.services;
 
-import app.data.Identity;
-import app.data.User;
+import app.data.user.Identity;
+import app.data.user.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,17 +1,13 @@
 package app.web.authentication;
 
-import app.data.Identity;
+import app.data.user.Identity;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
-import org.springframework.security.core.token.DefaultToken;
-import org.springframework.security.core.token.Token;
 import org.springframework.stereotype.Component;
 
 import java.nio.charset.StandardCharsets;
-import java.time.LocalDateTime;
-import java.time.ZoneOffset;
 import java.util.Calendar;
 import java.util.Date;
 

@@ -1,6 +1,6 @@
 package integration;
 
-import app.data.User;
+import app.data.user.User;
 import app.web.authentication.JwtHelper;
 import app.web.buyer.BuyerURI;
 import app.web.common.response.HrefResponse;

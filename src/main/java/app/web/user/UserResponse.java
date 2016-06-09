@@ -1,6 +1,6 @@
 package app.web.user;
 
-import app.data.User;
+import app.data.user.User;
 import app.web.ResourceURI;
 import app.web.common.response.HrefResponse;
 import app.web.common.response.expansion.Compact;

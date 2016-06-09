@@ -1,18 +1,15 @@
 package app.services;
 
-import app.data.Basket;
-import app.data.BasketItem;
-import app.data.TicketSet;
+import app.data.basket.Basket;
+import app.data.basket.BasketItem;
+import app.data.event.TicketSet;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import javax.persistence.*;
-import java.util.UUID;
 
 /**
- * TODO:
- *
  * @author DucNguyenMinh
  * @since 08.03.16
  */

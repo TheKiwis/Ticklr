@@ -1,7 +1,6 @@
 package app.services;
 
-import app.data.Event;
-import app.services.EventRepository;
+import app.data.event.Event;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;

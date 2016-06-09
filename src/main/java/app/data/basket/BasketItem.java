@@ -1,5 +1,6 @@
-package app.data;
+package app.data.basket;
 
+import app.data.event.TicketSet;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import org.hibernate.annotations.CreationTimestamp;
@@ -12,7 +13,8 @@ import java.math.BigDecimal;
 import java.util.Date;
 
 /**
- * Created by DucNguyenMinh on 05.03.16.
+ * @author DucNguyenMinh
+ * @since 05.03.16
  */
 
 @Entity
