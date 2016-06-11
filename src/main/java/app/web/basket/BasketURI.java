@@ -3,6 +3,7 @@ package app.web.basket;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.UUID;
 
@@ -49,12 +50,12 @@ public class BasketURI
 
     public String basketURI(UUID buyerId)
     {
-        return "/api/buyers/" + buyerId + "/basket";
+        return UriComponentsBuilder.fromUriString(BASKET_URI).buildAndExpand(buyerId).encode().toUriString();
     }
 
-    public String basketItemURI(UUID buyerId, Long basketItemId)
+    public String basketItemURI(UUID buyerId, Long itemId)
     {
-        return basketURI(buyerId) + "/items" + (basketItemId == null ? "" : "/" + basketItemId);
+        return UriComponentsBuilder.fromUriString(ITEM_URI).buildAndExpand(buyerId, itemId).encode().toUriString();
     }
 }
 

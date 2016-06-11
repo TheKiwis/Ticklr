@@ -395,6 +395,59 @@ traits:
                     "href": "http://example.com/api/users/103d34a8-1420-74e9-153d-7a35e1ea8619/basket"
                   }
                 }
+    /checkout:
+      /paypal:
+        /init:
+          is: [authorized]
+          post:
+            description: |
+              "Creates a Paypal payment and return an approval-url. Any change to the 
+              basket after this operation will invalidate it.
+              Precondition: Basket must contain at least one item."
+            body:
+              application/json:
+                exmpale:
+                  {
+                    "returnUrl": "http://ticklr.com/checkout/paypal/approved",
+                    "cancelUrl": "http://ticklr.com/checkout/paypal/cancel"
+                  }
+            responses:
+              201:
+                description: Paypal payment created, approval URL is returned
+                body:
+                  application/json:
+                    example: |
+                      {
+                        "approvalUrl": 'https://www.sandbox.paypal.com/cgi-bin/webscr?cmd=_express-checkout&token=EC-8XM06646TU234545U'
+                      }
+              400:
+                description: Basket is empty.
+      /execute:
+        is: [authorized]
+        post:
+          description: Places a new order, executes any payment process.
+          application/json:
+            example:
+              {
+                "ticketInfos": [
+                  {
+                    "ticketSetId": "5",
+                    "firstName": "Bob",
+                    "lastName": "Dylan"
+                  },
+                  {
+                    "ticketSetId": "6",
+                    "firstName": "James",
+                    "lastName": "Watson"
+                  }
+                ],
+
+                "paymentMethod": "paypal",
+
+                "paypal": {
+                  "payerId": "XRXRDFBB6BF7Q"
+                }
+              }
 
     /basket:
       is: [authorized, has_resource_not_found]
@@ -434,7 +487,6 @@ traits:
                       ]
                     }
                   }
-
       /items:
         is: [authorized, has_resource_not_found]
         # get:
@@ -551,6 +603,7 @@ traits:
             # TODO
             put:
               description: Refresh the basket item to be consistent with the ticket set (same unit price). This request should be executed with empty body. 
+
 
 /auth:
   /request-token:

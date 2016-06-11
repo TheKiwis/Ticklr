@@ -30,7 +30,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author ngnmhieu
  */
-public class AuthenticationIT extends CommonIntegrationTest
+public class AuthenticationIT extends CommonTestTest
 {
     @Value("${app.auth.secret}")
     private String authSecret;

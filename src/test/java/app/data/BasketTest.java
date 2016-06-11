@@ -87,4 +87,25 @@ public class BasketTest
         assertEquals(mockItem, basket.getItemFor(1l));
         assertNull(basket.getItemFor(2l));
     }
+
+    @Test
+    public void getTotalPrice() throws Exception
+    {
+        Basket basket = new Basket();
+        basket.addItem(new BasketItem(mock(TicketSet.class), 4, BigDecimal.TEN));
+        basket.addItem(new BasketItem(mock(TicketSet.class), 2, BigDecimal.valueOf(15.5)));
+
+        assertEquals(0, basket.getTotalPrice().compareTo(BigDecimal.valueOf(71)));
+    }
+
+    @Test
+    public void isEmpty() throws Exception
+    {
+        Basket basket = new Basket();
+        assertTrue(basket.isEmpty());
+
+        basket = new Basket();
+        basket.addItem(mock(BasketItem.class));
+        assertFalse(basket.isEmpty());
+    }
 }

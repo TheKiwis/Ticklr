@@ -1,9 +1,9 @@
 package app.web.event;
 
-import app.web.user.UserURI;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.UUID;
 
@@ -43,7 +43,7 @@ public class EventURI
     {
         if (userId == null)
             throw new IllegalArgumentException("userId must not be null.");
-        return "/api/users/" + userId + "/events" + (eventId != null ? "/" + eventId : "");
+        return UriComponentsBuilder.fromUriString(EVENT_URI).buildAndExpand(userId, eventId).encode().toUriString();
     }
 
     /**
@@ -58,7 +58,8 @@ public class EventURI
     {
         if (userId == null || eventId == null)
             throw new IllegalArgumentException("userId and eventId must not be null.");
-        return eventURI(userId, eventId) + "/ticket-sets" + (ticketSetId == null ? "" : "/" + ticketSetId);
+
+        return UriComponentsBuilder.fromUriString(TICKET_SET_URI).buildAndExpand(userId, eventId, ticketSetId).encode().toUriString();
     }
 
     /**

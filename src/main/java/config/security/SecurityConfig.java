@@ -56,8 +56,9 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
         http.addFilterAfter(jwtAuthenticationFilter(), BasicAuthenticationFilter.class);
 
         http.authorizeRequests()
-                .antMatchers(HttpMethod.GET, "/users/**").authenticated()
-                .antMatchers("/users/*/events/**", "/users/*/basket/**").authenticated();
+                .antMatchers(HttpMethod.GET, "/api/users/**").authenticated()
+                .antMatchers("/api/users/*/events/**", "/api/users/*/basket/**").authenticated()
+                .antMatchers("/api/buyers/**").authenticated();
 
     }
 

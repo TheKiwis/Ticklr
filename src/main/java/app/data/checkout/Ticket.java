@@ -1,4 +1,4 @@
-package app.data.purchase;
+package app.data.checkout;
 
 import org.hibernate.annotations.GenericGenerator;
 
@@ -10,7 +10,8 @@ import java.util.UUID;
  * @author ngnmhieu
  * @since 09.06.16
  */
-@Entity(name = "tickets")
+@Entity
+@Table(name = "tickets")
 public class Ticket
 {
     @Id

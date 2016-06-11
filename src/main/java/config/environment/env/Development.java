@@ -1,8 +1,10 @@
 package config.environment.env;
 
+import app.services.checkout.PaypalConfiguration;
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
-import config.environment.Profile;
-import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
+import com.paypal.base.Constants;
+import config.environment.Profiles;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
 import org.springframework.core.io.ClassPathResource;
@@ -11,12 +13,11 @@ import org.springframework.orm.jpa.vendor.Database;
 import org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter;
 
 import javax.sql.DataSource;
-import java.util.Properties;
 
 /**
  * @author ngnmhieu
  */
-@org.springframework.context.annotation.Profile(Profile.DEVELOPMENT)
+@org.springframework.context.annotation.Profile(Profiles.DEVELOPMENT)
 public class Development
 {
     @Bean
@@ -52,5 +53,14 @@ public class Development
         placeholderConfigurer.setIgnoreUnresolvablePlaceholders(true);
 
         return placeholderConfigurer;
+    }
+
+    @Bean
+    public PaypalConfiguration paypalConfiguration(@Value("${app.payment.paypal.clientID}") String clientID,
+                                                   @Value("${app.payment.paypal.clientSecret}") String clientSecret)
+    {
+        PaypalConfiguration config = new PaypalConfiguration(clientID, clientSecret);
+        config.put(Constants.MODE, Constants.SANDBOX);
+        return config;
     }
 }

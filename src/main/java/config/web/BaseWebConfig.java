@@ -3,6 +3,8 @@ package config.web;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import org.springframework.context.annotation.*;
+import org.springframework.context.support.PropertySourcesPlaceholderConfigurer;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
@@ -49,5 +51,20 @@ public abstract class BaseWebConfig extends WebMvcConfigurerAdapter
     public void configureContentNegotiation(ContentNegotiationConfigurer configurer)
     {
         configurer.defaultContentType(MediaType.APPLICATION_JSON);
+    }
+
+    /**
+     * This PropertySourcesPlaceholderConfigurer object only resolves values inside
+     * servlet-container other values that are resolved in root-container are ignored
+     */
+    @Bean
+    public PropertySourcesPlaceholderConfigurer servletPropertySourcesPlaceholderConfigurer()
+    {
+        PropertySourcesPlaceholderConfigurer placeholderConfigurer = new PropertySourcesPlaceholderConfigurer();
+
+        placeholderConfigurer.setLocation(new ClassPathResource("META-INF/config.properties"));
+        placeholderConfigurer.setIgnoreUnresolvablePlaceholders(true);
+
+        return placeholderConfigurer;
     }
 }

@@ -27,7 +27,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author ngnmhieu
  */
-public class EventIT extends CommonIntegrationTest
+public class EventIT extends CommonTestTest
 {
     // loaded fixtures from database
     private User sampleUser;

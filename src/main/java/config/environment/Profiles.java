@@ -6,7 +6,7 @@ package config.environment;
  * @author ngnmhieu
  * @since 05.05.16
  */
-public final class Profile
+public final class Profiles
 {
     public static final String PRODUCTION = "prod";
     public static final String DEVELOPMENT = "dev";

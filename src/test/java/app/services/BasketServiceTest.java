@@ -20,7 +20,8 @@ import static org.mockito.Matchers.*;
 import static org.mockito.Mockito.*;
 
 /**
- * Created by DucNguyenMinh on 08.03.16.
+ * @author DucNguyenMinh
+ * @since 8.03.16
  */
 @RunWith(MockitoJUnitRunner.class)
 public class BasketServiceTest

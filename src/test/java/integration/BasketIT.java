@@ -22,7 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
  * @author DucNguyenMinh
  * @since 08.03.16.
  */
-public class BasketIT extends CommonIntegrationTest
+public class BasketIT extends CommonTestTest
 {
     // authentication token
     private String authString;

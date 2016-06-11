@@ -21,7 +21,7 @@ import java.util.UUID;
 /**
  * @author ngnmhieu
  */
-public class UserIT extends CommonIntegrationTest
+public class UserIT extends CommonTestTest
 {
     // authentication token
     private String authString;

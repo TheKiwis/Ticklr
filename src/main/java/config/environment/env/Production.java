@@ -1,7 +1,7 @@
 package config.environment.env;
 
 import com.mysql.jdbc.jdbc2.optional.MysqlDataSource;
-import config.environment.Profile;
+import config.environment.Profiles;
 import org.springframework.beans.factory.config.PropertyPlaceholderConfigurer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.orm.jpa.JpaVendorAdapter;
@@ -14,7 +14,7 @@ import java.util.Properties;
 /**
  * @author ngnmhieu
  */
-@org.springframework.context.annotation.Profile(Profile.PRODUCTION)
+@org.springframework.context.annotation.Profile(Profiles.PRODUCTION)
 public class Production
 {
     @Bean

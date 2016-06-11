@@ -1,4 +1,4 @@
-package app.data.purchase;
+package app.data.checkout;
 
 import app.data.event.TicketSet;
 
@@ -9,7 +9,8 @@ import java.math.BigDecimal;
  * @author ngnmhieu
  * @since 09.06.16
  */
-@Entity(name = "order_positions")
+@Entity
+@Table(name = "order_positions")
 public class OrderPosition
 {
     @Id
@@ -26,9 +27,6 @@ public class OrderPosition
     @Column(name = "unit_price")
     private BigDecimal unitPrice;
 
-    @Column(name = "total_price")
-    private BigDecimal totalPrice;
-
     @ManyToOne
     @JoinColumn(name = "order_id", nullable = false)
     private Order order;
@@ -42,13 +40,12 @@ public class OrderPosition
 
     protected OrderPosition() {}
 
-    public OrderPosition(Long id, String title, Integer quantity, BigDecimal unitPrice, BigDecimal totalPrice, Order order, TicketSet ticketSet)
+    public OrderPosition(Long id, String title, Integer quantity, BigDecimal unitPrice, Order order, TicketSet ticketSet)
     {
         this.id = id;
         this.title = title;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
-        this.totalPrice = totalPrice;
         this.order = order;
         this.ticketSet = ticketSet;
     }
@@ -91,16 +88,6 @@ public class OrderPosition
     public void setUnitPrice(BigDecimal unitPrice)
     {
         this.unitPrice = unitPrice;
-    }
-
-    public BigDecimal getTotalPrice()
-    {
-        return totalPrice;
-    }
-
-    public void setTotalPrice(BigDecimal totalPrice)
-    {
-        this.totalPrice = totalPrice;
     }
 
     public Order getOrder()

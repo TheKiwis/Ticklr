@@ -4,7 +4,7 @@
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>486</x>
+      <x>495</x>
       <y>207</y>
       <w>135</w>
       <h>72</h>
@@ -20,7 +20,7 @@ address: Address
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>774</x>
+      <x>783</x>
       <y>180</y>
       <w>135</w>
       <h>99</h>
@@ -35,7 +35,7 @@ status</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>612</x>
+      <x>621</x>
       <y>243</y>
       <w>180</w>
       <h>45</h>
@@ -49,23 +49,23 @@ makes</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>774</x>
+      <x>783</x>
       <y>450</y>
       <w>162</w>
-      <h>81</h>
+      <h>99</h>
     </coordinates>
     <panel_attributes>OrderPosition
 --
-title: String // ...
-quantity: int
-unitPrice: BigDecimal
-totalPrice: BigDecimal</panel_attributes>
+title
+quantity
+unitPrice
+totalPrice</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>810</x>
+      <x>819</x>
       <y>270</y>
       <w>45</w>
       <h>198</h>
@@ -77,7 +77,7 @@ m2=1..n</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>513</x>
+      <x>522</x>
       <y>450</y>
       <w>117</w>
       <h>81</h>
@@ -92,7 +92,7 @@ price: BigDecimal</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>621</x>
+      <x>630</x>
       <y>468</y>
       <w>171</w>
       <h>45</h>
@@ -106,7 +106,7 @@ corresponds to</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>270</x>
+      <x>279</x>
       <y>225</y>
       <w>90</w>
       <h>54</h>
@@ -118,7 +118,7 @@ corresponds to</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>351</x>
+      <x>360</x>
       <y>252</y>
       <w>153</w>
       <h>36</h>
@@ -131,7 +131,7 @@ m2=1</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>306</x>
+      <x>315</x>
       <y>270</y>
       <w>45</w>
       <h>99</h>
@@ -143,20 +143,23 @@ m2=0..n</panel_attributes>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>1071</x>
+      <x>1080</x>
       <y>459</y>
-      <w>90</w>
-      <h>63</h>
+      <w>135</w>
+      <h>90</h>
     </coordinates>
     <panel_attributes>Ticket
 --
+ticketNr
+firstName
+lastName
 status</panel_attributes>
     <additional_attributes/>
   </element>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>927</x>
+      <x>936</x>
       <y>459</y>
       <w>162</w>
       <h>45</h>
@@ -170,7 +173,7 @@ m2=1..n
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>207</x>
+      <x>216</x>
       <y>450</y>
       <w>117</w>
       <h>63</h>
@@ -183,7 +186,7 @@ m2=1..n
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>315</x>
+      <x>324</x>
       <y>468</y>
       <w>216</w>
       <h>45</h>
@@ -197,8 +200,8 @@ m2=1..n
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>486</x>
-      <y>90</y>
+      <x>495</x>
+      <y>72</y>
       <w>135</w>
       <h>63</h>
     </coordinates>
@@ -211,21 +214,21 @@ password</panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>540</x>
-      <y>144</y>
+      <x>549</x>
+      <y>126</y>
       <w>54</w>
-      <h>81</h>
+      <h>99</h>
     </coordinates>
     <panel_attributes>lt=&lt;-
 m1=1
 m2=1
 has a </panel_attributes>
-    <additional_attributes>10.0;10.0;10.0;70.0</additional_attributes>
+    <additional_attributes>10.0;10.0;10.0;90.0</additional_attributes>
   </element>
   <element>
     <id>UMLClass</id>
     <coordinates>
-      <x>270</x>
+      <x>279</x>
       <y>351</y>
       <w>90</w>
       <h>45</h>
@@ -237,7 +240,7 @@ has a </panel_attributes>
   <element>
     <id>Relation</id>
     <coordinates>
-      <x>351</x>
+      <x>360</x>
       <y>369</y>
       <w>333</w>
       <h>99</h>

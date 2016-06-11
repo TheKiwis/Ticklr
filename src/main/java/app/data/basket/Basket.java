@@ -9,6 +9,7 @@ import javax.persistence.*;
 import javax.persistence.CascadeType;
 import javax.persistence.Entity;
 import javax.persistence.Table;
+import java.math.BigDecimal;
 import java.util.*;
 
 /**
@@ -137,5 +138,23 @@ public class Basket
     public void removeItem(BasketItem item)
     {
         items.remove(item);
+    }
+
+    /**
+     * @return total price of the basket
+     */
+    public BigDecimal getTotalPrice()
+    {
+        return items.stream()
+                .map(BasketItem::getTotalPrice)
+                .reduce(BigDecimal.ZERO, (a, b) -> a.add(b));
+    }
+
+    /**
+     * @return if basket is empty (true if there are no items in the basket)
+     */
+    public boolean isEmpty()
+    {
+        return items.isEmpty();
     }
 }

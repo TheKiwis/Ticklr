@@ -218,6 +218,12 @@
         </dependency>
         <!-- end Database -->
 
+        <dependency>
+            <groupId>com.paypal.sdk</groupId>
+            <artifactId>rest-api-sdk</artifactId>
+            <version>LATEST</version>
+        </dependency>
+
     </dependencies>
 
     <properties>

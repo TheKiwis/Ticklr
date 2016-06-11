@@ -1,4 +1,4 @@
-package app.data.purchase;
+package app.data.checkout;
 
 import app.data.user.Buyer;
 import io.jsonwebtoken.lang.Assert;
@@ -6,15 +6,14 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.time.ZonedDateTime;
-import java.util.Collections;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * @author ngnmhieu
  * @since 09.06.16
  */
-@Entity(name = "orders")
+@Entity
+@Table(name = "orders")
 public class Order
 {
     @Id
@@ -33,7 +32,7 @@ public class Order
     private Buyer buyer;
 
     @OneToMany
-    private Set<OrderPosition> orderPositions;
+    private List<OrderPosition> orderPositions;
 
     protected Order()
     {
@@ -55,6 +54,7 @@ public class Order
         this.orderTime = orderTime;
         this.status = status == null ? OrderStatus.PENDING : status;
         this.buyer = buyer;
+        this.orderPositions = new ArrayList<>();
     }
 
     public UUID getId()
@@ -97,9 +97,9 @@ public class Order
         this.buyer = buyer;
     }
 
-    public Set<OrderPosition> getOrderPositions()
+    public List<OrderPosition> getOrderPositions()
     {
-        return Collections.unmodifiableSet(orderPositions);
+        return Collections.unmodifiableList(orderPositions);
     }
 
     public void addOrderPosition(OrderPosition orderPosition)

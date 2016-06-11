@@ -1,7 +1,7 @@
 package integration;
 
 import config.RootConfig;
-import config.environment.Profile;
+import config.environment.Profiles;
 import config.web.TestWebConfig;
 import org.dbunit.DataSourceBasedDBTestCase;
 import org.dbunit.dataset.DefaultDataSet;
@@ -39,9 +39,9 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
         DependencyInjectionTestExecutionListener.class,
         FlywayTestExecutionListener.class
 })
-@ActiveProfiles(Profile.TEST)
+@ActiveProfiles(Profiles.TEST)
 @FlywayTest
-abstract public class CommonIntegrationTest extends DataSourceBasedDBTestCase
+abstract public class CommonTestTest extends DataSourceBasedDBTestCase
 {
     @Autowired
     protected DataSource dataSource;
