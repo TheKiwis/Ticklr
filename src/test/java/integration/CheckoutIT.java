@@ -47,6 +47,8 @@ public class CheckoutIT extends CommonIntegrationTest
 
     private UUID buyerWithBasketId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
 
+    private UUID buyerNoPayment = UUID.fromString("3ab30c38-34ca-11e6-ac61-9e71128cae77");
+
     private UUID buyerEmptyBasketId = UUID.fromString("d2d981e8-3017-11e6-ac61-9e71128cae77");
 
     private Basket basket;
@@ -193,10 +195,10 @@ public class CheckoutIT extends CommonIntegrationTest
     {
         setupHappyServerMock();
 
-        String token = AuthenticationIT.getAuthTokenFor("buyer_with_empty_basket@example.com", "123456789", mockMvc);
+        String token = AuthenticationIT.getAuthTokenFor("buyer_no_payment@example.com", "123456789", mockMvc);
 
-        mockMvc.perform(post(checkoutURI.purchaseExecuteURL(buyerEmptyBasketId))
-                .header("Authorization", "Bearer " + token)
+        mockMvc.perform(post(checkoutURI.purchaseExecuteURL(buyerNoPayment))
+                .header("Authorization", token)
                 .contentType("application/json")
                 .content(getPurchaseForm(new ArrayList<>())))
                 .andExpect(status().isBadRequest())

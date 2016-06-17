@@ -124,6 +124,9 @@ public class CheckoutController
         } catch (PayPalRESTException e) {
             log.error("Paypal error: " + e.getMessage(), e);
             return PAYPAL_ERROR;
+        } catch (PaypalService.NoPaymentException e) {
+            log.error("No payment created before execute: " + e.getMessage(), e);
+            return new ResponseEntity(new ErrorResponse(ErrorCodes.PURCHASE_NO_PAYMENT), HttpStatus.BAD_REQUEST);
         }
 
         return new ResponseEntity(HttpStatus.OK);

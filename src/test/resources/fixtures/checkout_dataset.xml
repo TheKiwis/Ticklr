@@ -13,6 +13,7 @@
             user_id="uuid'9207df40-0f18-9b6a-874c-00c51b02a5d5'"/>
         <ticket_sets id="3" price="25.00" title="Single ticket" event_id="2"/>
 
+    <!-- buyer that has items in her basket -->
     <identities id="uuid'8dd43440-1f81-11e6-b6ba-3e1d05defe78'" email="buyer_with_basket@example.com" password="$2a$10$7DiTrG0atup/drERomar.eg4N0yVhRDvd7VHmAGKpxZP.XTzwCq16"/>
     <users id="uuid'12933556-24db-11e6-b67b-9e71128cae77'" identity_id="uuid'8dd43440-1f81-11e6-b6ba-3e1d05defe78'"/>
     <buyers id="uuid'4eab8080-0f0e-11e6-9f74-0002a5d5c51b'" identity_id="uuid'8dd43440-1f81-11e6-b6ba-3e1d05defe78'"/>
@@ -21,6 +22,15 @@
             <basket_items id="2" basket_id="456" unit_price="25.00" quantity="5" ticket_set_id="3" />
     <paypal_payments id="456" payment_id="PAY-PAYMENT-OLD" created_time="2016-02-14 00:00:00" />
 
+    <!-- buyer that has items in her basket -->
+    <identities id="uuid'23a2d6c2-34ca-11e6-ac61-9e71128cae77'" email="buyer_no_payment@example.com" password="$2a$10$7DiTrG0atup/drERomar.eg4N0yVhRDvd7VHmAGKpxZP.XTzwCq16"/>
+    <users id="uuid'3040c0f6-34ca-11e6-ac61-9e71128cae77'" identity_id="uuid'23a2d6c2-34ca-11e6-ac61-9e71128cae77'"/>
+    <buyers id="uuid'3ab30c38-34ca-11e6-ac61-9e71128cae77'" identity_id="uuid'23a2d6c2-34ca-11e6-ac61-9e71128cae77'"/>
+        <baskets id="666" buyer_id="uuid'3ab30c38-34ca-11e6-ac61-9e71128cae77'" />
+            <basket_items id="3" basket_id="666" unit_price="30.00" quantity="8" ticket_set_id="1" />
+            <basket_items id="4" basket_id="666" unit_price="25.00" quantity="5" ticket_set_id="3" />
+
+    <!-- buyer with an empty basket -->
     <identities id="uuid'c19dcde4-3017-11e6-ac61-9e71128cae77'" email="buyer_with_empty_basket@example.com" password="$2a$10$7DiTrG0atup/drERomar.eg4N0yVhRDvd7VHmAGKpxZP.XTzwCq16"/>
         <users id="uuid'cb810b1e-3017-11e6-ac61-9e71128cae77'" identity_id="uuid'c19dcde4-3017-11e6-ac61-9e71128cae77'"/>
         <buyers id="uuid'd2d981e8-3017-11e6-ac61-9e71128cae77'" identity_id="uuid'c19dcde4-3017-11e6-ac61-9e71128cae77'"/>

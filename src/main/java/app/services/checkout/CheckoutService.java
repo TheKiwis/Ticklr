@@ -52,6 +52,7 @@ public class CheckoutService
     /**
      * @param basket
      * @param form   TODO: what if there is not enough ticket set?
+     *               TODO: created payment expired? How does paypal answer?
      * @throws IllegalArgumentException if basket is empty
      * @throws PaypalService.NoPaymentException if no payment created before the execution
      * @throws PayPalRESTException if there is any error with Paypal REST API
