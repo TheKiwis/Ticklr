@@ -1,0 +1,17 @@
+<configuration>
+
+    <!-- Appenders -->
+    <appender name="util" class="ch.qos.logback.core.FileAppender">
+        <Append>true</Append>
+        <encoder>
+            <pattern>%t %-5p %c{2} - %m%n</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.springframework" level="info" />
+
+    <root level="info">
+        <appender-ref ref="util" />
+    </root>
+
+</configuration>
