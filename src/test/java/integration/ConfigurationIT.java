@@ -11,7 +11,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 /**
  * @author ngnmhieu
  */
-public class ConfigurationIT extends CommonTestTest
+public class ConfigurationIT extends CommonIntegrationTest
 {
     @Test
     public void shouldServeResourceAsXML() throws Exception

@@ -47,6 +47,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
     //  - configure places that require HTTPS (requires Channels)
     //  - configure roles (how can it work with jwtAuthenticationFilter?)
     //  - consider if we need csrf, or jwt token is enough see: https://docs.spring.io/spring-security/site/docs/current/reference/html/csrf.html
+    // TODO: Security is still like shit, FIX IT
     protected void configure(HttpSecurity http) throws Exception
     {
         // temporarily disable csrf
@@ -55,11 +56,10 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter
         // performs Jwt Authentication
         http.addFilterAfter(jwtAuthenticationFilter(), BasicAuthenticationFilter.class);
 
-        http.authorizeRequests()
-                .antMatchers(HttpMethod.GET, "/api/users/**").authenticated()
-                .antMatchers("/api/users/*/events/**", "/api/users/*/basket/**").authenticated()
-                .antMatchers("/api/buyers/**").authenticated();
-
+        //http.authorizeRequests()
+        //        .antMatchers(HttpMethod.GET, "/api/users/**").authenticated()
+        //        .antMatchers("/api/users/*/events/**").authenticated()
+        //        .antMatchers("/api/buyers/**").authenticated();
     }
 
     @Bean

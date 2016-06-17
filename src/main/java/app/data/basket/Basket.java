@@ -29,6 +29,10 @@ public class Basket
     @JoinColumn(name = "buyer_id")
     protected Buyer buyer;
 
+    @OneToMany(mappedBy = "basket", fetch = FetchType.EAGER,
+            cascade = CascadeType.ALL, orphanRemoval = true)
+    protected List<BasketItem> items = new ArrayList<>();
+
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "created_time", updatable = false)
     @CreationTimestamp
@@ -38,11 +42,6 @@ public class Basket
     @Column(name = "updated_time", insertable = false, updatable = false)
     @Generated(GenerationTime.ALWAYS)
     protected Date updatedTime;
-
-    // TODO: why remove does not work with CascadeType.PERSIST
-    //@OneToMany(mappedBy = "basket", fetch = FetchType.EAGER, cascade = {CascadeType.MERGE, CascadeType.PERSIST})
-    @OneToMany(mappedBy = "basket", fetch = FetchType.EAGER, cascade = {CascadeType.MERGE})
-    protected Set<BasketItem> items = new HashSet<>();
 
     public Basket()
     {
@@ -71,9 +70,9 @@ public class Basket
     /**
      * @return Items an immutable collection of BasketItem's contained in this Basket
      */
-    public Collection<BasketItem> getItems()
+    public List<BasketItem> getItems()
     {
-        return Collections.unmodifiableCollection(items);
+        return Collections.unmodifiableList(items);
     }
 
     /**
@@ -156,5 +155,16 @@ public class Basket
     public boolean isEmpty()
     {
         return items.isEmpty();
+    }
+
+    /**
+     * Clears the basket, remove all items
+     */
+    public void clear()
+    {
+        for (BasketItem item : items) {
+            item.setBasket(null);
+        }
+        items.clear();
     }
 }

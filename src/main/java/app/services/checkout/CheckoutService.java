@@ -1,162 +1,98 @@
 package app.services.checkout;
 
 import app.data.basket.Basket;
-import app.services.BasketService;
-import com.paypal.api.payments.*;
-import com.paypal.base.rest.APIContext;
-import com.paypal.base.rest.OAuthTokenCredential;
+import app.data.basket.BasketItem;
+import app.data.checkout.Order;
+import app.data.checkout.OrderPosition;
+import app.data.checkout.PaymentMethod;
+import app.data.checkout.Ticket;
+import app.data.event.TicketSet;
+import app.services.basket.BasketService;
+import app.web.checkout.forms.PurchaseForm;
 import com.paypal.base.rest.PayPalRESTException;
+import io.jsonwebtoken.lang.Assert;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.Assert;
+import org.springframework.stereotype.Service;
 
-import javax.persistence.EntityManager;
-import javax.persistence.PersistenceContext;
-import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collections;
+import java.time.ZonedDateTime;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Properties;
-import java.util.stream.Collectors;
+import java.util.Map;
 
 /**
  * @author ngnmhieu
- * @since 11.06.16
+ * @since 13.06.16
  */
-@Repository
-@Transactional
+@Service
 public class CheckoutService
 {
-    @PersistenceContext
-    private EntityManager em;
+    // handles paypal payments and transactions
+    private PaypalService paypalService;
 
-    // manages buyer's basket
-    // TODO: currently not used
+    // manages the basket
     private BasketService basketService;
 
-    // contains configurations for Paypal API
-    private PaypalConfiguration paypalConfig;
+    private OrderRepository orderRepository;
 
-    private static final String CURRENCY = "EUR";
+    protected CheckoutService()
+    {
+    }
 
     /**
-     * Construct an instance of EventRepository
-     *
-     * @param basketService manges basket
+     * @param paypalService
      */
     @Autowired
-    public CheckoutService(BasketService basketService, PaypalConfiguration paypalConfig)
-    {
-        Assert.notNull(basketService);
-        Assert.notNull(paypalConfig);
-
+    public CheckoutService(PaypalService paypalService, BasketService basketService, OrderRepository orderRepository)
+   {
+        this.paypalService = paypalService;
         this.basketService = basketService;
-        this.paypalConfig = paypalConfig;
+        this.orderRepository = orderRepository;
     }
 
     /**
-     * Setter for EntityManager
-     *
-     * @param em
+     * @param basket
+     * @param form   TODO: what if there is not enough ticket set?
+     * @throws IllegalArgumentException if basket is empty
+     * @throws PaypalService.NoPaymentException if no payment created before the execution
+     * @throws PayPalRESTException if there is any error with Paypal REST API
      */
-    public void setEntityManager(EntityManager em)
+    public Order purchase(Basket basket, PurchaseForm form) throws PayPalRESTException
     {
-        this.em = em;
-    }
+        Assert.notNull(form);
 
-    /**
-     * @param returnUrl
-     * @param cancelUrl
-     * @return Paypal Approval URL, where buyer confirms the transaction
-     * @throws IllegalArgumentException if basket.isEmpty()
-     */
-    public String createPaypalPayment(Basket basket, String returnUrl, String cancelUrl) throws PayPalRESTException
-    {
-        if (basket.isEmpty())
-            throw new IllegalArgumentException("Basket should not be empty.");
+        if (basket == null || basket.isEmpty())
+            throw new IllegalArgumentException();
 
-        APIContext context = null;
+        paypalService.executePayment(basket, form.paypal.payerId);
 
-        context = createAPIContext();
+        Order order = new Order(ZonedDateTime.now(), PaymentMethod.PAYPAL, basket.getBuyer());
 
-        String approvalUrl = null;
-        Payment payment = createPayment();
-
-        Payer payer = new Payer();
-        payer.setPaymentMethod("paypal");
-
-        // ## payment intent and payer
-        payment.setIntent("sale");
-        payment.setPayer(payer);
-
-        // ## client Redirect URLs
-        RedirectUrls redirectUrls = new RedirectUrls();
-        redirectUrls.setReturnUrl(returnUrl);
-        redirectUrls.setCancelUrl(cancelUrl);
-        payment.setRedirectUrls(redirectUrls);
-
-        // ## Transaction
-        Transaction transaction = new Transaction();
-        transaction.setDescription("Thank you for purchasing tickets at Ticklr.com!");
-
-        // Amount
-        Details details = new Details();
-        details.setSubtotal(formattedNumber(basket.getTotalPrice()));
-        Amount amount = new Amount(CURRENCY, formattedNumber(basket.getTotalPrice()));
-        amount.setDetails(details);
-        transaction.setAmount(amount);
-
-        // collect items from basket
-        List<Item> items = basket.getItems().stream()
-                .map(item -> new Item(item.getTicketSet().getTitle(), item.getQuantity().toString(), formattedNumber(item.getUnitPrice()), CURRENCY))
-                .collect(Collectors.toList());
-
-        ItemList itemList = new ItemList();
-        itemList.setItems(items);
-        transaction.setItemList(itemList);
-        payment.setTransactions(Collections.singletonList(transaction));
-
-        Payment createdPayment = payment.create(context);
-
-        List<Links> links = createdPayment.getLinks();
-        for (Links link : links) {
-            if (link.getRel().equalsIgnoreCase("approval_url")) {
-                approvalUrl = link.getHref();
-                break;
-            }
+        Map<Long, PurchaseForm.TicketInfo> ticketsMap = new HashMap<>();
+        for (PurchaseForm.TicketInfo info : form.ticketInfos) {
+            ticketsMap.put(info.ticketSetId, info);
         }
 
-        return approvalUrl;
-    }
+        List<BasketItem> basketItems = basket.getItems();
+        for (BasketItem item : basketItems) {
 
-    /**
-     * @return formatted BigDecimal number. E.g: 210.50
-     */
-    private String formattedNumber(BigDecimal num)
-    {
-        return num.setScale(2).toPlainString();
-    }
+            TicketSet ticketSet = item.getTicketSet();
+            ticketSet.setStock(ticketSet.getStock() - item.getQuantity());
 
-    /**
-     * Factory method creating Paypal Payment object
-     *
-     * @return a new Payment object
-     */
-    protected APIContext createAPIContext() throws PayPalRESTException
-    {
-        APIContext context = new APIContext(new OAuthTokenCredential(paypalConfig.getClientID(), paypalConfig.getClientSecret(), paypalConfig).getAccessToken());
-        context.setConfigurationMap(paypalConfig);
-        return context;
-    }
+            // create new ticket for a ticket set
+            PurchaseForm.TicketInfo info = ticketsMap.get(ticketSet.getId());
+            Ticket ticket = new Ticket(info.firstName, info.lastName);
 
-    /**
-     * Factory method creating Payment object
-     *
-     * @return a new Payment object
-     */
-    protected Payment createPayment()
-    {
-        return new Payment();
+            OrderPosition position = new OrderPosition(ticketSet.getTitle(), item.getQuantity(), ticketSet.getPrice());
+            position.setTicketSet(ticketSet);
+            position.setTicket(ticket);
+
+            order.addOrderPosition(position);
+        }
+
+        orderRepository.save(order);
+
+        basketService.clearBasket(basket);
+
+        return order;
     }
 }

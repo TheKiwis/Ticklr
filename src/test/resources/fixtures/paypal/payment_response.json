@@ -1,0 +1,78 @@
+{
+  "id": "PAY-SAMPLE-PAYMENT-ID",
+  "create_time": "2014-09-22T20:53:43Z",
+  "update_time": "2014-09-22T20:53:44Z",
+  "state": "created",
+  "intent": "sale",
+  "payer": {
+    "payment_method": "paypal"
+  },
+  "transactions": [
+    {
+      "amount": {
+        "total": "30.11",
+        "currency": "USD",
+        "details": {
+          "subtotal": "30.00",
+          "tax": "0.07",
+          "shipping": "0.03",
+          "handling_fee": "1.00",
+          "insurance": "0.01",
+          "shipping_discount": "-1.00"
+        }
+      },
+      "description": "This is the payment transaction description.",
+      "custom": "EBAY_EMS_90048630024435",
+      "invoice_number": "48787589673",
+      "item_list": {
+        "items": [
+          {
+            "name": "hat",
+            "sku": "1",
+            "price": "3.00",
+            "currency": "USD",
+            "quantity": "5",
+            "description": "Brown color hat",
+            "tax": "0.01"
+          },
+          {
+            "name": "handbag",
+            "sku": "product34",
+            "price": "15.00",
+            "currency": "USD",
+            "quantity": "1",
+            "description": "Black color handbag",
+            "tax": "0.02"
+          }
+        ],
+        "shipping_address": {
+          "recipient_name": "HelloWorld",
+          "line1": "4thFloor",
+          "line2": "unit#34",
+          "city": "SAn Jose",
+          "state": "CA",
+          "phone": "011862212345678",
+          "postal_code": "95131",
+          "country_code": "US"
+        }
+      }
+    }
+  ],
+  "links": [
+    {
+      "href": "https://api.paypal.com/v1/payments/payment/PAY-1B56960729604235TKQQIYVY",
+      "rel": "self",
+      "method": "GET"
+    },
+    {
+      "href": "https://api.paypal.com/v1/payments//cgi-bin/webscr?cmd=_express-checkout&token=EC-60385559L1062554J",
+      "rel": "approval_url",
+      "method": "REDIRECT"
+    },
+    {
+      "href": "https://api.paypal.com/v1/payments/payment/PAY-1B56960729604235TKQQIYVY/execute",
+      "rel": "execute",
+      "method": "POST"
+    }
+  ]
+}

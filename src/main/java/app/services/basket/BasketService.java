@@ -1,4 +1,4 @@
-package app.services;
+package app.services.basket;
 
 import app.data.basket.Basket;
 import app.data.basket.BasketItem;
@@ -8,6 +8,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import javax.persistence.*;
+import java.util.List;
+import java.util.Observable;
+import java.util.function.ToIntFunction;
+import java.util.stream.Collectors;
 
 /**
  * @author DucNguyenMinh
@@ -15,7 +19,7 @@ import javax.persistence.*;
  */
 @Repository
 @Transactional
-public class BasketService
+public class BasketService extends Observable
 {
     @PersistenceContext
     private EntityManager em;
@@ -59,6 +63,8 @@ public class BasketService
 
         em.merge(basket);
 
+        notifyBasketChanges(basket);
+
         return item;
     }
 
@@ -77,6 +83,8 @@ public class BasketService
         } else {
             basket = em.merge(basket);
         }
+
+        notifyBasketChanges(basket);
 
         return basket;
     }
@@ -97,6 +105,8 @@ public class BasketService
         item.setQuantity(quantity);
 
         em.merge(item);
+
+        notifyBasketChanges(item.getBasket());
     }
 
     /**
@@ -115,5 +125,29 @@ public class BasketService
         basket.removeItem(item);
 
         em.remove(item);
+
+        notifyBasketChanges(basket);
+    }
+
+    /**
+     * Clears the basket, removes all items in the basket
+     * @param basket
+     * @return true if basket is successfully cleared
+     * TODO: Integration test with Purchase
+     */
+    public void clearBasket(Basket basket)
+    {
+        basket.clear();
+        em.merge(basket);
+    }
+
+    /**
+     * Notifies the observer and pass basket as argument
+     * @param basket
+     */
+    private void notifyBasketChanges(Basket basket)
+    {
+        setChanged();
+        notifyObservers(basket);
     }
 }

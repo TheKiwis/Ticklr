@@ -1,0 +1,121 @@
+{
+  "id": "PAY-4N746561P0587231SKQQK6MY",
+  "create_time": "2014-09-22T23:22:27Z",
+  "update_time": "2014-09-22T23:31:13Z",
+  "state": "approved",
+  "intent": "sale",
+  "payer": {
+    "payment_method": "paypal",
+    "payer_info": {
+      "email": "npurayil-uspr-60@paypal.com",
+      "first_name": "Brian",
+      "last_name": "Robinson",
+      "payer_id": "JMKDKJ4D7DG7G",
+      "shipping_address": {
+        "line1": "4thFloor",
+        "line2": "unit#34",
+        "city": "SAn Jose",
+        "state": "CA",
+        "postal_code": "95131",
+        "country_code": "US",
+        "phone": "011862212345678",
+        "recipient_name": "HelloWorld"
+      }
+    }
+  },
+  "transactions": [
+    {
+      "amount": {
+        "total": "30.11",
+        "currency": "USD",
+        "details": {
+          "subtotal": "30.00",
+          "tax": "0.07",
+          "shipping": "0.03",
+          "handling_fee": "1.00",
+          "insurance": "0.01",
+          "shipping_discount": "-1.00"
+        }
+      },
+      "description": "This is the payment transaction description.",
+      "item_list": {
+        "items": [
+          {
+            "name": "hat",
+            "sku": "1",
+            "price": "3.00",
+            "currency": "USD",
+            "quantity": "5",
+            "description": "Brown color hat",
+            "tax": "0.01"
+          },
+          {
+            "name": "handbag",
+            "sku": "product34",
+            "price": "15.00",
+            "currency": "USD",
+            "quantity": "1",
+            "description": "Black color handbag",
+            "tax": "0.02"
+          }
+        ],
+        "shipping_address": {
+          "recipient_name": "HelloWorld",
+          "line1": "4thFloor",
+          "line2": "unit#34",
+          "city": "SAn Jose",
+          "state": "CA",
+          "phone": "011862212345678",
+          "postal_code": "95131",
+          "country_code": "US"
+        }
+      },
+      "related_resources": [
+        {
+          "sale": {
+            "id": "4XP56210M0797192Y",
+            "create_time": "2014-09-22T23:22:27Z",
+            "update_time": "2014-09-22T23:31:13Z",
+            "amount": {
+              "total": "30.11",
+              "currency": "USD"
+            },
+            "payment_mode": "INSTANT_TRANSFER",
+            "state": "completed",
+            "protection_eligibility": "ELIGIBLE",
+            "protection_eligibility_type": "ITEM_NOT_RECEIVED_ELIGIBLE",
+            "transaction_fee": {
+              "value": "1.75",
+              "currency": "USD"
+            },
+            "parent_payment": "PAY-4N746561P0587231SKQQK6MY",
+            "links": [
+              {
+                "href": "https://api.paypal.com/v1/payments/sale/4XP56210M0797192Y",
+                "rel": "self",
+                "method": "GET"
+              },
+              {
+                "href": "https://api.paypal.com/v1/payments/sale/4XP56210M0797192Y/refund",
+                "rel": "refund",
+                "method": "POST"
+              },
+              {
+                "href": "https://api.paypal.com/v1/payments/payment/PAY-4N746561P0587231SKQQK6MY",
+                "rel": "parent_payment",
+                "method": "GET"
+              }
+            ]
+          }
+        }
+      ]
+    }
+  ],
+  "links": [
+    {
+      "href": "https://api.paypal.com/v1/payments/payment/PAY-4N746561P0587231SKQQK6MY",
+      "rel": "self",
+      "method": "GET"
+    }
+  ]
+}

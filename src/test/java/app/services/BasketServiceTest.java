@@ -4,16 +4,17 @@ import app.data.basket.Basket;
 import app.data.basket.BasketItem;
 import app.data.user.Buyer;
 import app.data.event.TicketSet;
+import app.services.basket.BasketService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import javax.persistence.EntityManager;
 
 import java.math.BigDecimal;
-import java.util.UUID;
 
 import static org.junit.Assert.*;
 import static org.mockito.Matchers.*;
@@ -26,12 +27,10 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class BasketServiceTest
 {
-    @Mock
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     EntityManager em;
 
     BasketService basketService;
-
-    UUID userId = UUID.fromString("4eab8080-0f0e-11e6-9f74-0002a5d5c51b");
 
     @Before
     public void setUp() throws Exception
@@ -42,15 +41,16 @@ public class BasketServiceTest
     @Test
     public void saveBasket()
     {
-        Basket mockBasket1 = mock(Basket.class);
-        when(mockBasket1.getId()).thenReturn(null);
-        basketService.saveBasket(mockBasket1);
-        verify(em, times(1)).persist(mockBasket1);
+        Basket mockBasket = mock(Basket.class);
+        when(em.merge(mockBasket)).thenReturn(mockBasket);
 
-        Basket mockBasket2 = mock(Basket.class);
-        when(mockBasket1.getId()).thenReturn(1l);
-        basketService.saveBasket(mockBasket1);
-        verify(em, times(1)).merge(mockBasket1);
+        when(mockBasket.getId()).thenReturn(null);
+        basketService.saveBasket(mockBasket);
+        verify(em, times(1)).persist(mockBasket);
+
+        when(mockBasket.getId()).thenReturn(1l);
+        basketService.saveBasket(mockBasket);
+        verify(em, times(1)).merge(mockBasket);
     }
 
     @Test
@@ -106,5 +106,20 @@ public class BasketServiceTest
 
         assertTrue(20 == item.getQuantity());
         verify(em, times(1)).merge(item);
+    }
+
+    @Test
+    public void clearBasket() throws Exception
+    {
+        Basket basket = new Basket();
+
+        BasketItem item = new BasketItem(mock(TicketSet.class), 10, BigDecimal.TEN);
+
+        basket.addItem(item);
+
+        basketService.clearBasket(basket);
+
+        assertTrue(basket.isEmpty());
+        assertNull(item.getBasket());
     }
 }

@@ -12,12 +12,13 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 @org.springframework.context.annotation.Profile(Profiles.DEVELOPMENT)
 public class DevWebConfig extends BaseWebConfig
 {
+    @Override
     public void addCorsMappings(CorsRegistry registry)
     {
-        registry.addMapping("/**")
-                .allowedOrigins("*")
-                .allowedMethods("*")
-                .allowedHeaders("*")
-                .exposedHeaders("Location");
+        registry.addMapping("/**/*");
+                //.allowedOrigins("http://localhost:3000")
+                //.allowedMethods("HEAD, GET, POST, PUT, DELETE, OPTIONS")
+                //.allowedHeaders("content-type, authorization")
+                //.exposedHeaders("Location");
     }
 }

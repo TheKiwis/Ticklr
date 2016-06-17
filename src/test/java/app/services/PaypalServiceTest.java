@@ -1,8 +1,10 @@
 package app.services;
 
 import app.data.basket.Basket;
-import app.services.checkout.CheckoutService;
+import app.services.basket.BasketService;
+import app.services.checkout.PaypalService;
 import app.services.checkout.PaypalConfiguration;
+import app.services.checkout.PaypalPaymentRepository;
 import com.paypal.api.payments.Links;
 import com.paypal.api.payments.Payment;
 import com.paypal.base.rest.APIContext;
@@ -28,10 +30,8 @@ import static org.mockito.Mockito.*;
  * @since 11.06.16
  */
 @RunWith(MockitoJUnitRunner.class)
-public class CheckoutServiceTest
+public class PaypalServiceTest
 {
-    CheckoutService service;
-
     @Mock
     EntityManager em;
 
@@ -47,10 +47,13 @@ public class CheckoutServiceTest
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     Basket mockBasket;
 
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    PaypalPaymentRepository paymentRepository;
+
     // creates a new CheckoutService test object
-    private CheckoutService createCheckOutService()
+    private PaypalService createCheckOutService()
     {
-        return new CheckoutServiceMocked(em, basketService, mockPayment, mockAPIContext);
+        return new PaypalServiceMocked(paymentRepository, basketService, mockPayment, mockAPIContext);
     }
 
     @Test
@@ -77,16 +80,15 @@ public class CheckoutServiceTest
     }
 
     // stub out factory methods
-    static class CheckoutServiceMocked extends CheckoutService
+    static class PaypalServiceMocked extends PaypalService
     {
         private Payment mockPayment;
 
         private APIContext mockAPIContext;
 
-        public CheckoutServiceMocked(EntityManager em, BasketService basketService, Payment mockPayment, APIContext mockAPIContext)
+        public PaypalServiceMocked(PaypalPaymentRepository paymentRepository, BasketService basketService, Payment mockPayment, APIContext mockAPIContext)
         {
-            super(basketService, new PaypalConfiguration("clientID", "clientSecret"));
-            this.setEntityManager(em);
+            super(paymentRepository, basketService, new PaypalConfiguration("clientID", "clientSecret"));
             this.mockPayment = mockPayment;
             this.mockAPIContext = mockAPIContext;
         }

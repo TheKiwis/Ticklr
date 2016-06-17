@@ -35,19 +35,18 @@ public class OrderPosition
     @JoinColumn(name = "ticket_set_id", nullable = false)
     private TicketSet ticketSet;
 
-    @OneToOne
+    //@OneToOne(cascade = CascadeType.MERGE)
+    //@JoinColumn(name = "ticket_id")
+    @OneToOne(mappedBy = "orderPosition", cascade = CascadeType.MERGE)
     private Ticket ticket;
 
     protected OrderPosition() {}
 
-    public OrderPosition(Long id, String title, Integer quantity, BigDecimal unitPrice, Order order, TicketSet ticketSet)
+    public OrderPosition(String title, Integer quantity, BigDecimal unitPrice)
     {
-        this.id = id;
         this.title = title;
         this.quantity = quantity;
         this.unitPrice = unitPrice;
-        this.order = order;
-        this.ticketSet = ticketSet;
     }
 
     public Long getId()
@@ -108,6 +107,17 @@ public class OrderPosition
     public void setTicketSet(TicketSet ticketSet)
     {
         this.ticketSet = ticketSet;
+    }
+
+    public Ticket getTicket()
+    {
+        return ticket;
+    }
+
+    public void setTicket(Ticket ticket)
+    {
+        this.ticket = ticket;
+        ticket.setOrderPosition(this);
     }
 
     @Override

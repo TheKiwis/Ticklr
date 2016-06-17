@@ -29,12 +29,19 @@ public class Ticket
     @Column(name = "usage_time")
     private ZonedDateTime usageTime;
 
+    //@OneToOne(mappedBy = "ticket")
     @OneToOne
-    @JoinColumn(name = "order_position_id", nullable = false)
+    @JoinColumn(name = "order_position_id")
     private OrderPosition orderPosition;
 
     protected Ticket()
     {
+    }
+
+    public Ticket(String firstName, String lastName)
+    {
+        this.firstName = firstName;
+        this.lastName = lastName;
     }
 
     public UUID getId()

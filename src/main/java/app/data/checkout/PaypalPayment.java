@@ -17,24 +17,38 @@ import java.util.UUID;
 public class PaypalPayment
 {
     @Id
-    protected UUID id;
+    protected Long id;
 
     @Column(name = "payment_id")
     protected String paymentId;
 
-    @Column(name = "created_time", updatable = false)
+    @Column(name = "created_time")
     protected ZonedDateTime createdTime;
 
     @OneToOne(fetch = FetchType.LAZY)
     @PrimaryKeyJoinColumn
     protected Basket basket;
 
+    protected PaypalPayment()
+    {
+    }
 
+    /**
+     * @param paymentId
+     * @param basket
+     */
+    public PaypalPayment(String paymentId, Basket basket)
+    {
+        this.id = basket.getId();
+        this.paymentId = paymentId;
+        this.basket = basket;
+        this.createdTime = ZonedDateTime.now();
+    }
 
     /**
      * @return ID of the payment in system
      */
-    public UUID getId()
+    public Long getId()
     {
         return id;
     }
@@ -42,7 +56,7 @@ public class PaypalPayment
     /**
      * @param id
      */
-    public void setId(UUID id)
+    public void setId(Long id)
     {
         this.id = id;
     }
@@ -80,8 +94,10 @@ public class PaypalPayment
         this.paymentId = paymentId;
     }
 
+    @PreUpdate
     @PrePersist
-    protected void onCreate() {
+    protected void initCreatedTime()
+    {
         createdTime = ZonedDateTime.now();
     }
 }

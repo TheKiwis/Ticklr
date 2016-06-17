@@ -4,13 +4,14 @@ import app.data.basket.Basket;
 import app.data.basket.BasketItem;
 import app.data.event.TicketSet;
 import app.data.user.Buyer;
-import app.services.BasketService;
+import app.services.basket.BasketService;
 import app.services.TicketSetRepository;
 import app.services.BuyerService;
 import app.web.ResourceURI;
 import app.web.authorization.IdentityAuthorizer;
 import app.web.basket.responses.BasketItemResponse;
 import app.web.basket.responses.BasketResponse;
+import app.web.common.response.ErrorCodes;
 import app.web.common.response.ErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -80,9 +81,9 @@ public class BasketController
         return new ResponseEntity(new BasketResponse(basket, resURI), status);
     }
 
-
     /**
      * Add new a item to the basket
+     * TODO: out of stock situation
      */
     @RequestMapping(value = BasketURI.ITEMS_URI, method = RequestMethod.POST)
     public ResponseEntity addItem(@PathVariable UUID buyerId, @Valid @RequestBody(required = false) BasketItemForm basketItemForm, BindingResult bindingResult)
@@ -96,7 +97,7 @@ public class BasketController
             return FORBIDDEN;
 
         if (basketItemForm == null || bindingResult.hasFieldErrors())
-            return new ResponseEntity(new ErrorResponse(ErrorResponse.VALIDATION_ERROR), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(new ErrorResponse(ErrorCodes.VALIDATION_ERROR), HttpStatus.BAD_REQUEST);
 
         TicketSet ticketSet = ticketSetRepository.findById(basketItemForm.ticketSetId);
         if (ticketSet == null)
@@ -170,6 +171,7 @@ public class BasketController
 
     /**
      * Update basket item's quantity
+     * TODO: out of stock situation
      */
     @RequestMapping(value = BasketURI.ITEM_URI, method = RequestMethod.PUT)
     public ResponseEntity updateItem(@PathVariable UUID buyerId, @PathVariable Long itemId,
@@ -185,7 +187,7 @@ public class BasketController
             return FORBIDDEN;
 
         if (basketItemUpdateForm == null || bindingResult.hasFieldErrors())
-            return new ResponseEntity(new ErrorResponse(ErrorResponse.VALIDATION_ERROR), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(new ErrorResponse(ErrorCodes.VALIDATION_ERROR), HttpStatus.BAD_REQUEST);
 
         Basket basket = buyer.getBasket();
 

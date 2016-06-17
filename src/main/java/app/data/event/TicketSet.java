@@ -62,6 +62,11 @@ public class TicketSet
         return id;
     }
 
+    public void setId(Long id)
+    {
+        this.id = id;
+    }
+
     public int getStock()
     {
         return stock;

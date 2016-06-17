@@ -11,6 +11,8 @@ import org.flywaydb.test.junit.FlywayTestExecutionListener;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.runner.RunWith;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.test.context.ActiveProfiles;
@@ -27,6 +29,8 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.sql.DataSource;
 
+import java.util.logging.LogManager;
+
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 
 /**
@@ -41,8 +45,10 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 })
 @ActiveProfiles(Profiles.TEST)
 @FlywayTest
-abstract public class CommonTestTest extends DataSourceBasedDBTestCase
+abstract public class CommonIntegrationTest extends DataSourceBasedDBTestCase
 {
+    private static final Logger logger = LoggerFactory.getLogger(DataSourceBasedDBTestCase.class);
+
     @Autowired
     protected DataSource dataSource;
 
@@ -69,6 +75,7 @@ abstract public class CommonTestTest extends DataSourceBasedDBTestCase
     {
         super.setUp();
         mockMvc = MockMvcBuilders.webAppContextSetup(wac).apply(springSecurity()).build();
+        logger.getName();
     }
 
     @Override

@@ -93,6 +93,7 @@ public class Test
     {
         PaypalConfiguration config = new PaypalConfiguration(clientID, clientSecret);
         config.put(Constants.MODE, Constants.SANDBOX);
+        config.put(Constants.ENDPOINT, "http://localhost:1080");
         return config;
     }
 }

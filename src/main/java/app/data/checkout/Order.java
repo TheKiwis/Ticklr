@@ -24,14 +24,14 @@ public class Order
     @Column(name = "order_time")
     private ZonedDateTime orderTime;
 
-    @Column(name = "status")
-    private OrderStatus status;
+    @Column(name = "payment_method")
+    private PaymentMethod paymentMethod;
 
     @ManyToOne
     @JoinColumn(name = "buyer_id", nullable = false)
     private Buyer buyer;
 
-    @OneToMany
+    @OneToMany(mappedBy = "order", cascade = CascadeType.MERGE)
     private List<OrderPosition> orderPositions;
 
     protected Order()
@@ -39,20 +39,18 @@ public class Order
     }
 
     /**
-     * @param id != null
      * @param orderTime != null
-     * @param status default to OrderStatus.PENDING
+     * @param paymentMethod != null
      * @param buyer != null
      */
-    public Order(UUID id, ZonedDateTime orderTime, OrderStatus status, Buyer buyer)
+    public Order(ZonedDateTime orderTime, PaymentMethod paymentMethod, Buyer buyer)
     {
-        Assert.notNull(id);
         Assert.notNull(orderTime);
         Assert.notNull(buyer);
+        Assert.notNull(paymentMethod);
 
-        this.id = id;
         this.orderTime = orderTime;
-        this.status = status == null ? OrderStatus.PENDING : status;
+        this.paymentMethod = paymentMethod;
         this.buyer = buyer;
         this.orderPositions = new ArrayList<>();
     }
@@ -77,16 +75,6 @@ public class Order
         this.orderTime = date;
     }
 
-    public OrderStatus getStatus()
-    {
-        return status;
-    }
-
-    public void setStatus(OrderStatus status)
-    {
-        this.status = status;
-    }
-
     public Buyer getBuyer()
     {
         return buyer;
@@ -105,11 +93,23 @@ public class Order
     public void addOrderPosition(OrderPosition orderPosition)
     {
         this.orderPositions.add(orderPosition);
+        orderPosition.setOrder(this);
     }
 
-    public static enum OrderStatus
+    /**
+     * @return Payment method that buyer have chosen
+     */
+    public PaymentMethod getPaymentMethod()
     {
-        PENDING, APPROVED, CANCELED
+        return paymentMethod;
+    }
+
+    /**
+     * @return Payment method that buyer have chosen
+     */
+    public void setPaymentMethod(PaymentMethod paymentMethod)
+    {
+        this.paymentMethod = paymentMethod;
     }
 
     @Override

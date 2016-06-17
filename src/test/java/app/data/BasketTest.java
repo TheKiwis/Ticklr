@@ -108,4 +108,17 @@ public class BasketTest
         basket.addItem(mock(BasketItem.class));
         assertFalse(basket.isEmpty());
     }
+
+    @Test
+    public void clear()
+    {
+        Basket basket = new Basket();
+        basket.addItem(mock(BasketItem.class));
+        basket.addItem(mock(BasketItem.class));
+
+        assertFalse(basket.isEmpty());
+        basket.clear();
+        assertTrue(basket.isEmpty());
+    }
+
 }
