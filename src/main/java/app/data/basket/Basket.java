@@ -137,6 +137,7 @@ public class Basket
     public void removeItem(BasketItem item)
     {
         items.remove(item);
+        item.setBasket(null);
     }
 
     /**

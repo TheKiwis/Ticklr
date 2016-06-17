@@ -3,34 +3,27 @@ package app.services.basket;
 import app.data.basket.Basket;
 import app.data.basket.BasketItem;
 import app.data.event.TicketSet;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.Assert;
 
 import javax.persistence.*;
-import java.util.List;
 import java.util.Observable;
-import java.util.function.ToIntFunction;
-import java.util.stream.Collectors;
 
 /**
  * @author DucNguyenMinh
  * @since 08.03.16
  */
 @Repository
-@Transactional
 public class BasketService extends Observable
 {
-    @PersistenceContext
-    private EntityManager em;
+    private BasketRepository basketRepository;
 
-    public BasketService(EntityManager em)
+    @Autowired
+    public BasketService(BasketRepository basketRepository)
     {
-        this.em = em;
-    }
-
-    protected BasketService()
-    {
+        this.basketRepository = basketRepository;
     }
 
     /**
@@ -61,32 +54,11 @@ public class BasketService extends Observable
             basket.addItem(item);
         }
 
-        em.merge(basket);
+        basketRepository.save(basket);
 
         notifyBasketChanges(basket);
 
         return item;
-    }
-
-    /**
-     * Save the basket to the database
-     * @param basket
-     * @return updated basket
-     * @throws IllegalArgumentException if basket == null
-     */
-    public Basket saveBasket(Basket basket)
-    {
-        Assert.notNull(basket);
-
-        if (basket.getId() == null) {
-            em.persist(basket);
-        } else {
-            basket = em.merge(basket);
-        }
-
-        notifyBasketChanges(basket);
-
-        return basket;
     }
 
     /**
@@ -104,7 +76,7 @@ public class BasketService extends Observable
 
         item.setQuantity(quantity);
 
-        em.merge(item);
+        basketRepository.save(item.getBasket());
 
         notifyBasketChanges(item.getBasket());
     }
@@ -119,12 +91,9 @@ public class BasketService extends Observable
     {
         Assert.isTrue(basket.isInBasket(item));
 
-        // make item entity managed if needed
-        item = em.contains(item) ? item : em.merge(item);
-
         basket.removeItem(item);
 
-        em.remove(item);
+        basketRepository.save(basket);
 
         notifyBasketChanges(basket);
     }
@@ -133,12 +102,11 @@ public class BasketService extends Observable
      * Clears the basket, removes all items in the basket
      * @param basket
      * @return true if basket is successfully cleared
-     * TODO: Integration test with Purchase
      */
     public void clearBasket(Basket basket)
     {
         basket.clear();
-        em.merge(basket);
+        basketRepository.save(basket);
     }
 
     /**

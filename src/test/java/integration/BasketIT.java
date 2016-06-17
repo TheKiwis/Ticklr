@@ -142,7 +142,7 @@ public class BasketIT extends CommonIntegrationTest
     {
         assertEquals(1, (long) em.createQuery("SELECT COUNT(i) FROM BasketItem i WHERE i.id = :id").setParameter("id", 1l).getSingleResult());
 
-        mockMvc.perform(delete(basketURI.basketItemURI(buyerOneId, 1l))
+        mockMvc.perform(prepareRequest(delete(basketURI.basketItemURI(buyerOneId, 1l)))
                 .header("Authorization", authString))
                 .andExpect(status().isOk());
 

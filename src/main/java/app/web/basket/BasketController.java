@@ -4,6 +4,7 @@ import app.data.basket.Basket;
 import app.data.basket.BasketItem;
 import app.data.event.TicketSet;
 import app.data.user.Buyer;
+import app.services.basket.BasketRepository;
 import app.services.basket.BasketService;
 import app.services.TicketSetRepository;
 import app.services.BuyerService;
@@ -35,6 +36,8 @@ public class BasketController
 
     public static final ResponseEntity FORBIDDEN = new ResponseEntity(HttpStatus.FORBIDDEN);
 
+    protected BasketRepository basketRepository;
+
     protected BasketService basketService;
 
     protected BuyerService buyerService;
@@ -48,9 +51,10 @@ public class BasketController
     @Autowired
     public BasketController(BasketService basketService, BuyerService buyerService,
                             TicketSetRepository ticketSetRepository, IdentityAuthorizer identityAuthorizer,
-                            ResourceURI resURI)
+                            ResourceURI resURI, BasketRepository basketRepository)
     {
         this.basketService = basketService;
+        this.basketRepository = basketRepository;
         this.buyerService = buyerService;
         this.ticketSetRepository = ticketSetRepository;
         this.identityAuthorizer = identityAuthorizer;
@@ -75,7 +79,7 @@ public class BasketController
         basket = buyer.getBasket();
 
         if (basket == null) {
-            basket = basketService.saveBasket(new Basket(buyer));
+            basket = basketRepository.save(new Basket(buyer));
         }
 
         return new ResponseEntity(new BasketResponse(basket, resURI), status);

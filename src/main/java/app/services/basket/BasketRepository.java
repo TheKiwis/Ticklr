@@ -3,6 +3,7 @@ package app.services.basket;
 import app.data.basket.Basket;
 import app.services.BaseRepository;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author ngnmhieu

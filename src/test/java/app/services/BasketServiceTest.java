@@ -4,6 +4,7 @@ import app.data.basket.Basket;
 import app.data.basket.BasketItem;
 import app.data.user.Buyer;
 import app.data.event.TicketSet;
+import app.services.basket.BasketRepository;
 import app.services.basket.BasketService;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,30 +28,15 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class BasketServiceTest
 {
-    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
-    EntityManager em;
-
     BasketService basketService;
+
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private BasketRepository basketRepository;
 
     @Before
     public void setUp() throws Exception
     {
-        basketService = new BasketService(em);
-    }
-
-    @Test
-    public void saveBasket()
-    {
-        Basket mockBasket = mock(Basket.class);
-        when(em.merge(mockBasket)).thenReturn(mockBasket);
-
-        when(mockBasket.getId()).thenReturn(null);
-        basketService.saveBasket(mockBasket);
-        verify(em, times(1)).persist(mockBasket);
-
-        when(mockBasket.getId()).thenReturn(1l);
-        basketService.saveBasket(mockBasket);
-        verify(em, times(1)).merge(mockBasket);
+        basketService = new BasketService(basketRepository);
     }
 
     @Test
@@ -59,12 +45,11 @@ public class BasketServiceTest
         Basket basket = new Basket(mock(Buyer.class));
         BasketItem item = new BasketItem(mock(TicketSet.class), 10, BigDecimal.ONE);
         basket.addItem(item);
-        when(em.merge(item)).thenReturn(item);
 
         basketService.removeItem(basket, item);
 
         assertFalse(basket.isInBasket(item));
-        verify(em, times(1)).remove(any(BasketItem.class));
+        verify(basketRepository, times(1)).save(basket);
     }
 
     @Test
@@ -80,7 +65,7 @@ public class BasketServiceTest
         assertEquals(ticketSet, item.getTicketSet());
         assertEquals(ticketSet.getPrice(), item.getUnitPrice());
         assertTrue(10 == item.getQuantity());
-        verify(em, times(1)).merge(basket);
+        verify(basketRepository, times(1)).save(basket);
     }
 
     @Test
@@ -105,7 +90,7 @@ public class BasketServiceTest
         basketService.updateItemQuantity(item, 20);
 
         assertTrue(20 == item.getQuantity());
-        verify(em, times(1)).merge(item);
+        verify(basketRepository, times(1)).save(any());
     }
 
     @Test
