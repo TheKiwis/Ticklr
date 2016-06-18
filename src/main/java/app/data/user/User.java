@@ -25,6 +25,8 @@ public class User
     @JoinColumn(name = "identity_id")
     protected Identity identity;
 
+    // TODO: firstname lastname
+
     protected User()
     {
     }

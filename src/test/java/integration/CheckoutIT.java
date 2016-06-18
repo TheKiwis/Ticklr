@@ -6,7 +6,7 @@ import app.data.event.Event;
 import app.web.basket.BasketURI;
 import app.web.checkout.CheckoutURI;
 import app.web.checkout.forms.PurchaseForm;
-import app.web.common.response.ErrorCodes;
+import app.web.common.response.ErrorCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dbunit.dataset.IDataSet;
@@ -25,7 +25,6 @@ import java.util.UUID;
 
 import static org.junit.Assert.assertNotEquals;
 import static org.mockserver.integration.ClientAndServer.startClientAndServer;
-import static org.mockserver.matchers.Times.exactly;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.StringBody.exact;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -55,8 +54,8 @@ public class CheckoutIT extends CommonIntegrationTest
 
     private BasketURI basketURI;
 
-    @BeforeClass
-    public static void setupMockPaypalServer() throws IOException
+    @Before
+    public void setupMockPaypalServer() throws IOException
     {
         mockServer = startClientAndServer(1080);
 
@@ -71,8 +70,8 @@ public class CheckoutIT extends CommonIntegrationTest
 
     }
 
-    @AfterClass
-    public static void tearDownMockServer()
+    @After
+    public void tearDownMockServer()
     {
         mockServer.stop();
     }
@@ -183,11 +182,48 @@ public class CheckoutIT extends CommonIntegrationTest
     @Test
     public void happy_execute_payment_use_buyer_name_for_ticket_by_default() throws Exception
     {
+        // TODO
     }
 
     @Test
-    public void sad_payment_already_done() throws Exception
+    public void sad_should_not_re_execute_payment_that_is_already_done() throws Exception
     {
+        mockServer.when(HttpRequest.request()
+                .withMethod("POST")
+                .withPath("/v1/payments/payment/.*/execute"))
+                .respond(response()
+                        .withStatusCode(400)
+                        .withHeaders(new Header("Content-Type", "application/json; charset=utf-8"))
+                        .withBody(readResource("/fixtures/paypal/payment_done_error.json")));
+
+
+        List<PurchaseForm.TicketInfo> ticketInfos = Arrays.asList(new PurchaseForm.TicketInfo[]{
+                new PurchaseForm.TicketInfo(1l, "Hieu", "Nguyen"),
+                new PurchaseForm.TicketInfo(3l, "Duc", "Nguyen")
+        });
+
+        long orderCountOld = (Long) em.createQuery("SELECT COUNT(o) FROM Order o").getSingleResult();
+
+        mockMvc.perform(prepareRequest(post(checkoutURI.purchaseExecuteURL(buyerWithBasketId)))
+                .content(getPurchaseForm(ticketInfos)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value(ErrorCode.PAYPAL_ERROR.getCode()));
+
+        long orderCountNew = (Long) em.createQuery("SELECT COUNT(o) FROM Order o").getSingleResult();
+
+        assertEquals(orderCountOld, orderCountNew);
+    }
+
+    @Test
+    public void sad_execute_payment_ticket_out_of_stock() throws Exception
+    {
+        // TODO
+    }
+
+    @Test
+    public void sad_execute_expired_payment() throws Exception
+    {
+        // TODO
     }
 
     @Test
@@ -202,7 +238,7 @@ public class CheckoutIT extends CommonIntegrationTest
                 .contentType("application/json")
                 .content(getPurchaseForm(new ArrayList<>())))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorCode").value(ErrorCodes.PURCHASE_NO_PAYMENT));
+                .andExpect(jsonPath("$.errorCode").value(ErrorCode.PURCHASE_NO_PAYMENT.getCode()));
     }
 
     private String getPurchaseForm(List<PurchaseForm.TicketInfo> ticketInfos) throws JsonProcessingException

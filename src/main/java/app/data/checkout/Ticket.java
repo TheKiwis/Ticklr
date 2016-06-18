@@ -34,6 +34,9 @@ public class Ticket
     @JoinColumn(name = "order_position_id")
     private OrderPosition orderPosition;
 
+
+    // TODO: need created time
+
     protected Ticket()
     {
     }

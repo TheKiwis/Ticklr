@@ -155,6 +155,7 @@ public class PaypalService
 
         PaymentExecution paymentExecution = new PaymentExecution();
         paymentExecution.setPayerId(payerId);
+
         Payment createdPayment = payment.execute(createAPIContext(), paymentExecution);
 
         return createdPayment;

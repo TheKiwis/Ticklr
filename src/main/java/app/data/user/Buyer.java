@@ -26,6 +26,9 @@ public class Buyer
     @OneToOne(mappedBy = "buyer")
     protected Basket basket;
 
+
+    // TODO: firstname lastname
+
     protected Buyer()
     {
     }

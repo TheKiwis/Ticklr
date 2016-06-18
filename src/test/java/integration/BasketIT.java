@@ -1,8 +1,7 @@
 package integration;
 
 import app.web.basket.BasketURI;
-import app.web.common.response.ErrorCodes;
-import app.web.common.response.ErrorResponse;
+import app.web.common.response.ErrorCode;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.dbunit.dataset.IDataSet;
@@ -150,6 +149,15 @@ public class BasketIT extends CommonIntegrationTest
     }
 
     @Test
+    public void sad_add_item_but_out_of_stock() throws Exception
+    {
+        mockMvc.perform(prepareRequest(post(basketURI.basketItemURI(buyerOneId, null)))
+                .content(getAddItemForm(11, 1l)))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.errorCode").value(ErrorCode.TICKET_SET_OUT_OF_STOCK.getCode()));
+    }
+
+    @Test
     public void sad_should_return_HTTP_NotFound() throws Exception
     {
         mockMvc.perform(prepareRequest(get(basketURI.basketURI(UUID.randomUUID()))))
@@ -188,12 +196,12 @@ public class BasketIT extends CommonIntegrationTest
     public void sad_should_validate_input_when_add_new_item() throws Exception
     {
         mockMvc.perform(prepareRequest(post(basketURI.basketItemURI(buyerOneId, null))))
-                .andExpect(jsonPath("$.errorCode").value(ErrorCodes.VALIDATION_ERROR))
+                .andExpect(jsonPath("$.errorCode").value(ErrorCode.VALIDATION_ERROR.getCode()))
                 .andExpect(status().isBadRequest());
 
         mockMvc.perform(prepareRequest(post(basketURI.basketItemURI(buyerOneId, null)))
                 .content(getAddItemForm(3, null)))
-                .andExpect(jsonPath("$.errorCode").value(ErrorCodes.VALIDATION_ERROR))
+                .andExpect(jsonPath("$.errorCode").value(ErrorCode.VALIDATION_ERROR.getCode()))
                 .andExpect(status().isBadRequest());
 
         mockMvc.perform(prepareRequest(post(basketURI.basketItemURI(buyerOneId, null)))
@@ -211,17 +219,17 @@ public class BasketIT extends CommonIntegrationTest
     {
         mockMvc.perform(prepareRequest(put(basketURI.basketItemURI(buyerOneId, 1l))))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorCode").value(ErrorCodes.VALIDATION_ERROR));
+                .andExpect(jsonPath("$.errorCode").value(ErrorCode.VALIDATION_ERROR.getCode()));
 
         mockMvc.perform(prepareRequest(put(basketURI.basketItemURI(buyerOneId, 1l)))
                 .content("{\"quantity\": -1}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorCode").value(ErrorCodes.VALIDATION_ERROR));
+                .andExpect(jsonPath("$.errorCode").value(ErrorCode.VALIDATION_ERROR.getCode()));
 
         mockMvc.perform(prepareRequest(put(basketURI.basketItemURI(buyerOneId, 1l)))
                 .content("{\"quantity\": 0}"))
                 .andExpect(status().isBadRequest())
-                .andExpect(jsonPath("$.errorCode").value(ErrorCodes.VALIDATION_ERROR));
+                .andExpect(jsonPath("$.errorCode").value(ErrorCode.VALIDATION_ERROR.getCode()));
     }
 
     @Test

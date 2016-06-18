@@ -43,7 +43,7 @@ public class CheckoutService
      */
     @Autowired
     public CheckoutService(PaypalService paypalService, BasketService basketService, OrderRepository orderRepository)
-   {
+    {
         this.paypalService = paypalService;
         this.basketService = basketService;
         this.orderRepository = orderRepository;
@@ -51,11 +51,11 @@ public class CheckoutService
 
     /**
      * @param basket
-     * @param form   TODO: what if there is not enough ticket set?
-     *               TODO: created payment expired? How does paypal answer?
-     * @throws IllegalArgumentException if basket is empty
+     * @param form
+     * @throws IllegalArgumentException         if basket is empty
      * @throws PaypalService.NoPaymentException if no payment created before the execution
-     * @throws PayPalRESTException if there is any error with Paypal REST API
+     * @throws PayPalRESTException              if there is any error with Paypal REST API
+     * @throws PaymentAlreadyExecutedException  if a the created payment is already executed
      */
     public Order purchase(Basket basket, PurchaseForm form) throws PayPalRESTException
     {
@@ -64,7 +64,16 @@ public class CheckoutService
         if (basket == null || basket.isEmpty())
             throw new IllegalArgumentException();
 
-        paypalService.executePayment(basket, form.paypal.payerId);
+        try {
+            paypalService.executePayment(basket, form.paypal.payerId);
+        } catch (PayPalRESTException e) {
+            switch (e.getDetails().getName()) {
+                case "PAYMENT_ALREADY_DONE":
+                    throw new PaymentAlreadyExecutedException();
+                default:
+                    throw e;
+            }
+        }
 
         Order order = new Order(ZonedDateTime.now(), PaymentMethod.PAYPAL, basket.getBuyer());
 
@@ -95,5 +104,10 @@ public class CheckoutService
         basketService.clearBasket(basket);
 
         return order;
+    }
+
+    // Gets thrown when a payment is executed twice, see CheckoutService#purchase()
+    public static class PaymentAlreadyExecutedException extends RuntimeException
+    {
     }
 }

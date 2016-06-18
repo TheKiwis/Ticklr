@@ -9,7 +9,7 @@ import app.services.checkout.PaypalService;
 import app.web.authorization.IdentityAuthorizer;
 import app.web.checkout.forms.PurchaseForm;
 import app.web.checkout.forms.PaypalInitForm;
-import app.web.common.response.ErrorCodes;
+import app.web.common.response.ErrorCode;
 import app.web.common.response.ErrorResponse;
 import com.paypal.base.rest.PayPalRESTException;
 import org.slf4j.Logger;
@@ -25,7 +25,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
 
-import static app.web.common.response.ErrorCodes.BASKET_IS_EMPTY;
+import static app.web.common.response.ErrorCode.BASKET_IS_EMPTY;
 
 /**
  * @author ngnmhieu
@@ -36,7 +36,7 @@ public class CheckoutController
 {
     private static final Logger log = LoggerFactory.getLogger(CheckoutController.class);
 
-    private static final ResponseEntity PAYPAL_ERROR = new ResponseEntity(new ErrorResponse("PAYPAL_ERROR"), HttpStatus.INTERNAL_SERVER_ERROR);
+    private static final ResponseEntity PAYPAL_ERROR = new ResponseEntity(new ErrorResponse(ErrorCode.PAYPAL_ERROR), HttpStatus.INTERNAL_SERVER_ERROR);
 
     // performs Checkout related use cases
     private PaypalService paypalService;
@@ -76,7 +76,7 @@ public class CheckoutController
             return FORBIDDEN;
 
         if (bindingResult.hasErrors())
-            return new ResponseEntity(new ErrorResponse(ErrorCodes.VALIDATION_ERROR), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(new ErrorResponse(ErrorCode.VALIDATION_ERROR), HttpStatus.BAD_REQUEST);
 
         Basket basket = buyer.getBasket();
 
@@ -111,7 +111,7 @@ public class CheckoutController
             return FORBIDDEN;
 
         if (bindingResult.hasErrors())
-            return new ResponseEntity(new ErrorResponse(ErrorCodes.VALIDATION_ERROR), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(new ErrorResponse(ErrorCode.VALIDATION_ERROR), HttpStatus.BAD_REQUEST);
 
         Basket basket = buyer.getBasket();
 
@@ -121,12 +121,15 @@ public class CheckoutController
         Order order = null;
         try {
             order = checkoutService.purchase(basket, purchaseForm);
+        } catch (PaypalService.NoPaymentException e) {
+            log.error("No payment created before execute: " + e.getMessage(), e);
+            return new ResponseEntity(new ErrorResponse(ErrorCode.PURCHASE_NO_PAYMENT), HttpStatus.BAD_REQUEST);
+        } catch (CheckoutService.PaymentAlreadyExecutedException e) {
+            log.error("Payment already executed", e);
+            return new ResponseEntity(new ErrorResponse(ErrorCode.PAYPAL_ERROR, "Payment already executed"), HttpStatus.BAD_REQUEST);
         } catch (PayPalRESTException e) {
             log.error("Paypal error: " + e.getMessage(), e);
             return PAYPAL_ERROR;
-        } catch (PaypalService.NoPaymentException e) {
-            log.error("No payment created before execute: " + e.getMessage(), e);
-            return new ResponseEntity(new ErrorResponse(ErrorCodes.PURCHASE_NO_PAYMENT), HttpStatus.BAD_REQUEST);
         }
 
         return new ResponseEntity(HttpStatus.OK);

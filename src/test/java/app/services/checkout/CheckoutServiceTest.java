@@ -9,7 +9,10 @@ import app.data.event.TicketSet;
 import app.data.user.Buyer;
 import app.services.basket.BasketService;
 import app.web.checkout.forms.PurchaseForm;
+import com.paypal.api.payments.Details;
+import com.paypal.api.payments.Error;
 import com.paypal.api.payments.Payment;
+import com.paypal.base.rest.PayPalRESTException;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -77,5 +80,19 @@ public class CheckoutServiceTest
         OrderPosition position = order.getOrderPositions().get(0);
         assertNotNull(position.getTicket());
         assertEquals(ts1, position.getTicketSet());
+    }
+
+    @Test(expected = CheckoutService.PaymentAlreadyExecutedException.class)
+    public void purchase_throw_PaymentAlreadyExecutedException() throws Exception
+    {
+        Basket basket = mock(Basket.class);
+        when(basket.isEmpty()).thenReturn(false);
+        PayPalRESTException exp = new PayPalRESTException("Payment already executed");
+        exp.setDetails(new Error("PAYMENT_ALREADY_DONE", "", "", ""));
+        when(paypalService.executePayment(any(), any())).thenThrow(exp);
+
+        checkoutService.purchase(basket, new PurchaseForm()
+                                .setPaymentMethod(PaymentMethod.PAYPAL.toString())
+                                .setPaypalPayer("ID-12AS34A3ND"));
     }
 }

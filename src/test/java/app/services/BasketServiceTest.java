@@ -56,9 +56,8 @@ public class BasketServiceTest
     public void addItemToBasket_should_add_new_item_to_basket()
     {
         Basket basket = new Basket(mock(Buyer.class));
-
+        when(basketRepository.save(basket)).thenReturn(basket);
         TicketSet ticketSet = new TicketSet("To the moon", BigDecimal.TEN, 50);
-
         BasketItem item = basketService.addItemToBasket(basket, ticketSet, 10);
 
         assertTrue(1 == basket.getItems().size());
@@ -68,12 +67,28 @@ public class BasketServiceTest
         verify(basketRepository, times(1)).save(basket);
     }
 
+    @Test(expected = BasketService.TicketOutOfStockException.class)
+    public void addItemToBasket_should_throw_TicketOutOfStockException()
+    {
+        Basket basket = new Basket(mock(Buyer.class));
+        TicketSet ticketSet = new TicketSet("To the moon", BigDecimal.TEN, 10);
+        basketService.addItemToBasket(basket, ticketSet, 20);
+    }
+
+    @Test(expected = BasketService.TicketOutOfStockException.class)
+    public void updateItemQuantity_should_throw_TicketOutOfStockException()
+    {
+        TicketSet ticketSet = new TicketSet("Sample", BigDecimal.TEN, 10);
+        BasketItem item = new BasketItem(ticketSet, 9, BigDecimal.TEN);
+        basketService.updateItemQuantity(item, 11);
+    }
+
     @Test
     public void addItemToBasket_should_increment_quantity()
     {
         TicketSet ticketSet = new TicketSet("To the moon", BigDecimal.TEN, 50);
-
         Basket basket = new Basket(mock(Buyer.class));
+        when(basketRepository.save(basket)).thenReturn(basket);
 
         BasketItem oldItem = basketService.addItemToBasket(basket, ticketSet, 10);
         BasketItem item = basketService.addItemToBasket(basket, ticketSet, 10);
@@ -85,7 +100,8 @@ public class BasketServiceTest
     @Test
     public void updateItemQuantity() throws Exception
     {
-        BasketItem item = new BasketItem(mock(TicketSet.class), 10, BigDecimal.TEN);
+        TicketSet ticketSet = new TicketSet("Sample", BigDecimal.TEN, 50);
+        BasketItem item = new BasketItem(ticketSet, 10, BigDecimal.TEN);
 
         basketService.updateItemQuantity(item, 20);
 

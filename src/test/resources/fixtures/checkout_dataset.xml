@@ -6,12 +6,12 @@
     <events id="1" title="Sample Event" description="Pool Party" start_time="2015-09-15 00:00:00"
             end_time="2015-09-15 00:00:00" canceled="1" public="1"
             user_id="uuid'9207df40-0f18-9b6a-874c-00c51b02a5d5'"/>
-        <ticket_sets id="1" price="30.00" title="Couple ticket" event_id="1"/>
-        <ticket_sets id="2" price="20.00" title="Couple ticket" event_id="1"/>
+        <ticket_sets id="1" price="30.00" title="Couple ticket" event_id="1" stock="10" />
+        <ticket_sets id="2" price="20.00" title="Couple ticket" event_id="1" stock="10" />
     <events id="2" title="Sample Event" description="Pool Party" start_time="2015-09-15 00:00:00"
             end_time="2015-09-15 00:00:00" canceled="1" public="1"
             user_id="uuid'9207df40-0f18-9b6a-874c-00c51b02a5d5'"/>
-        <ticket_sets id="3" price="25.00" title="Single ticket" event_id="2"/>
+        <ticket_sets id="3" price="25.00" title="Single ticket" event_id="2" stock="10" />
 
     <!-- buyer that has items in her basket -->
     <identities id="uuid'8dd43440-1f81-11e6-b6ba-3e1d05defe78'" email="buyer_with_basket@example.com" password="$2a$10$7DiTrG0atup/drERomar.eg4N0yVhRDvd7VHmAGKpxZP.XTzwCq16"/>

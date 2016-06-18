@@ -3,7 +3,6 @@ CREATE TABLE `order_positions` (
   `title` VARCHAR(255) NULL,
   `quantity` INT NULL,
   `unit_price` DECIMAL(10,0) NULL,
-  `total_price` DECIMAL(10,0) NULL,
   `order_id` BINARY(16) NULL,
   `ticket_set_id` INT NULL,
   PRIMARY KEY (`id`));

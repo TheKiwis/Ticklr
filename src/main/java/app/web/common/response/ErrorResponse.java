@@ -6,12 +6,27 @@ package app.web.common.response;
  */
 public class ErrorResponse
 {
-    public static final String VALIDATION_ERROR = "VALIDATION_ERROR";
-
     public String errorCode;
 
-    public ErrorResponse(String errorCode)
+    public String message;
+
+    public Object details;
+
+    public ErrorResponse(ErrorCode errorCode)
     {
-        this.errorCode = errorCode;
+        this.errorCode = errorCode.getCode();
+        this.message = errorCode.getDefaultMessage();
+    }
+
+    public ErrorResponse(ErrorCode errorCode, String message)
+    {
+        this.errorCode = errorCode.getCode();
+        this.message = message;
+    }
+
+    public ErrorResponse(ErrorCode errorCode, String message, Object details)
+    {
+        this(errorCode, message);
+        this.details = details;
     }
 }

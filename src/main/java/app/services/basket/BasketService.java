@@ -35,6 +35,7 @@ public class BasketService extends Observable
      * @param quantity
      * @return the new BasketItem
      * @throws IllegalArgumentException if quantity > 0
+     * @throws TicketOutOfStockException if ticketSet.getStock() < quantity
      * @ensure item.getTicketSet() == ticketSet
      * @ensure item.getUnitPrice().equals(ticketSet.getPrice())
      * @ensure item.getQuantity() == (basket.isInBasket(ticketSet) ? basket.getItem(ticketSet).getQuantity() + quantity : quantity)
@@ -45,6 +46,9 @@ public class BasketService extends Observable
         Assert.notNull(ticketSet);
         Assert.isTrue(quantity > 0);
 
+        if (ticketSet.getStock() < quantity)
+            throw new TicketOutOfStockException();
+
         BasketItem item;
         if (basket.isInBasket(ticketSet)) {
             item = basket.getItemFor(ticketSet);
@@ -54,11 +58,11 @@ public class BasketService extends Observable
             basket.addItem(item);
         }
 
-        basketRepository.save(basket);
+        basket = basketRepository.save(basket);
 
         notifyBasketChanges(basket);
 
-        return item;
+        return basket.getItemFor(ticketSet);
     }
 
     /**
@@ -68,11 +72,15 @@ public class BasketService extends Observable
      * @param quantity
      * @throws IllegalArgumentException if quantity > 0
      * @throws IllegalArgumentException if item == null
+     * @throws TicketOutOfStockException quantity exceeds the number of available ticket sets
      */
     public void updateItemQuantity(BasketItem item, int quantity)
     {
         Assert.notNull(item);
         Assert.isTrue(quantity > 0);
+
+        if (item.getTicketSet().getStock() < quantity)
+            throw new TicketOutOfStockException();
 
         item.setQuantity(quantity);
 
@@ -117,5 +125,10 @@ public class BasketService extends Observable
     {
         setChanged();
         notifyObservers(basket);
+    }
+
+    public class TicketOutOfStockException extends RuntimeException
+    {
+
     }
 }

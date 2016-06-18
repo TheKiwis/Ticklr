@@ -1,0 +1,6 @@
+{
+    "name":"PAYMENT_ALREADY_DONE",
+    "message":"Payment has been done already for this cart.",
+    "information_link":"https://developer.paypal.com/docs/api/#PAYMENT_ALREADY_DONE",
+    "debug_id":"490cc385e23ef"
+}

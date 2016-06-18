@@ -12,7 +12,7 @@ import app.web.ResourceURI;
 import app.web.authorization.IdentityAuthorizer;
 import app.web.basket.responses.BasketItemResponse;
 import app.web.basket.responses.BasketResponse;
-import app.web.common.response.ErrorCodes;
+import app.web.common.response.ErrorCode;
 import app.web.common.response.ErrorResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -101,7 +101,7 @@ public class BasketController
             return FORBIDDEN;
 
         if (basketItemForm == null || bindingResult.hasFieldErrors())
-            return new ResponseEntity(new ErrorResponse(ErrorCodes.VALIDATION_ERROR), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(new ErrorResponse(ErrorCode.VALIDATION_ERROR), HttpStatus.BAD_REQUEST);
 
         TicketSet ticketSet = ticketSetRepository.findById(basketItemForm.ticketSetId);
         if (ticketSet == null)
@@ -113,7 +113,12 @@ public class BasketController
         if (basket == null)
             basket = new Basket(buyer);
 
-        BasketItem item = basketService.addItemToBasket(basket, ticketSet, basketItemForm.quantity);
+        BasketItem item = null;
+        try {
+            item = basketService.addItemToBasket(basket, ticketSet, basketItemForm.quantity);
+        } catch (BasketService.TicketOutOfStockException e) {
+            return new ResponseEntity(new ErrorResponse(ErrorCode.TICKET_SET_OUT_OF_STOCK), HttpStatus.BAD_REQUEST);
+        }
 
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(URI.create(resURI.getBasketURI().basketItemURL(buyerId, item.getId())));
@@ -191,7 +196,7 @@ public class BasketController
             return FORBIDDEN;
 
         if (basketItemUpdateForm == null || bindingResult.hasFieldErrors())
-            return new ResponseEntity(new ErrorResponse(ErrorCodes.VALIDATION_ERROR), HttpStatus.BAD_REQUEST);
+            return new ResponseEntity(new ErrorResponse(ErrorCode.VALIDATION_ERROR), HttpStatus.BAD_REQUEST);
 
         Basket basket = buyer.getBasket();
 
@@ -200,7 +205,11 @@ public class BasketController
         if (basket == null || basketItem == null)
             return NOT_FOUND;
 
-        basketService.updateItemQuantity(basketItem, basketItemUpdateForm.quantity);
+        try {
+            basketService.updateItemQuantity(basketItem, basketItemUpdateForm.quantity);
+        } catch (BasketService.TicketOutOfStockException e) {
+            return new ResponseEntity(new ErrorResponse(ErrorCode.TICKET_SET_OUT_OF_STOCK), HttpStatus.BAD_REQUEST);
+        }
 
         return new ResponseEntity(HttpStatus.OK);
     }

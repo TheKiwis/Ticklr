@@ -82,7 +82,7 @@ public class Basket
     public void addItem(BasketItem item)
     {
         items.add(item);
-        item.basket = this;
+        item.setBasket(this);
     }
 
     /**
