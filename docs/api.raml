@@ -406,7 +406,7 @@ traits:
               Precondition: Basket must contain at least one item."
             body:
               application/json:
-                exmpale:
+                example: |
                   {
                     "returnUrl": "http://ticklr.com/checkout/paypal/approved",
                     "cancelUrl": "http://ticklr.com/checkout/paypal/cancel"
@@ -426,28 +426,40 @@ traits:
         is: [authorized]
         post:
           description: Places a new order, executes any payment process.
-          application/json:
-            example:
-              {
-                "ticketInfos": [
-                  {
-                    "ticketSetId": "5",
-                    "firstName": "Bob",
-                    "lastName": "Dylan"
-                  },
-                  {
-                    "ticketSetId": "6",
-                    "firstName": "James",
-                    "lastName": "Watson"
+          body:
+            application/json:
+              example: |
+                {
+                  "ticketInfos": [
+                    {
+                      "ticketSetId": "5",
+                      "firstName": "Bob",
+                      "lastName": "Dylan"
+                    },
+                    {
+                      "ticketSetId": "6",
+                      "firstName": "James",
+                      "lastName": "Watson"
+                    }
+                  ],
+
+                  "paymentMethod": "paypal",
+
+                  "paypal": {
+                    "payerId": "XRXRDFBB6BF7Q"
                   }
-                ],
-
-                "paymentMethod": "paypal",
-
-                "paypal": {
-                  "payerId": "XRXRDFBB6BF7Q"
                 }
-              }
+
+    /tickets:
+      /{ticketId}:
+        /qr-code:
+          is: [has_resource_not_found]
+          get:
+            description: QR-Code representation of the ticket.
+            responses:
+              200:
+                body:
+                  image/png:
 
     /basket:
       is: [authorized, has_resource_not_found]
