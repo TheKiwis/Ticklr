@@ -90,7 +90,12 @@ public class CheckoutService
 
             // create new ticket for a ticket set
             PurchaseForm.TicketInfo info = ticketsMap.get(ticketSet.getId());
-            Ticket ticket = new Ticket(info.firstName, info.lastName);
+
+            Ticket ticket;
+            if (info != null)
+                ticket = new Ticket(info.firstName, info.lastName);
+            else
+                ticket = new Ticket(basket.getBuyer().getIdentity().getEmail(), "");
 
             OrderPosition position = new OrderPosition(ticketSet.getTitle(), item.getQuantity(), ticketSet.getPrice());
             position.setTicketSet(ticketSet);

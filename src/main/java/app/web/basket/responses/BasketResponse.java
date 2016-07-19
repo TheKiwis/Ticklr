@@ -6,6 +6,7 @@ import app.data.event.TicketSet;
 import app.data.user.Buyer;
 import app.web.ResourceURI;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,29 +40,19 @@ public class BasketResponse
         }
     }
 
-    public static class TicketSetResponse
-    {
-        public long id;
-        public String href;
-
-        public TicketSetResponse(TicketSet ticketSet, ResourceURI resURI)
-        {
-            Event event = ticketSet.getEvent();
-            href = resURI.getEventURI().ticketSetURL(event.getUser().getId(), event.getId(), ticketSet.getId());
-            id = ticketSet.getId();
-        }
-    }
-
     public String href;
 
     public BuyerResponse buyer;
 
     public BasketItemsResponse items;
 
+    public BigDecimal totalPrice;
+
     public BasketResponse(Basket basket, ResourceURI resURI)
     {
         href = resURI.getBasketURI().basketURL(basket.getBuyer().getId());
         buyer = new BuyerResponse(basket.getBuyer(), resURI);
+        totalPrice = basket.getTotalPrice();
         items = new BasketItemsResponse(basket, resURI);
     }
 }

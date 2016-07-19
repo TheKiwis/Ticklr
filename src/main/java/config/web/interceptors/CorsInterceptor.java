@@ -22,8 +22,11 @@ public class CorsInterceptor extends HandlerInterceptorAdapter
     // Max amount of seconds browsers are allowed to cache pre-flight request
     private String maxAge = "3600";
 
-    // Default allowed Headers
-    private String headers = "Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers";
+    // Default allowed headers
+    private String allowedHeaders = "Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers";
+
+    // No headers are exposed by default
+    private String exposedHeaders = "";
 
     private CorsInterceptor()
     {
@@ -56,9 +59,15 @@ public class CorsInterceptor extends HandlerInterceptorAdapter
         return this;
     }
 
-    public CorsInterceptor withHeaders(String headers)
+    public CorsInterceptor withAllowHeaders(String headers)
     {
-        this.headers = headers;
+        this.allowedHeaders = headers;
+        return this;
+    }
+
+    public CorsInterceptor withExposeHeaders(String exposedHeaders)
+    {
+        this.exposedHeaders = exposedHeaders;
         return this;
     }
 
@@ -68,7 +77,8 @@ public class CorsInterceptor extends HandlerInterceptorAdapter
         response.setHeader("Access-Control-Allow-Origin", origin);
         response.setHeader("Access-Control-Allow-Methods", methods);
         response.setHeader("Access-Control-Max-Age", maxAge);
-        response.setHeader("Access-Control-Allow-Headers", headers);
+        response.setHeader("Access-Control-Allow-Headers", allowedHeaders);
+        response.setHeader("Access-Control-Expose-Headers", exposedHeaders);
 
         return true;
     }

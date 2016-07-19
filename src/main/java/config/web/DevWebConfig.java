@@ -21,6 +21,8 @@ public class DevWebConfig extends BaseWebConfig
                 .withOrigin("*")
                 .withMethods("POST, PUT, GET, OPTIONS, DELETE")
                 .withMaxAge("3600")
-                .withHeaders("Content-Type, x-requested-with, X-Custom-Header, Location, Authorization"));
+                .withExposeHeaders("Content-Type, x-requested-with, X-Custom-Header, Location")
+                .withAllowHeaders("Origin, Accept, X-Requested-With, Content-Type, Access-Control-Request-Method, Access-Control-Request-Headers, Authorization"));
+
     }
 }
