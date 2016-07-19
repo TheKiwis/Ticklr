@@ -39,6 +39,8 @@ public class BasketService extends Observable
      * @ensure item.getTicketSet() == ticketSet
      * @ensure item.getUnitPrice().equals(ticketSet.getPrice())
      * @ensure item.getQuantity() == (basket.isInBasket(ticketSet) ? basket.getItem(ticketSet).getQuantity() + quantity : quantity)
+     *
+     * TODO: cannot add item to basket if event is expired
      */
     public BasketItem addItemToBasket(Basket basket, TicketSet ticketSet, int quantity)
     {

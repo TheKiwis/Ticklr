@@ -3,18 +3,15 @@ package app.web.event;
 import app.data.event.Event;
 import app.data.event.TicketSet;
 import app.data.user.User;
+import app.web.event.responses.*;
 import app.web.validation.EventValidator;
-import app.services.EventRepository;
+import app.services.event.EventRepository;
 import app.services.TicketSetRepository;
 import app.services.UserService;
 import app.web.ResourceURI;
 import app.web.authorization.IdentityAuthorizer;
 import app.web.common.response.expansion.ResponseExpansion;
 import app.web.event.forms.TicketSetForm;
-import app.web.event.responses.EventResponse;
-import app.web.event.responses.EventsResponse;
-import app.web.event.responses.TicketSetResponse;
-import app.web.event.responses.TicketSetsResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -120,7 +117,7 @@ public class EventController
 
             requestEvent.setUser(user);
 
-            Event event = eventRepository.saveOrUpdate(requestEvent);
+            Event event = eventRepository.save(requestEvent);
 
             headers.setLocation(URI.create(eventURI.eventURL(userId, event.getId())));
         } else {
@@ -167,7 +164,7 @@ public class EventController
         validator.validate(requestEvent, bindingResult);
 
         if (!bindingResult.hasFieldErrors()) {
-            Event updatedEvent = eventRepository.saveOrUpdate(event.merge(requestEvent));
+            Event updatedEvent = eventRepository.save(event.merge(requestEvent));
             headers.setLocation(URI.create(eventURI.eventURL(userId, updatedEvent.getId())));
         } else {
             status = HttpStatus.BAD_REQUEST;
@@ -199,6 +196,33 @@ public class EventController
         return new ResponseEntity(response, HttpStatus.OK);
     }
 
+    @RequestMapping(value = EventURI.PUBLIC_EVENT_URI, method = RequestMethod.GET)
+    public ResponseEntity showPublicEvent(@PathVariable Long eventId, @RequestParam(name = "expand", required = false) String expand)
+    {
+        Event event = eventRepository.findById(eventId);
+
+        if (!event.isPublic())
+            return NOT_FOUND;
+
+        EventResponse eventResponse = new EventResponse(event, resURI, new TicketSetsResponse(event, resURI));
+
+        Object response = ResponseExpansion.expand(eventResponse, getExpansionRules(expand));
+
+        return new ResponseEntity(response, HttpStatus.OK);
+    }
+
+    @RequestMapping(value = EventURI.PUBLIC_EVENTS_URI, method = RequestMethod.GET)
+    public ResponseEntity showPublicEvents(@RequestParam(name = "expand", required = false) String expand)
+    {
+        List<Event> events = eventRepository.findPublicEvents();
+
+        PublicEventsResponse eventsResponse = new PublicEventsResponse(events, resURI);
+
+        Object response = ResponseExpansion.expand(eventsResponse, getExpansionRules(expand));
+
+        return new ResponseEntity(response, HttpStatus.OK);
+    }
+
     @RequestMapping(value = EventURI.EVENT_URI, method = RequestMethod.DELETE)
     public ResponseEntity cancelEvent(@PathVariable UUID userId, @PathVariable Long eventId)
     {
@@ -218,7 +242,7 @@ public class EventController
 
         event.setCanceled(true);
 
-        eventRepository.saveOrUpdate(event);
+        eventRepository.save(event);
 
         return new ResponseEntity(HttpStatus.NO_CONTENT);
     }
@@ -306,7 +330,7 @@ public class EventController
         TicketSet ticketSet = ticketSetForm.getTicketSet();
         event.addTicketSet(ticketSet);
 
-        eventRepository.saveOrUpdate(event);
+        eventRepository.save(event);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setLocation(URI.create(eventURI.ticketSetURL(userId, event.getId(), ticketSet.getId())));
@@ -344,7 +368,7 @@ public class EventController
         if (bindingResult.hasFieldErrors())
             return new ResponseEntity(bindingResult.getFieldErrors(), HttpStatus.BAD_REQUEST);
 
-        //ticketSetRepository.saveOrUpdate(ticketSet.merge(ticketSetForm));
+        //ticketSetRepository.save(ticketSet.merge(ticketSetForm));
 
         ticketSetRepository.saveOrUpdate(ticketSetForm.getTicketSet(ticketSet));
 

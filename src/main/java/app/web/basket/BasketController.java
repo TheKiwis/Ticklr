@@ -87,7 +87,6 @@ public class BasketController
 
     /**
      * Add new a item to the basket
-     * TODO: out of stock situation
      */
     @RequestMapping(value = BasketURI.ITEMS_URI, method = RequestMethod.POST)
     public ResponseEntity addItem(@PathVariable UUID buyerId, @Valid @RequestBody(required = false) BasketItemForm basketItemForm, BindingResult bindingResult)
@@ -180,7 +179,6 @@ public class BasketController
 
     /**
      * Update basket item's quantity
-     * TODO: out of stock situation
      */
     @RequestMapping(value = BasketURI.ITEM_URI, method = RequestMethod.PUT)
     public ResponseEntity updateItem(@PathVariable UUID buyerId, @PathVariable Long itemId,

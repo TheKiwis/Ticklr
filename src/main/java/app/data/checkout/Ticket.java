@@ -29,11 +29,9 @@ public class Ticket
     @Column(name = "usage_time")
     private ZonedDateTime usageTime;
 
-    //@OneToOne(mappedBy = "ticket")
     @OneToOne
     @JoinColumn(name = "order_position_id")
     private OrderPosition orderPosition;
-
 
     // TODO: need created time
 

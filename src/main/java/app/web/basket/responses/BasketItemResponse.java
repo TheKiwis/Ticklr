@@ -13,16 +13,24 @@ import java.math.BigDecimal;
 public class BasketItemResponse
 {
     public String href;
+
+    public String title;
+
     public long id;
+
     public int quantity;
+
     public BigDecimal unitPrice;
+
     public BigDecimal totalPrice;
+
     public BasketResponse.TicketSetResponse ticketSet;
 
     public BasketItemResponse(Basket basket, BasketItem item, ResourceURI resURI)
     {
         href = resURI.getBasketURI().basketItemURL(basket.getBuyer().getId(), item.getId());
         id = item.getId();
+        title = item.getTicketSet().getTitle();
         quantity = item.getQuantity();
         unitPrice = item.getUnitPrice();
         totalPrice = item.getTotalPrice();

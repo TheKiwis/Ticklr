@@ -12,10 +12,13 @@ import app.web.checkout.forms.PaypalInitForm;
 import app.web.common.response.ErrorCode;
 import app.web.common.response.ErrorResponse;
 import com.paypal.base.rest.PayPalRESTException;
+import net.glxn.qrgen.core.image.ImageType;
+import net.glxn.qrgen.javase.QRCode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
@@ -133,5 +136,13 @@ public class CheckoutController
         }
 
         return new ResponseEntity(HttpStatus.OK);
+    }
+
+    @RequestMapping(path = "/api/buyers/{buyerId}/tickets/{ticketId}/qr-code", method = RequestMethod.GET, produces = MediaType.IMAGE_PNG_VALUE)
+    public @ResponseBody byte[] ticketQRCode(@PathVariable UUID buyerId, @PathVariable UUID ticketId)
+    {
+        byte[] image = QRCode.from(UUID.randomUUID().toString()).to(ImageType.PNG).stream().toByteArray();
+        //return new ResponseEntity(image, HttpStatus.OK);
+        return image;
     }
 }

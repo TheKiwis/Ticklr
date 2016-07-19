@@ -14,6 +14,7 @@ import org.dbunit.dataset.xml.FlatXmlDataSetBuilder;
 import org.junit.*;
 import org.mockserver.integration.ClientAndServer;
 import org.mockserver.model.*;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.io.*;
@@ -28,6 +29,7 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.StringBody.exact;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -184,6 +186,16 @@ public class CheckoutIT extends CommonIntegrationTest
     {
         // TODO
     }
+
+    // TODO moving to another IT test
+    //@Test
+    //public void happy_should_return_barcode_image_for_ticket() throws Exception
+    //{
+    //    mockMvc.perform(get("/api/buyers/"+buyerWithBasketId+"/tickets/bc09be82-3f9f-11e6-beb8-9e71128cae77/qr-code"))
+    //            .andExpect(content().contentType(MediaType.IMAGE_PNG))
+    //            .andExpect(status().isOk());
+    //}
+
 
     @Test
     public void sad_should_not_re_execute_payment_that_is_already_done() throws Exception

@@ -70,7 +70,10 @@ public class EventIT extends CommonIntegrationTest
      */
     private String eventURL(UUID userId, Long eventId)
     {
-        return eventURI.eventURL(userId, eventId);
+        if (userId == null)
+            return eventURI.publicEventURL(eventId);
+        else
+            return eventURI.eventURL(userId, eventId);
     }
 
     @Before
@@ -357,6 +360,20 @@ public class EventIT extends CommonIntegrationTest
                 .andExpect(status().isOk());
 
         assertEquals(count - 1, (long) em.createQuery("SELECT count(ts) FROM TicketSet ts").getSingleResult());
+    }
+
+    @Test
+    public void happy_should_return_public_events() throws Exception
+    {
+        mockMvc.perform(get(eventURL(null, null)))
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    public void happy_should_return_public_event() throws Exception
+    {
+        mockMvc.perform(get(eventURL(null, sampleEventId)))
+                .andExpect(status().isOk());
     }
 
     /*************************************************

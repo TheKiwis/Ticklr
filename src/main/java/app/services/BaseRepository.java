@@ -15,7 +15,7 @@ import javax.persistence.PersistenceContext;
 abstract public class BaseRepository<T, ID>
 {
     @PersistenceContext
-    private EntityManager em;
+    protected EntityManager em;
 
     /**
      * @param em manages ORM Entities

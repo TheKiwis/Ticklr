@@ -19,6 +19,9 @@ public class EventURI
     public static final String TICKET_SETS_URI = EVENT_URI + "/ticket-sets";
     public static final String TICKET_SET_URI = TICKET_SETS_URI + "/{ticketSetId}";
 
+    public static final String PUBLIC_EVENTS_URI = "/api/public/events";
+    public static final String PUBLIC_EVENT_URI = PUBLIC_EVENTS_URI + "/{eventId}";
+
     // hostname of the server on which the app is running
     private String hostname;
 
@@ -70,6 +73,24 @@ public class EventURI
     public String eventURL(UUID userId, Long eventId)
     {
         return hostname + eventURI(userId, eventId);
+    }
+
+    /**
+     * @param eventId
+     * @return
+     */
+    public String publicEventURI(Long eventId)
+    {
+        return UriComponentsBuilder.fromUriString(PUBLIC_EVENT_URI).buildAndExpand(eventId).encode().toUriString();
+    }
+
+    /**
+     * @param eventId
+     * @return URL of the event resource exposed to the public
+     */
+    public String publicEventURL(Long eventId)
+    {
+        return hostname + publicEventURI(eventId);
     }
 
     /**
