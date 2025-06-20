@@ -322,12 +322,12 @@ public class EventIT extends CommonIntegrationTest
         mockMvc.perform(put(ticketSetURL(sampleUserId, sampleEventId, sampleTicketSetId))
                 .header("Authorization", authString)
                 .contentType("application/json")
-                .content(getTicketSetForm("Updated title", 30.00, 10)))
+                .content(getTicketSetForm("Updated title", 30, 10)))
                 .andExpect(status().isNoContent());
 
         TicketSet ticketSet = (TicketSet) em.createQuery("SELECT ts FROM TicketSet ts WHERE ts.id = " + sampleTicketSetId).getSingleResult();
         assertEquals("Updated title", ticketSet.getTitle());
-        assertEquals(new BigDecimal(30), ticketSet.getPrice());
+        assertEquals(new BigDecimal(30).setScale(2), ticketSet.getPrice());
         assertEquals(10, ticketSet.getStock());
     }
 
